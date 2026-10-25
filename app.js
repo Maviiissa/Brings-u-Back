@@ -351,6 +351,49 @@
     area.append(avatar(null),label,done);
     root.append(area);host.append(root);
   }
+  function plot4Composer(messages,stage){
+    const form=elem('div','composer story-composer plot4-composer');
+    form.append(elem('span','composer-icon','+'));
+    const field=click('Text Message · SMS','composer-field story-scripted-input',()=>{
+      if(field.disabled)return;
+      field.disabled=true;
+      const replies=stage===0?[cfg.story.plot4Messages[2].text]:
+        [cfg.story.plot4Messages[4].text,cfg.story.plot4Messages[5].text];
+      const next=(index)=>{
+        plot3Type(field,replies[index],()=>{
+          scheduleStoryUi(()=>{
+            if(page!=='sms')return;
+            if(index+1<replies.length){
+              const row=elem('div','chat-row me');
+              row.append(elem('div','bubble',replies[index]));
+              messages.append(row);scrollDown(messages);
+              field.textContent='';field.classList.remove('story-typing-active');
+              scheduleStoryUi(()=>next(index+1),450);
+            }else{
+              saved.storyPlot4Stage=stage===0?1:3;
+              persist();render();
+            }
+          },600);
+        });
+      };
+      next(0);
+    });
+    field.setAttribute('aria-label','Tap to type scripted reply');
+    form.append(field,elem('span','story-send-decoration','↑'));
+    return form;
+  }
+  function plot4Incoming(messages,stage){
+    const indicator=elem('div','story-typing-row');
+    const bubble=elem('div','story-typing-bubble');
+    for(let i=0;i<3;i++)bubble.append(elem('span','story-typing-dot'));
+    indicator.append(bubble,elem('span','story-typing-label','Natsha is typing…'));
+    messages.append(indicator);scrollDown(messages);
+    scheduleStoryUi(()=>{
+      if(page!=='sms')return;
+      saved.storyPlot4Stage=stage+1;
+      persist();render();
+    },cfg.story.strangerTypingDelayMs);
+  }
   function smsPlot4(){
     const root=appShell('Messages','home');
     const contact=elem('div','sms-contact');
