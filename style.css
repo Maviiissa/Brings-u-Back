@@ -385,3 +385,15 @@
   transform-origin:50% 50%;
   object-fit:cover;
 }
+
+/* Sequential SMS delivery: animate only the new bubble, never the chat screen. */
+.sms-chat .chat-row.story-bubble-enter{
+  animation:story-bubble-appear 210ms ease-out both;
+}
+@keyframes story-bubble-appear{
+  from{opacity:0;transform:translateY(7px)}
+  to{opacity:1;transform:translateY(0)}
+}
+@media(prefers-reduced-motion:reduce){
+  .sms-chat .chat-row.story-bubble-enter{animation:none}
+}
