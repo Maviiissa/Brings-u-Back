@@ -109,7 +109,7 @@
     if(name==='wifi')return `<svg width="20" height="16" viewBox="0 0 20 16" aria-hidden="true"><path d="M2 5C6 1 14 1 18 5M5 8c3-3 7-3 10 0M8 11c1.5-1.3 2.5-1.3 4 0" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="10" cy="14" r="1.4" fill="currentColor"/></svg>`;
     return '';
   };
-  function status(time=cfg.phone.time,light=false){
+  function status(time=(saved.storyPlot2DateChanged?cfg.story.plot2Date.time:cfg.phone.time),light=false){
     const b=elem('div','statusbar'+(light?' light':''));b.append(elem('span','',time));
     const icons=elem('div','status-icons');icons.innerHTML=svg('signal')+svg('wifi');
     const battery=elem('div','battery');battery.append(elem('span','',cfg.phone.battery));icons.append(battery);b.append(icons);return b;
