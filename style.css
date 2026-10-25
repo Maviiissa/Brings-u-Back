@@ -224,7 +224,7 @@
 .ig-scroll{padding:0;overscroll-behavior:contain}
 .ig-overview{padding:16px 13px 0}
 .ig-summary{display:flex;align-items:center;gap:13px}
-.ig-photo{background-image:url('assets/instagram-sprite.jpg');background-size:300% 200%;background-position:calc(var(--ig-col) * 50%) calc(var(--ig-row) * 100%);background-color:#30343c}
+.ig-photo{background-image:url('assets/instagram-sprite.svg');background-size:300% 200%;background-position:calc(var(--ig-col) * 50%) calc(var(--ig-row) * 100%);background-color:#30343c}
 .ig-avatar{width:94px;height:94px;flex:0 0 94px;border:4px solid #090d15;outline:3px solid #535d6b;border-radius:50%}
 .ig-stats{display:flex;flex:1;justify-content:space-around;text-align:center;gap:5px}
 .ig-stat{display:flex;flex-direction:column;gap:3px;font-size:12px}
