@@ -32,18 +32,37 @@
   const click = (text,cls,action) => {const b=elem('button',cls,text);b.type='button';b.addEventListener('click',action);return b;};
   const img = (src,alt='') => {const i=elem('img');i.src=src;i.alt=alt;return i;};
   const setPage = (p, id=null) => {
-    const unlocking = page==='lock' && p==='home';
+    const previous=page;
+    const unlocking=page==='lock' && p==='home';
     clearStoryUi();
-    page=p; selected=id;draft='';
-    if(p==='notes' && !saved.storyNotesOpenedAt && !saved.storyFirstSmsDelivered){saved.storyNotesOpenedAt=Date.now();persist();}
-    render();
-    if(unlocking) startStoryBrowsing();
-    if(p==='sms' && saved.storyFirstSmsDelivered){
-      saved.storyFirstSmsOpened=true;
+    page=p;selected=id;draft='';
+    if(p==='notes' && !saved.storyNotesOpenedAt && !saved.storyFirstSmsDelivered){
+      saved.storyNotesOpenedAt=Date.now();
+      persist();
+    }
+    // Plot 2: the new journal entry appears when Notes is reopened after "Sorry!".
+    if(p==='notes' && saved.storyStrangerReplied && !saved.storyPlot2NoteAdded){
+      saved.storyPlot2NoteAdded=true;
+      persist();
+    }
+    // The next text is released only on returning home after discovering the note.
+    if(p==='home' && previous==='notes' && saved.storyPlot2NoteAdded && !saved.storySecondSmsDelivered){
+      saved.storyPlot2DateChanged=true;
+      saved.storySecondSmsDelivered=true;
+      notificationVisible=true;
+      persist();
+    }
+    if(p==='sms'){
+      if(saved.storySecondSmsDelivered && !saved.storySecondSmsOpened){
+        saved.storySecondSmsOpened=true;
+      }
+      if(saved.storyFirstSmsDelivered) saved.storyFirstSmsOpened=true;
       notificationVisible=false;
       persist();
-      document.querySelector('.story-notification')?.remove();
-    } else if(notificationVisible) showStoryNotification();
+    }
+    render();
+    if(unlocking)startStoryBrowsing();
+    if(notificationVisible && p!=='sms')showStoryNotification();
   };
   // Browsing time only accumulates while the phone is unlocked and the tab is visible.
   // The event fires once per saved playthrough, including across page navigation.
@@ -72,14 +91,12 @@
   }
   function showStoryNotification(){
     document.querySelector('.story-notification')?.remove();
-    if(!notificationVisible || saved.storyFirstSmsOpened || page==='lock')return;
-    const msg=cfg.story.firstMessage;
-    const banner=click('','story-notification',()=>{
-      notificationVisible=false;
-      saved.storyFirstSmsOpened=true;
-      persist();
-      setPage('sms');
-    });
+    if(!notificationVisible || page==='lock')return;
+    const second=saved.storySecondSmsDelivered && !saved.storySecondSmsOpened;
+    const first=saved.storyFirstSmsDelivered && !saved.storyFirstSmsOpened;
+    if(!second && !first)return;
+    const msg=second?cfg.story.secondMessage:cfg.story.firstMessage;
+    const banner=click('','story-notification',()=>setPage('sms'));
     banner.setAttribute('aria-label','Open text message from '+msg.sender);
     const head=elem('div','story-notification-head');
     head.append(elem('span','story-notification-app','✉  MESSAGES'),elem('span','story-notification-time',msg.time));
@@ -207,12 +224,13 @@
     });
   }
   function home(){
-    const root=elem('section','page home');root.append(status(cfg.phone.time,true));
+    const root=elem('section','page home');root.append(status(saved.storyPlot2DateChanged?cfg.story.plot2Date.time:cfg.phone.time,true));
     const main=elem('div','home-content');
     const imageButton=click('','photo-widget',()=>setPage('photos'));imageButton.append(img(cfg.phone.homePhoto,'Photos'));main.append(imageButton);
     main.append(elem('div','photo-label','Photos'));
     const grid=elem('div','home-grid');const cal=click('','calendar-card',()=>setPage('calendar'));
-    cal.append(elem('div','cal-weekday',cfg.phone.date.weekday),elem('div','cal-day',cfg.phone.date.day),elem('div','cal-detail',cfg.phone.date.detail));grid.append(cal);
+    const homeDate=saved.storyPlot2DateChanged?cfg.story.plot2Date:cfg.phone.date;
+    cal.append(elem('div','cal-weekday',homeDate.weekday),elem('div','cal-day',homeDate.day),elem('div','cal-detail',saved.storyPlot2DateChanged?homeDate.month:homeDate.detail));grid.append(cal);
     grid.append(appTile('Camera','camera'),appTile('Instagram','instagram'),appTile('LINE','line','',null,'line-list'),appTile('Notes','notes'));
     main.append(grid);main.append(elem('div','home-search','⌕  Search'));root.append(main);
     const dock=elem('div','dock');dock.append(appTile('','phoneicon','☎',cfg.phone.unreadPhone,'phone'),appTile('','safari','◉',null,'safari'),appTile('','messagesicon','●',cfg.phone.unreadMessages,'sms'),appTile('','music','♫',null,'music'));
@@ -275,51 +293,63 @@
     const contact=elem('div','sms-contact');contact.append(avatar(null));
     contact.append(elem('div','sms-number',cfg.sms.number||cfg.sms.name),elem('div','sms-meta',cfg.sms.service));root.append(contact);
     const messages=elem('div','scroll chat-view sms-chat');
-    const incoming=saved.storyFirstSmsDelivered?[cfg.story.firstMessage]:[];
-    const player=saved.storyPlayerReplied?[{from:'me',text:cfg.story.playerReply}]:[];
-    const stranger=saved.storyStrangerReplied?[{from:'them',text:cfg.story.strangerReply}]:[];
-    renderMessages(messages,[...(cfg.sms.messages||[]),...incoming,...player,...stranger]);
-    root.append(messages);
-    if(saved.storyPlayerReplied && !saved.storyStrangerReplied){
-      showStrangerTyping(messages);
+    const history=[...(cfg.sms.messages||[])];
+    if(saved.storyFirstSmsDelivered)history.push(cfg.story.firstMessage);
+    if(saved.storyPlayerReplied)history.push({from:'me',text:cfg.story.playerReply});
+    if(saved.storyStrangerReplied)history.push({from:'them',text:cfg.story.strangerReply});
+    if(saved.storySecondSmsDelivered){
+      history.push({type:'date',text:'October 28, 2027'});
+      history.push(cfg.story.secondMessage);
     }
-    if(saved.storyFirstSmsDelivered && !saved.storyPlayerReplied){
-      root.append(storySmsComposer(messages));
+    if(saved.storySecondPlayerReplied)history.push({from:'me',text:cfg.story.secondPlayerReply});
+    if(saved.storySecondStrangerReplied)history.push({from:'them',text:cfg.story.secondStrangerReply});
+    renderMessages(messages,history);
+    root.append(messages);
+    const phase=saved.storySecondSmsDelivered?2:1;
+    const replyDone=phase===2?saved.storySecondPlayerReplied:saved.storyPlayerReplied;
+    const responseDone=phase===2?saved.storySecondStrangerReplied:saved.storyStrangerReplied;
+    if(replyDone && !responseDone)showStrangerTyping(messages,phase);
+    if(saved.storyFirstSmsDelivered && !replyDone){
+      root.append(storySmsComposer(messages,phase));
     }else{
       const inactive=elem('div','composer story-composer story-composer-inactive');
-      inactive.append(elem('span','composer-icon','+'),elem('div','composer-field story-readonly',saved.storyPlayerReplied?'Text Message':'Waiting for message…'));
+      inactive.append(elem('span','composer-icon','+'),elem('div','composer-field story-readonly',replyDone?'Text Message':'Waiting for message…'));
       root.append(inactive);
     }
     host.append(root);scrollDown(messages);
   }
-  function storySmsComposer(messages){
+  function storySmsComposer(messages,phase){
     const form=elem('div','composer story-composer');
     form.append(elem('span','composer-icon','+'));
     const field=click('Text Message · SMS','composer-field story-scripted-input',()=>{
-      if(field.disabled || saved.storyPlayerReplied)return;
+      if(field.disabled)return;
+      if(phase===1 && saved.storyPlayerReplied)return;
+      if(phase===2 && saved.storySecondPlayerReplied)return;
       field.disabled=true;
       field.textContent='';
       field.classList.add('story-typing-active');
-      const text=cfg.story.playerReply;
+      const message=phase===2?cfg.story.secondPlayerReply:cfg.story.playerReply;
       let pos=0;
       const typeNext=()=>{
         if(page!=='sms')return;
         pos++;
-        field.textContent=text.slice(0,pos);
-        if(pos<text.length) scheduleStoryUi(typeNext,cfg.story.replyTypingIntervalMs);
+        field.textContent=message.slice(0,pos);
+        if(pos<message.length)scheduleStoryUi(typeNext,cfg.story.replyTypingIntervalMs);
         else scheduleStoryUi(sendReply,650);
       };
       const sendReply=()=>{
         if(page!=='sms')return;
-        saved.storyPlayerReplied=true;persist();
+        if(phase===2)saved.storySecondPlayerReplied=true;
+        else saved.storyPlayerReplied=true;
+        persist();
         field.classList.remove('story-typing-active');
         const row=elem('div','chat-row me');
-        row.append(elem('div','bubble',text));
+        row.append(elem('div','bubble',message));
         messages.append(row);scrollDown(messages);
         field.textContent='Text Message';
         field.classList.remove('story-scripted-input');
         field.classList.add('story-readonly');
-        showStrangerTyping(messages);
+        showStrangerTyping(messages,phase);
       };
       scheduleStoryUi(typeNext,250);
     });
@@ -328,8 +358,9 @@
     form.append(elem('span','story-send-decoration','↑'));
     return form;
   }
-  function showStrangerTyping(messages){
-    if(messages.querySelector('.story-typing-row') || saved.storyStrangerReplied)return;
+  function showStrangerTyping(messages,phase=1){
+    const alreadyReplied=phase===2?saved.storySecondStrangerReplied:saved.storyStrangerReplied;
+    if(messages.querySelector('.story-typing-row') || alreadyReplied)return;
     const indicator=elem('div','story-typing-row');
     indicator.setAttribute('aria-label','Unknown Number is typing');
     const bubble=elem('div','story-typing-bubble');
@@ -339,9 +370,11 @@
     scheduleStoryUi(()=>{
       if(page!=='sms')return;
       indicator.remove();
-      saved.storyStrangerReplied=true;persist();
+      if(phase===2)saved.storySecondStrangerReplied=true;
+      else saved.storyStrangerReplied=true;
+      persist();
       const replyRow=elem('div','chat-row them');
-      replyRow.append(elem('div','bubble',cfg.story.strangerReply));
+      replyRow.append(elem('div','bubble',phase===2?cfg.story.secondStrangerReply:cfg.story.strangerReply));
       messages.append(replyRow);scrollDown(messages);
     },cfg.story.strangerTypingDelayMs);
   }
@@ -406,10 +439,12 @@
     const root=appShell('Notes','home',[click('+','',()=>{const id='user-'+Date.now();saved.noteEdits[id]={title:'New Note',body:''};persist();setPage('note-editor',id)})]);
     const list=elem('div','app-list notes-list');
     // Preloaded notes appear first, newest to oldest. User-created notes follow.
+    const plot2Notes=saved.storyPlot2NoteAdded?[cfg.story.plot2Note]:[];
     const entries=[
+      ...plot2Notes.map(n=>({...n,...saved.noteEdits[n.id],id:n.id,isStoryNote:true})),
       ...cfg.notes.map(n=>({ ...n, ...saved.noteEdits[n.id], id:n.id, date:n.date, isStoryNote:true })),
       ...Object.entries(saved.noteEdits)
-        .filter(([id])=>!cfg.notes.some(n=>n.id===id))
+        .filter(([id])=>!cfg.notes.some(n=>n.id===id) && id!==cfg.story.plot2Note.id)
         .map(([id,n])=>({id,...n,date:'Personal note',isStoryNote:false}))
     ];
     entries.forEach(n=>{
@@ -423,7 +458,7 @@
     root.append(list);host.append(root);
   }
   function noteEditor(){
-    const config=cfg.notes.find(n=>n.id===selected);
+    const config=cfg.notes.find(n=>n.id===selected) || (saved.storyPlot2NoteAdded && selected===cfg.story.plot2Note.id?cfg.story.plot2Note:null);
     const record=saved.noteEdits[selected]||config||{title:'New Note',body:''};
     const root=appShell('Notes','notes',[click('Done','pill',()=>setPage('notes'))]);
     const isStoryNote=Boolean(config);
