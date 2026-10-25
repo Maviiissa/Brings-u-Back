@@ -64,7 +64,17 @@
       saved.storyPlot3DateChanged=true;
       persist();
     }
+    // Plot 4 is gated on the player explicitly renaming the contact.
+    if(p==='notes' && saved.storyContactName==='Natsha' && (saved.storyPlot3Stage||0)>=7 && !saved.storyPlot4NoteAdded){
+      saved.storyPlot4NoteAdded=true;persist();
+    }
+    if(p==='home' && previous==='notes' && saved.storyPlot4NoteAdded && !saved.storyFourthSmsDelivered){
+      saved.storyPlot4Ready=true;
+      saved.storyPlot4DateChanged=true;
+      persist();
+    }
     if(p==='sms'){
+      if(saved.storyFourthSmsDelivered)saved.storyFourthSmsOpened=true;
       if(saved.storyThirdSmsDelivered)saved.storyThirdSmsOpened=true;
       if(saved.storySecondSmsDelivered && !saved.storySecondSmsOpened){
         saved.storySecondSmsOpened=true;
@@ -85,6 +95,16 @@
         persist();
         showStoryNotification();
       },cfg.story.plot3HomeDelayMs);
+    }
+    if(p==='home' && saved.storyPlot4Ready && !saved.storyFourthSmsDelivered){
+      scheduleStoryUi(()=>{
+        if(page!=='home' || saved.storyFourthSmsDelivered)return;
+        saved.storyFourthSmsDelivered=true;
+        saved.storyPlot4Stage=0;
+        notificationVisible=true;
+        persist();
+        showStoryNotification();
+      },cfg.story.plot4HomeDelayMs);
     }
   };
   // Browsing time only accumulates while the phone is unlocked and the tab is visible.
@@ -115,11 +135,12 @@
   function showStoryNotification(){
     document.querySelector('.story-notification')?.remove();
     if(!notificationVisible || page==='lock')return;
+    const fourth=saved.storyFourthSmsDelivered && !saved.storyFourthSmsOpened;
     const third=saved.storyThirdSmsDelivered && !saved.storyThirdSmsOpened;
     const second=saved.storySecondSmsDelivered && !saved.storySecondSmsOpened;
     const first=saved.storyFirstSmsDelivered && !saved.storyFirstSmsOpened;
-    if(!third && !second && !first)return;
-    const msg=third?cfg.story.plot3Message:(second?cfg.story.secondMessage:cfg.story.firstMessage);
+    if(!fourth && !third && !second && !first)return;
+    const msg=fourth?cfg.story.plot4Notification:(third?cfg.story.plot3Message:(second?cfg.story.secondMessage:cfg.story.firstMessage));
     const banner=click('','story-notification',()=>setPage('sms'));
     banner.setAttribute('aria-label','Open text message from '+msg.sender);
     const head=elem('div','story-notification-head');
@@ -133,7 +154,7 @@
     if(name==='wifi')return `<svg width="20" height="16" viewBox="0 0 20 16" aria-hidden="true"><path d="M2 5C6 1 14 1 18 5M5 8c3-3 7-3 10 0M8 11c1.5-1.3 2.5-1.3 4 0" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="10" cy="14" r="1.4" fill="currentColor"/></svg>`;
     return '';
   };
-  function status(time=(saved.storyPlot3DateChanged?cfg.story.plot3Date.time:(saved.storyPlot2DateChanged?cfg.story.plot2Date.time:cfg.phone.time)),light=false){
+  function status(time=(saved.storyPlot4DateChanged?cfg.story.plot4Date.time:(saved.storyPlot3DateChanged?cfg.story.plot3Date.time:(saved.storyPlot2DateChanged?cfg.story.plot2Date.time:cfg.phone.time))),light=false){
     const b=elem('div','statusbar'+(light?' light':''));b.append(elem('span','',time));
     const icons=elem('div','status-icons');icons.innerHTML=svg('signal')+svg('wifi');
     const battery=elem('div','battery');battery.append(elem('span','',cfg.phone.battery));icons.append(battery);b.append(icons);return b;
@@ -248,13 +269,13 @@
     });
   }
   function home(){
-    const root=elem('section','page home');root.append(status(saved.storyPlot3DateChanged?cfg.story.plot3Date.time:(saved.storyPlot2DateChanged?cfg.story.plot2Date.time:cfg.phone.time),true));
+    const root=elem('section','page home');root.append(status(saved.storyPlot4DateChanged?cfg.story.plot4Date.time:(saved.storyPlot3DateChanged?cfg.story.plot3Date.time:(saved.storyPlot2DateChanged?cfg.story.plot2Date.time:cfg.phone.time)),true));
     const main=elem('div','home-content');
     const imageButton=click('','photo-widget',()=>setPage('photos'));imageButton.append(img(cfg.phone.homePhoto,'Photos'));main.append(imageButton);
     main.append(elem('div','photo-label','Photos'));
     const grid=elem('div','home-grid');const cal=click('','calendar-card',()=>setPage('calendar'));
-    const homeDate=saved.storyPlot3DateChanged?cfg.story.plot3Date:(saved.storyPlot2DateChanged?cfg.story.plot2Date:cfg.phone.date);
-    cal.append(elem('div','cal-weekday',homeDate.weekday),elem('div','cal-day',homeDate.day),elem('div','cal-detail',(saved.storyPlot2DateChanged||saved.storyPlot3DateChanged)?homeDate.month:homeDate.detail));grid.append(cal);
+    const homeDate=saved.storyPlot4DateChanged?cfg.story.plot4Date:(saved.storyPlot3DateChanged?cfg.story.plot3Date:(saved.storyPlot2DateChanged?cfg.story.plot2Date:cfg.phone.date));
+    cal.append(elem('div','cal-weekday',homeDate.weekday),elem('div','cal-day',homeDate.day),elem('div','cal-detail',(saved.storyPlot2DateChanged||saved.storyPlot3DateChanged||saved.storyPlot4DateChanged)?homeDate.month:homeDate.detail));grid.append(cal);
     grid.append(appTile('Camera','camera'),appTile('Instagram','instagram'),appTile('LINE','line','',null,'line-list'),appTile('Notes','notes'));
     main.append(grid);main.append(elem('div','home-search','⌕  Search'));root.append(main);
     const dock=elem('div','dock');dock.append(appTile('','phoneicon','☎',cfg.phone.unreadPhone,'phone'),appTile('','safari','◉',null,'safari'),appTile('','messagesicon','●',cfg.phone.unreadMessages,'sms'),appTile('','music','♫',null,'music'));
@@ -317,7 +338,8 @@
   function smsPlot3(){
     const root=appShell('Messages','home');
     const contact=elem('div','sms-contact');contact.append(avatar(null));
-    contact.append(elem('div','sms-number',cfg.sms.number||cfg.sms.name),elem('div','sms-meta',cfg.sms.service));
+    const nameButton=click(saved.storyContactName||cfg.sms.name,'sms-number sms-name-button',()=>setPage('sms-contact'));
+    contact.append(nameButton,elem('div','sms-meta',cfg.sms.service));
     root.append(contact);
     const messages=elem('div','scroll chat-view sms-chat');
     const history=[...(cfg.sms.messages||[])];
@@ -430,10 +452,11 @@
     },cfg.story.plot3ReactionPauseMs);
   }
   function sms(){
+    if(saved.storyFourthSmsDelivered)return smsPlot4();
     if(saved.storyThirdSmsDelivered)return smsPlot3();
     const root=appShell('Messages','home');
     const contact=elem('div','sms-contact');contact.append(avatar(null));
-    contact.append(elem('div','sms-number',cfg.sms.number||cfg.sms.name),elem('div','sms-meta',cfg.sms.service));root.append(contact);
+    contact.append(click(saved.storyContactName||cfg.sms.name,'sms-number sms-name-button',()=>setPage('sms-contact')),elem('div','sms-meta',cfg.sms.service));root.append(contact);
     const messages=elem('div','scroll chat-view sms-chat');
     const history=[...(cfg.sms.messages||[])];
     if(saved.storyFirstSmsDelivered)history.push(cfg.story.firstMessage);
@@ -583,12 +606,14 @@
     // Preloaded notes appear first, newest to oldest. User-created notes follow.
     const plot2Notes=saved.storyPlot2NoteAdded?[cfg.story.plot2Note]:[];
     const plot3Notes=saved.storyPlot3NoteAdded?[cfg.story.plot3Note]:[];
+    const plot4Notes=saved.storyPlot4NoteAdded?[cfg.story.plot4Note]:[];
     const entries=[
+      ...plot4Notes.map(n=>({...n,...saved.noteEdits[n.id],id:n.id,isStoryNote:true})),
       ...plot3Notes.map(n=>({...n,...saved.noteEdits[n.id],id:n.id,isStoryNote:true})),
       ...plot2Notes.map(n=>({...n,...saved.noteEdits[n.id],id:n.id,isStoryNote:true})),
       ...cfg.notes.map(n=>({ ...n, ...saved.noteEdits[n.id], id:n.id, date:n.date, isStoryNote:true })),
       ...Object.entries(saved.noteEdits)
-        .filter(([id])=>!cfg.notes.some(n=>n.id===id) && id!==cfg.story.plot2Note.id && id!==cfg.story.plot3Note.id)
+        .filter(([id])=>!cfg.notes.some(n=>n.id===id) && id!==cfg.story.plot2Note.id && id!==cfg.story.plot3Note.id && id!==cfg.story.plot4Note.id)
         .map(([id,n])=>({id,...n,date:'Personal note',isStoryNote:false}))
     ];
     entries.forEach(n=>{
@@ -603,6 +628,7 @@
   }
   function noteEditor(){
     const config=cfg.notes.find(n=>n.id===selected)
+      || (saved.storyPlot4NoteAdded && selected===cfg.story.plot4Note.id?cfg.story.plot4Note:null)
       || (saved.storyPlot3NoteAdded && selected===cfg.story.plot3Note.id?cfg.story.plot3Note:null)
       || (saved.storyPlot2NoteAdded && selected===cfg.story.plot2Note.id?cfg.story.plot2Note:null);
     const record=saved.noteEdits[selected]||config||{title:'New Note',body:''};
@@ -710,7 +736,7 @@
   function phoneApp(){const root=appShell('Phone','home');const content=elem('div','app-list');for(const p of cfg.phoneLog){const item=click('','list-item',()=>alert('This is a fictional call log.'));const t=elem('div');t.append(elem('strong','',p.name),elem('small','',p.subtitle));item.append(t,elem('div','','ⓘ'));content.append(item)}root.append(content);host.append(root)}
   function safari(){const root=appShell('Safari','home');const content=elem('div','scroll');for(const p of cfg.safari){content.append(elem('div','safari-address',p.url));const card=elem('div','app-list');card.append(elem('h2','',p.title),elem('p','',p.body));content.append(card)}root.append(content);host.append(root)}
   function music(){const root=appShell('Music','home');const list=elem('div','app-list');for(const track of cfg.music){const b=click('','list-item',()=>{saved.favoriteTrack=track.title;persist();render()});const l=elem('div');l.append(elem('strong','',track.title),elem('small','',track.artist));b.append(l,elem('div','',saved.favoriteTrack===track.title?'♥':'♡'));list.append(b)}list.append(elem('p','empty-app','No audio is included yet. Tracks can be added when you supply files.'));root.append(list);host.append(root)}
-  function render(){host.replaceChildren();switch(page){case'lock':return lockScreen();case'home':return home();case'line-list':return lineList();case'line':return line();case'sms':return sms();case'kiddo-profile':return kiddoProfile();case'notes':return notes();case'note-editor':return noteEditor();case'photos':return photos();case'photo-detail':return photoDetail();case'instagram':return instagram();case'instagram-post':return instagramPost();case'calendar':return calendar();case'camera':return camera();case'phone':return phoneApp();case'safari':return safari();case'music':return music();default:return home()}}
+  function render(){host.replaceChildren();switch(page){case'lock':return lockScreen();case'home':return home();case'line-list':return lineList();case'line':return line();case'sms':return sms();case'sms-contact':return smsContact();case'kiddo-profile':return kiddoProfile();case'notes':return notes();case'note-editor':return noteEditor();case'photos':return photos();case'photo-detail':return photoDetail();case'instagram':return instagram();case'instagram-post':return instagramPost();case'calendar':return calendar();case'camera':return camera();case'phone':return phoneApp();case'safari':return safari();case'music':return music();default:return home()}}
   render();
   // The countdown starts on first unlock; returning to the site resumes it.
   if(saved.storyBrowseMs>0 && !saved.storyFirstSmsDelivered){
