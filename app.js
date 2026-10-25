@@ -306,13 +306,78 @@
   }
   function photos(){const root=appShell('Photos','home');const container=elem('div','scroll');const grid=elem('div','photo-grid');for(const p of cfg.photos){const b=click('','photo-tile',()=>setPage('photo-detail',p.id));b.append(img(p.src,p.title));grid.append(b)}container.append(grid);root.append(container);host.append(root)}
   function photoDetail(){const p=cfg.photos.find(p=>p.id===selected)||cfg.photos[0];const root=appShell(p.title,'photos');const contents=elem('div','scroll photo-detail');contents.append(img(p.src,p.title),elem('p','',p.caption));root.append(contents);host.append(root)}
-  function instagram(){const root=appShell('Instagram','home');const content=elem('div','scroll app-list');for(const p of cfg.instagram){const post=elem('div','insta-card');post.append(elem('strong','',p.handle),img(p.image,'Instagram post'),elem('p','',p.caption));content.append(post)}root.append(content);host.append(root)}
+  function instaPhoto(index, cls=''){
+    const p=elem('div','ig-photo '+cls);
+    p.style.setProperty('--ig-col',index%3);
+    p.style.setProperty('--ig-row',Math.floor(index/3));
+    return p;
+  }
+  function instagram(){
+    const root=elem('section','page ig-page');
+    root.append(status());
+    const nav=elem('div','ig-nav');
+    nav.append(click('‹','ig-back',()=>setPage('home')));
+    const username=elem('div','ig-username');username.append(elem('strong','','lalinalena'),elem('span','ig-verified','✿'));
+    nav.append(username,elem('div','ig-nav-actions','♧  ···'));
+    root.append(nav);
+    const content=elem('div','scroll ig-scroll');
+    const overview=elem('div','ig-overview');
+    const summary=elem('div','ig-summary');
+    summary.append(instaPhoto(5,'ig-avatar'));
+    const stats=elem('div','ig-stats');
+    [['2,008','posts'],['1.8 M','followers'],['1,293','following']].forEach(([num,label])=>{
+      const stat=elem('div','ig-stat');stat.append(elem('strong','',num),elem('span','',label));stats.append(stat);
+    });
+    summary.append(stats);overview.append(summary);
+    overview.append(elem('div','ig-display-name','Lorena Schuett ⌘ ·°'));
+    const bio=elem('div','ig-bio');
+    ['Actor','✿ BKK','💌 Work Inquiries','Line ID : @ taoteaych3','Line ID : bookych3'].forEach(line=>bio.append(elem('div','',line)));
+    overview.append(bio);
+    overview.append(elem('div','ig-link','↗  linktr.ee/lalinalena'));
+    const tags=elem('div','ig-tags');tags.append(elem('span','','◎ lalinalena'),elem('span','','LaLi’sLoveLetters 💌 📮'));overview.append(tags);
+    overview.append(elem('div','ig-followers','Followed by jellyjelly5555, supassra_sp and 12 others'));
+    const actions=elem('div','ig-actions');actions.append(elem('div','','Following ⌄'),elem('div','','Message'),elem('div','','♙'));overview.append(actions);
+    const highlights=elem('div','ig-highlights');
+    [['🪩','👯'],['·ᴥ·','🤍'],['♡','💗'],['💪','🌷'],['LLN','🌊']].forEach(([label,emoji])=>{
+      const h=elem('div','ig-highlight');h.append(elem('div','ig-highlight-circle',emoji),elem('span','',label));highlights.append(h);
+    });
+    overview.append(highlights);content.append(overview);
+    const tabs=elem('div','ig-tabs');tabs.append(elem('span','ig-tab-selected','▦'),elem('span','','▷'),elem('span','','↻'),elem('span','','♙'));content.append(tabs);
+    const grid=elem('div','ig-grid');
+    cfg.instagram.forEach((p,i)=>{
+      const tile=click('','ig-tile',()=>setPage('instagram-post',i));
+      tile.append(instaPhoto(i));
+      tile.setAttribute('aria-label','View '+p.date+' post');
+      grid.append(tile);
+    });
+    content.append(grid);
+    root.append(content);host.append(root);
+  }
+  function instagramPost(){
+    const p=cfg.instagram[Number(selected)]||cfg.instagram[0];
+    const index=Math.max(0,cfg.instagram.indexOf(p));
+    const root=elem('section','page ig-page');
+    root.append(status());
+    const nav=elem('div','ig-nav');
+    nav.append(click('‹','ig-back',()=>setPage('instagram')));
+    nav.append(elem('strong','ig-post-title','Posts'));
+    root.append(nav);
+    const content=elem('div','scroll ig-post-scroll');
+    const header=elem('div','ig-post-header');
+    header.append(instaPhoto(5,'ig-post-avatar'),elem('strong','','lalinalena'),elem('span','ig-verified','✿'));
+    content.append(header);
+    content.append(instaPhoto(index,'ig-post-image'));
+    const likeRow=elem('div','ig-post-likes');likeRow.append(elem('span','','♥'),elem('strong','',p.likes+' likes'));content.append(likeRow);
+    const caption=elem('div','ig-post-caption');caption.append(elem('strong','','lalinalena '),document.createTextNode(p.caption));content.append(caption);
+    content.append(elem('div','ig-post-date',p.date));
+    root.append(content);host.append(root);
+  }
   function calendar(){const root=appShell('Calendar','home');const content=elem('div','app-list');for(const x of cfg.calendar){const b=elem('div','list-item');b.append(elem('div','',x.date),elem('strong','',x.title));content.append(b)}root.append(content);host.append(root)}
   function camera(){const root=appShell('Camera','home');const content=elem('div','scroll');const preview=img(cfg.phone.homePhoto,'Camera preview');preview.style.cssText='width:100%;height:70%;object-fit:cover';content.append(preview);
     const capture=click('● Capture','pill',()=>{alert('Camera is simulated. Add a photo to story-data.js to show it in Photos.');});capture.style.cssText='display:block;margin:25px auto';content.append(capture);root.append(content);host.append(root)}
   function phoneApp(){const root=appShell('Phone','home');const content=elem('div','app-list');for(const p of cfg.phoneLog){const item=click('','list-item',()=>alert('This is a fictional call log.'));const t=elem('div');t.append(elem('strong','',p.name),elem('small','',p.subtitle));item.append(t,elem('div','','ⓘ'));content.append(item)}root.append(content);host.append(root)}
   function safari(){const root=appShell('Safari','home');const content=elem('div','scroll');for(const p of cfg.safari){content.append(elem('div','safari-address',p.url));const card=elem('div','app-list');card.append(elem('h2','',p.title),elem('p','',p.body));content.append(card)}root.append(content);host.append(root)}
   function music(){const root=appShell('Music','home');const list=elem('div','app-list');for(const track of cfg.music){const b=click('','list-item',()=>{saved.favoriteTrack=track.title;persist();render()});const l=elem('div');l.append(elem('strong','',track.title),elem('small','',track.artist));b.append(l,elem('div','',saved.favoriteTrack===track.title?'♥':'♡'));list.append(b)}list.append(elem('p','empty-app','No audio is included yet. Tracks can be added when you supply files.'));root.append(list);host.append(root)}
-  function render(){host.replaceChildren();switch(page){case'lock':return lockScreen();case'home':return home();case'line-list':return lineList();case'line':return line();case'sms':return sms();case'kiddo-profile':return kiddoProfile();case'notes':return notes();case'note-editor':return noteEditor();case'photos':return photos();case'photo-detail':return photoDetail();case'instagram':return instagram();case'calendar':return calendar();case'camera':return camera();case'phone':return phoneApp();case'safari':return safari();case'music':return music();default:return home()}}
+  function render(){host.replaceChildren();switch(page){case'lock':return lockScreen();case'home':return home();case'line-list':return lineList();case'line':return line();case'sms':return sms();case'kiddo-profile':return kiddoProfile();case'notes':return notes();case'note-editor':return noteEditor();case'photos':return photos();case'photo-detail':return photoDetail();case'instagram':return instagram();case'instagram-post':return instagramPost();case'calendar':return calendar();case'camera':return camera();case'phone':return phoneApp();case'safari':return safari();case'music':return music();default:return home()}}
   render();
 })();
