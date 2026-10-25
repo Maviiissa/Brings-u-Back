@@ -311,3 +311,23 @@
 
 .story-typing-row{align-items:center;gap:8px}
 .story-typing-label{font-size:10px;color:#8d8e95;line-height:1.2}
+
+/* Fix Plot 1 typewriter: show the full reply as it wraps, not a horizontally
+   scrolled, ellipsized single-line input. The scripted field is a button,
+   not an editable text input, so its height can grow with the message. */
+.story-composer{align-items:flex-end}
+.story-composer .story-scripted-input{
+  display:block;flex:1;min-width:0;
+  height:auto;min-height:39px;
+  padding:9px 14px;
+  line-height:20px;
+  white-space:normal;
+  overflow-wrap:break-word;
+  word-break:normal;
+  overflow:visible;
+  text-overflow:clip;
+  text-align:left;
+  border-radius:20px;
+}
+.story-composer .story-scripted-input:disabled{opacity:1}
+.story-composer .composer-icon,.story-composer .story-send-decoration{align-self:flex-end;margin-bottom:5px}
