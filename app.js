@@ -341,9 +341,8 @@
     summary.append(stats);overview.append(summary);
     overview.append(elem('div','ig-display-name','Lorena Schuett ⌘ ·°'));
     const bio=elem('div','ig-bio');
-    ['Actor','✿ BKK','💌 Work Inquiries','Line ID : @ taoteaych3','Line ID : bookych3'].forEach(line=>bio.append(elem('div','',line)));
+    ['Actor','✿ BKK'].forEach(line=>bio.append(elem('div','',line)));
     overview.append(bio);
-    overview.append(elem('div','ig-link','↗  linktr.ee/lalinalena'));
     const tags=elem('div','ig-tags');tags.append(elem('span','','◎ lalinalena'),elem('span','','LaLi’sLoveLetters 💌 📮'));overview.append(tags);
     const actions=elem('div','ig-actions');actions.append(elem('div','','Following ⌄'),elem('div','','Message'),elem('div','','♙'));overview.append(actions);
     const highlights=elem('div','ig-highlights');
