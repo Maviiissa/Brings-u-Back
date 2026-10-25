@@ -345,3 +345,20 @@
 /* Contact rename scene: tap the name field to animate the scripted name. */
 .sms-contact-input[readonly]{cursor:pointer}
 .sms-contact-input.story-contact-typing{caret-color:transparent}
+
+/* Full white battery icon across lock screen, home screen and all apps.
+   Light app pages use a dark outline so the white fill remains visible. */
+.battery.battery-full,.lock-battery.battery-full{
+  width:27px;min-width:27px;height:14px;padding:0;
+  border:1.5px solid #444950;border-radius:4px;
+  background:#fff;color:#444950;
+  display:block;position:relative;flex-shrink:0;
+  font-size:0;box-sizing:border-box;
+}
+.battery.battery-full::after,.lock-battery.battery-full::after{
+  content:'';position:absolute;right:-4px;top:3px;
+  width:2px;height:5px;background:currentColor;border-radius:0 2px 2px 0;
+}
+.statusbar.light .battery.battery-full,.lock-indicators .lock-battery.battery-full{
+  border-color:#fff;color:#fff;background:#fff;
+}
