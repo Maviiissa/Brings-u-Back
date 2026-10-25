@@ -142,6 +142,26 @@ window.PHONE_STORY = {
     },
     plot4Date: {weekday:'SUNDAY',day:'7',month:'November',time:'14:23'},
     plot4HomeDelayMs: 5000,
+    plot6Note: {
+      id: 'plot6-2027-11-21',
+      title: "I couldn't help but smile reading her messages",
+      date: 'November 21, 2027 at 4:20 PM',
+      body: "I couldn't help but smile reading her messages about that \"senior\" in the marching band.\n\nMiu used to tell me how shy and tongue-tied she was when we first met. Listening to 18-year-old Miu ramble on about her campus life feels like unearthing lost fragments of a past I was never there to witness.\n\nI wish I had been there. I wish I had understood my own heart back then."
+    },
+    plot6Date: {weekday:'SUNDAY',day:'21',month:'November',time:'16:20'},
+    plot6HomeDelayMs: 5000,
+    plot6Notification: {
+      from:'them',sender:'Natsha',time:'4:20 PM',
+      text:"P'Lenaaaa I am dying of midterms! 😭 Everyday is just non-stop studying..."
+    },
+    plot6Messages: [
+      {stage:0,from:'them',text:"P'Lenaaaa I am dying of midterms! 😭 Everyday is just non-stop studying..."},
+      {stage:0,from:'them',text:'But I survived long enough to tell you a miracle - I got her Instagram! The drum major!'},
+      {stage:0,from:'them',text:"And you won't believe this... we literally share the same birthday!"},
+      {stage:0,from:'them',text:'And guess what her name is? Her name is also Lena! OMGGGG is this destiny or what?? 🥺✨'},
+      {stage:1,from:'me',text:'Sounds like destiny to me.'},
+      {stage:1,from:'me',text:"Don't stress too much about midterms, study hard and take care of yourself."}
+    ],
     plot5Note: {
       id: 'plot5-2027-11-14',
       title: 'Kiddo. I couldn’t help myself calling her that…',
