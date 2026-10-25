@@ -7,7 +7,7 @@
   let saved;
   try { saved = {...initial(), ...JSON.parse(localStorage.getItem(STORE)||'{}')}; }
   catch { saved = initial(); }
-  let page = 'home';
+  let page = 'lock';
   let selected = null;
   let draft = '';
   let lastPage = 'home';
@@ -36,6 +36,33 @@
   function appTile(label,type,graphic,count,target=type){
     const b=click('','home-app',()=>setPage(target));const icon=elem('div','tile '+type); if(graphic)icon.append(elem('span','',graphic));
     if(count){icon.append(elem('span','app-count',count));}b.append(icon,elem('div','app-caption',label));return b;
+  }
+  function lockscreen(){
+    const root=elem('section','page lock-screen');
+    root.setAttribute('aria-label','Lock screen. Swipe up to unlock.');
+    root.style.backgroundImage="url('assets/lockscreen.jpg')";
+    const date=elem('div','lock-date',cfg.lock.dateLabel);
+    root.append(date);
+    const hint=elem('div','lock-hint','Swipe up to unlock');
+    root.append(hint);
+    const unlock=()=>{
+      if(page!=='lock')return;
+      root.classList.add('unlocking');
+      window.setTimeout(()=>setPage('home'),330);
+    };
+    let startY=null;
+    root.addEventListener('pointerdown',e=>{startY=e.clientY;});
+    root.addEventListener('pointerup',e=>{if(startY!==null && startY-e.clientY>55)unlock();startY=null;});
+    root.addEventListener('pointercancel',()=>{startY=null;});
+    root.addEventListener('touchstart',e=>{startY=e.touches[0].clientY;},{passive:true});
+    root.addEventListener('touchend',e=>{if(startY!==null && startY-e.changedTouches[0].clientY>55)unlock();startY=null;},{passive:true});
+    root.addEventListener('wheel',e=>{if(e.deltaY>18)unlock();},{passive:true});
+    const bar=click('','unlock-homebar',unlock);
+    bar.setAttribute('aria-label','Unlock phone without password');
+    root.append(bar);
+    root.tabIndex=0;
+    root.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '||e.key==='ArrowUp'){e.preventDefault();unlock();}});
+    host.append(root);
   }
   function home(){
     const root=elem('section','page home');root.append(status(cfg.phone.time,true));
@@ -157,6 +184,6 @@
   function phoneApp(){const root=appShell('Phone','home');const content=elem('div','app-list');for(const p of cfg.phoneLog){const item=click('','list-item',()=>alert('This is a fictional call log.'));const t=elem('div');t.append(elem('strong','',p.name),elem('small','',p.subtitle));item.append(t,elem('div','','ⓘ'));content.append(item)}root.append(content);host.append(root)}
   function safari(){const root=appShell('Safari','home');const content=elem('div','scroll');for(const p of cfg.safari){content.append(elem('div','safari-address',p.url));const card=elem('div','app-list');card.append(elem('h2','',p.title),elem('p','',p.body));content.append(card)}root.append(content);host.append(root)}
   function music(){const root=appShell('Music','home');const list=elem('div','app-list');for(const track of cfg.music){const b=click('','list-item',()=>{saved.favoriteTrack=track.title;persist();render()});const l=elem('div');l.append(elem('strong','',track.title),elem('small','',track.artist));b.append(l,elem('div','',saved.favoriteTrack===track.title?'♥':'♡'));list.append(b)}list.append(elem('p','empty-app','No audio is included yet. Tracks can be added when you supply files.'));root.append(list);host.append(root)}
-  function render(){host.replaceChildren();switch(page){case'home':return home();case'line':return line();case'sms':return sms();case'kiddo-profile':return kiddoProfile();case'notes':return notes();case'note-editor':return noteEditor();case'photos':return photos();case'photo-detail':return photoDetail();case'instagram':return instagram();case'calendar':return calendar();case'camera':return camera();case'phone':return phoneApp();case'safari':return safari();case'music':return music();default:return home()}}
+  function render(){host.replaceChildren();switch(page){case'lock':return lockscreen();case'home':return home();case'line':return line();case'sms':return sms();case'kiddo-profile':return kiddoProfile();case'notes':return notes();case'note-editor':return noteEditor();case'photos':return photos();case'photo-detail':return photoDetail();case'instagram':return instagram();case'calendar':return calendar();case'camera':return camera();case'phone':return phoneApp();case'safari':return safari();case'music':return music();default:return home()}}
   render();
 })();
