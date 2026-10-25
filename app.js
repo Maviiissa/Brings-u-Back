@@ -310,6 +310,7 @@
     const p=elem('div','ig-photo '+cls);
     p.style.setProperty('--ig-col',index%3);
     p.style.setProperty('--ig-row',Math.floor(index/3));
+    p.style.backgroundPosition=['0%','50%','100%'][index%3]+' '+(Math.floor(index/3)*100)+'%';
     return p;
   }
   function instagram(){
