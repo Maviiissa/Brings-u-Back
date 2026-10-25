@@ -157,7 +157,7 @@
   function status(time=(saved.storyPlot4DateChanged?cfg.story.plot4Date.time:(saved.storyPlot3DateChanged?cfg.story.plot3Date.time:(saved.storyPlot2DateChanged?cfg.story.plot2Date.time:cfg.phone.time))),light=false){
     const b=elem('div','statusbar'+(light?' light':''));b.append(elem('span','',time));
     const icons=elem('div','status-icons');icons.innerHTML=svg('signal')+svg('wifi');
-    const battery=elem('div','battery');battery.append(elem('span','',cfg.phone.battery));icons.append(battery);b.append(icons);return b;
+    const battery=elem('div','battery battery-full');battery.setAttribute('aria-label','Battery full');icons.append(battery);b.append(icons);return b;
   }
   function appShell(title,back='home',actions=[]){
     const root=elem('section','page app');root.append(status());
@@ -212,7 +212,7 @@
 
     const indicators=elem('div','lock-indicators');
     indicators.innerHTML=svg('signal')+svg('wifi');
-    const battery=elem('div','lock-battery',cfg.phone.battery);
+    const battery=elem('div','lock-battery battery-full');battery.setAttribute('aria-label','Battery full');
     indicators.append(battery);
     scene.append(indicators);
     scene.append(elem('div','lock-date',cfg.lockScreen.date));
