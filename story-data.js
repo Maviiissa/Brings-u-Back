@@ -142,6 +142,27 @@ window.PHONE_STORY = {
     },
     plot4Date: {weekday:'SUNDAY',day:'7',month:'November',time:'14:23'},
     plot4HomeDelayMs: 5000,
+    plot5Note: {
+      id: 'plot5-2027-11-14',
+      title: 'Kiddo. I couldn’t help myself calling her that…',
+      date: 'November 14, 2027 at 3:15 PM',
+      body: "Kiddo. I couldn’t help myself calling her that…\n\nThe moment I typed that word, my hands were shaking.\n\nIt isn't just a resemblance. The girl on the other end of this line is Miu. It's her, eight years ago, back in 2019.\n\nI don't know how this miraculous bridge was built. She has no idea who I am in her future, but here I am, holding her past in the palm of my hand."
+    },
+    plot5Date: {weekday:'SUNDAY',day:'14',month:'November',time:'15:15'},
+    plot5HomeDelayMs: 5000,
+    plot5Notification: {
+      from:'them',sender:'Natsha',time:'3:15 PM',text:'Having my dinner hehehe'
+    },
+    plot5Messages: [
+      {stage:0,from:'them',type:'photo',text:'Image'},
+      {stage:0,from:'them',text:'Having my dinner hehehe'},
+      {stage:1,from:'me',text:'100% Brown food? That must be your favourite'},
+      {stage:2,from:'them',text:'How do you know?!!!😆'},
+      {stage:2,from:'them',text:'Oh, and good news! I officially passed my exams and got into Chulalongkorn University! 🎉'},
+      {stage:2,from:'them',text:"I'm thinking of joining the campus club! The Drum Major has this senior... OMG she is so prettyyyyyy 🫣"},
+      {stage:3,from:'me',text:'Congratulations on Chula, kiddo! I am so happy for you ☺️'},
+      {stage:3,from:'me',text:'Make sure you get some rest after celebrating 🤍'}
+    ],
     plot4Notification: {
       from:'them',sender:'Natsha',time:'2:23 PM',
       text:'Guess what? I forced myself to get out of bed early today, but I failed the pancake test again... 🥞🤦‍♀️'
