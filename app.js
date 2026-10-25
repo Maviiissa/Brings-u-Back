@@ -444,6 +444,79 @@
       persist();render();
     },cfg.story.strangerTypingDelayMs);
   }
+  function smsPlot5(){
+    const root=appShell('Messages','home');
+    const contact=elem('div','sms-contact');
+    contact.append(smsAvatar(),click(saved.storyContactName||'Natsha','sms-number sms-name-button',()=>setPage('sms-contact')),elem('div','sms-meta',cfg.sms.service));
+    root.append(contact);
+    const messages=elem('div','scroll chat-view sms-chat');
+    const history=[...(cfg.sms.messages||[])];
+    if(saved.storyFirstSmsDelivered)history.push(cfg.story.firstMessage);
+    if(saved.storyPlayerReplied)history.push({from:'me',text:cfg.story.playerReply});
+    if(saved.storyStrangerReplied)history.push({from:'them',text:cfg.story.strangerReply});
+    if(saved.storySecondSmsDelivered)history.push({type:'date',text:'October 28, 2027'},cfg.story.secondMessage);
+    if(saved.storySecondPlayerReplied)history.push({from:'me',text:cfg.story.secondPlayerReply});
+    if(saved.storySecondStrangerReplied)history.push({from:'them',text:cfg.story.secondStrangerReply});
+    history.push({type:'date',text:'October 31, 2027'});
+    for(const msg of cfg.story.plot3Messages)if(msg.stage<=(saved.storyPlot3Stage||0))history.push(msg);
+    history.push({type:'date',text:'November 7, 2027'});
+    for(const msg of cfg.story.plot4Messages)if(msg.stage<=(saved.storyPlot4Stage||0))history.push(msg);
+    history.push({type:'date',text:'November 14, 2027'});
+    const stage=Number(saved.storyPlot5Stage)||0;
+    for(const msg of cfg.story.plot5Messages)if(msg.stage<=stage)history.push(msg);
+    renderMessages(messages,history);root.append(messages);
+    if(stage===0 || stage===2)root.append(plot5Composer(messages,stage));
+    else{
+      const idle=elem('div','composer story-composer story-composer-inactive');
+      idle.append(elem('span','composer-icon','+'),elem('div','composer-field story-readonly','Text Message'));
+      root.append(idle);
+    }
+    host.append(root);scrollDown(messages);
+    if(stage===1)plot5Incoming(messages);
+  }
+  function plot5Composer(messages,stage){
+    const form=elem('div','composer story-composer plot5-composer');
+    form.append(elem('span','composer-icon','+'));
+    const field=click('Text Message · SMS','composer-field story-scripted-input',()=>{
+      if(field.disabled)return;
+      field.disabled=true;
+      const replies=stage===0?[cfg.story.plot5Messages[2].text]:
+        [cfg.story.plot5Messages[6].text,cfg.story.plot5Messages[7].text];
+      const next=(index)=>{
+        plot3Type(field,replies[index],()=>{
+          scheduleStoryUi(()=>{
+            if(page!=='sms')return;
+            if(index+1<replies.length){
+              const row=elem('div','chat-row me');
+              row.append(elem('div','bubble',replies[index]));
+              messages.append(row);scrollDown(messages);
+              field.textContent='';field.classList.remove('story-typing-active');
+              scheduleStoryUi(()=>next(index+1),500);
+            }else{
+              saved.storyPlot5Stage=stage===0?1:3;
+              persist();render();
+            }
+          },650);
+        });
+      };
+      next(0);
+    });
+    field.setAttribute('aria-label','Tap to type scripted reply');
+    form.append(field,elem('span','story-send-decoration','↑'));
+    return form;
+  }
+  function plot5Incoming(messages){
+    const indicator=elem('div','story-typing-row');
+    const bubble=elem('div','story-typing-bubble');
+    for(let i=0;i<3;i++)bubble.append(elem('span','story-typing-dot'));
+    indicator.append(bubble,elem('span','story-typing-label','Natsha is typing…'));
+    messages.append(indicator);scrollDown(messages);
+    scheduleStoryUi(()=>{
+      if(page!=='sms')return;
+      saved.storyPlot5Stage=2;
+      persist();render();
+    },cfg.story.strangerTypingDelayMs);
+  }
   function smsPlot4(){
     const root=appShell('Messages','home');
     const contact=elem('div','sms-contact');
@@ -685,6 +758,20 @@
     for(const item of messages){
       if(item.type==='date')container.append(elem('div','fake-date',item.text));
       else if(item.type==='notice')container.append(elem('div','inline-notice',item.text));
+      else if(item.type==='photo'){
+        const row=elem('div','chat-row '+(item.from||'them'));
+        const bubble=elem('div','bubble sms-photo-bubble');
+        if(item.src){
+          const photo=img(item.src,'Photo from Natsha');
+          photo.className='sms-story-photo';
+          bubble.append(photo);
+        }else{
+          const placeholder=elem('div','sms-photo-placeholder');
+          placeholder.append(elem('div','sms-photo-symbol','▧'),elem('div','sms-photo-caption','Image'));
+          bubble.append(placeholder);
+        }
+        row.append(bubble);container.append(row);
+      }
       else if(item.from==='me'||item.from==='them'){
         const row=elem('div','chat-row '+item.from);
         const bubble=elem('div','bubble',item.text);
