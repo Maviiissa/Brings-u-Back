@@ -11,11 +11,64 @@
   let selected = null;
   let draft = '';
   let lastPage = 'home';
+  let storyTimer = null;
+  let storyLastTick = 0;
+  let notificationVisible = false;
   const persist = () => {try{localStorage.setItem(STORE,JSON.stringify(saved));}catch{}};
   const elem = (tag,cls='',text) => {const el=document.createElement(tag);if(cls)el.className=cls;if(text!==undefined)el.textContent=text;return el;};
   const click = (text,cls,action) => {const b=elem('button',cls,text);b.type='button';b.addEventListener('click',action);return b;};
   const img = (src,alt='') => {const i=elem('img');i.src=src;i.alt=alt;return i;};
-  const setPage = (p, id=null) => {page=p; selected=id;draft='';render();};
+  const setPage = (p, id=null) => {
+    const unlocking = page==='lock' && p==='home';
+    page=p; selected=id;draft='';render();
+    if(unlocking) startStoryBrowsing();
+    if(p==='sms' && saved.storyFirstSmsDelivered){
+      saved.storyFirstSmsOpened=true;
+      notificationVisible=false;
+      persist();
+      document.querySelector('.story-notification')?.remove();
+    } else if(notificationVisible) showStoryNotification();
+  };
+  // Browsing time only accumulates while the phone is unlocked and the tab is visible.
+  // The event fires once per saved playthrough, including across page navigation.
+  function startStoryBrowsing(){
+    if(saved.storyFirstSmsDelivered)return;
+    if(!Number.isFinite(saved.storyBrowseMs))saved.storyBrowseMs=0;
+    if(storyTimer!==null)return;
+    storyLastTick=Date.now();
+    storyTimer=window.setInterval(()=>{
+      const now=Date.now();
+      const elapsed=Math.min(now-storyLastTick,1000);
+      storyLastTick=now;
+      if(document.hidden || page==='lock')return;
+      saved.storyBrowseMs+=Math.max(0,elapsed);
+      if(saved.storyBrowseMs>=cfg.story.firstMessageDelayMs){
+        window.clearInterval(storyTimer);storyTimer=null;
+        saved.storyFirstSmsDelivered=true;
+        notificationVisible=true;
+        persist();
+        if(page==='sms')render();
+        showStoryNotification();
+      } else if(Math.floor(saved.storyBrowseMs/5000)!==Math.floor((saved.storyBrowseMs-elapsed)/5000))persist();
+    },500);
+  }
+  function showStoryNotification(){
+    document.querySelector('.story-notification')?.remove();
+    if(!notificationVisible || saved.storyFirstSmsOpened || page==='lock')return;
+    const msg=cfg.story.firstMessage;
+    const banner=click('','story-notification',()=>{
+      notificationVisible=false;
+      saved.storyFirstSmsOpened=true;
+      persist();
+      setPage('sms');
+    });
+    banner.setAttribute('aria-label','Open text message from '+msg.sender);
+    const head=elem('div','story-notification-head');
+    head.append(elem('span','story-notification-app','✉  MESSAGES'),elem('span','story-notification-time',msg.time));
+    banner.append(head,elem('div','story-notification-sender',msg.sender),elem('div','story-notification-body',msg.text));
+    host.append(banner);
+    window.requestAnimationFrame(()=>banner.classList.add('story-notification-visible'));
+  }
   const svg = (name) => {
     if(name==='signal')return `<svg width="21" height="16" viewBox="0 0 21 16" aria-hidden="true"><rect x="1" y="9" width="4" height="7" rx="1" fill="currentColor" opacity=".6"/><rect x="6" y="6" width="4" height="10" rx="1" fill="currentColor" opacity=".75"/><rect x="11" y="3" width="4" height="13" rx="1" fill="currentColor" opacity=".9"/><rect x="16" y="0" width="4" height="16" rx="1" fill="currentColor"/></svg>`;
     if(name==='wifi')return `<svg width="20" height="16" viewBox="0 0 20 16" aria-hidden="true"><path d="M2 5C6 1 14 1 18 5M5 8c3-3 7-3 10 0M8 11c1.5-1.3 2.5-1.3 4 0" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="10" cy="14" r="1.4" fill="currentColor"/></svg>`;
@@ -204,7 +257,8 @@
     const contact=elem('div','sms-contact');contact.append(avatar(null));
     contact.append(elem('div','sms-number',cfg.sms.number||cfg.sms.name),elem('div','sms-meta',cfg.sms.service));root.append(contact);
     const messages=elem('div','scroll chat-view sms-chat');
-    renderMessages(messages,[...(cfg.sms.messages||[]),...saved.smsSent]);root.append(messages);
+    const incoming=saved.storyFirstSmsDelivered?[cfg.story.firstMessage]:[];
+    renderMessages(messages,[...(cfg.sms.messages||[]),...incoming,...saved.smsSent]);root.append(messages);
     root.append(elem('div','sms-footer-note','Messages sent here are fictional and stored only in this browser.'));
     root.append(composer('sms','Text Message · SMS'));host.append(root);scrollDown(messages);
   }
@@ -222,7 +276,13 @@
           if(item.time)meta.append(elem('span','line-time',item.time));
           if(item.from==='me')row.append(meta,bubble);
           else row.append(bubble,meta);
-        }else row.append(bubble);
+        }else{
+          if(container.classList.contains('sms-chat') && item.time){
+            const time=elem('div','sms-message-time',item.time);
+            container.append(time);
+          }
+          row.append(bubble);
+        }
         container.append(row);
       }
     }
@@ -388,4 +448,8 @@
   function music(){const root=appShell('Music','home');const list=elem('div','app-list');for(const track of cfg.music){const b=click('','list-item',()=>{saved.favoriteTrack=track.title;persist();render()});const l=elem('div');l.append(elem('strong','',track.title),elem('small','',track.artist));b.append(l,elem('div','',saved.favoriteTrack===track.title?'♥':'♡'));list.append(b)}list.append(elem('p','empty-app','No audio is included yet. Tracks can be added when you supply files.'));root.append(list);host.append(root)}
   function render(){host.replaceChildren();switch(page){case'lock':return lockScreen();case'home':return home();case'line-list':return lineList();case'line':return line();case'sms':return sms();case'kiddo-profile':return kiddoProfile();case'notes':return notes();case'note-editor':return noteEditor();case'photos':return photos();case'photo-detail':return photoDetail();case'instagram':return instagram();case'instagram-post':return instagramPost();case'calendar':return calendar();case'camera':return camera();case'phone':return phoneApp();case'safari':return safari();case'music':return music();default:return home()}}
   render();
+  // The countdown starts on first unlock; returning to the site resumes it.
+  if(saved.storyBrowseMs>0 && !saved.storyFirstSmsDelivered){
+    // Keep the phone locked until the player swipes up again.
+  }
 })();
