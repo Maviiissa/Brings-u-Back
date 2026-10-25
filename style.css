@@ -211,3 +211,44 @@
 .line-conversation-name{font-size:17px;font-weight:700}
 .line-conversation-preview{font-size:13px;color:#8d9098;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .line-conversation-date{font-size:11px;color:#a2a4ac;align-self:flex-start;white-space:nowrap;margin-top:3px}
+
+/* Instagram dark profile, three-column gallery and minimal post detail */
+.ig-page{background:#090d15;color:#f8f8fb}
+.ig-page .statusbar{color:#fff}
+.ig-page .statusbar .battery span{color:#111;mix-blend-mode:normal}
+.ig-nav{height:53px;flex:0 0 53px;display:flex;align-items:center;padding:0 15px;gap:18px}
+.ig-back{font-size:38px;line-height:1;padding:0 7px 6px 0;font-weight:250}
+.ig-username{display:flex;align-items:center;gap:5px;font-size:21px}
+.ig-verified{display:inline-grid;place-items:center;background:#2899f6;color:#fff;border-radius:50%;font-size:12px;width:18px;height:18px}
+.ig-nav-actions{margin-left:auto;font-size:25px;letter-spacing:8px}
+.ig-scroll{padding:0;overscroll-behavior:contain}
+.ig-overview{padding:16px 13px 0}
+.ig-summary{display:flex;align-items:center;gap:13px}
+.ig-photo{background-image:url('assets/instagram-sprite.jpg');background-size:300% 200%;background-position:calc(var(--ig-col) * 50%) calc(var(--ig-row) * 100%);background-color:#30343c}
+.ig-avatar{width:94px;height:94px;flex:0 0 94px;border:4px solid #090d15;outline:3px solid #535d6b;border-radius:50%}
+.ig-stats{display:flex;flex:1;justify-content:space-around;text-align:center;gap:5px}
+.ig-stat{display:flex;flex-direction:column;gap:3px;font-size:12px}
+.ig-stat strong{font-size:16px}.ig-display-name{font-family:Georgia,serif;font-size:15px;font-style:italic;margin:15px 0 8px}
+.ig-bio{font-size:13px;line-height:1.45}.ig-link{font-size:13px;color:#83aaff;margin-top:9px}
+.ig-tags{display:flex;gap:7px;white-space:nowrap;overflow:hidden;margin-top:14px}
+.ig-tags span{border:1px solid #343b46;border-radius:20px;padding:6px 10px;font-size:11px}
+.ig-followers{font-size:12px;line-height:1.4;margin-top:14px}
+.ig-actions{display:grid;grid-template-columns:1fr 1fr 45px;gap:6px;margin:14px 0 17px}
+.ig-actions>div{background:#282e37;border-radius:8px;text-align:center;padding:10px 4px;font-size:13px;font-weight:600}
+.ig-highlights{display:flex;gap:17px;overflow:auto;padding-bottom:16px;scrollbar-width:none}
+.ig-highlight{flex:0 0 61px;text-align:center;font-size:11px}
+.ig-highlight-circle{width:58px;height:58px;border:3px solid #586272;border-radius:50%;display:grid;place-items:center;margin-bottom:5px;font-size:23px}
+.ig-tabs{height:46px;display:flex;justify-content:space-around;align-items:center;color:#8c94a2;font-size:26px}
+.ig-tabs span{width:25%;height:100%;display:grid;place-items:center}
+.ig-tabs .ig-tab-selected{color:#fff;border-bottom:2px solid #fff}
+.ig-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:2px;padding-bottom:20px}
+.ig-tile{aspect-ratio:1;padding:0;overflow:hidden}
+.ig-tile .ig-photo{height:100%;width:100%}
+.ig-post-title{font-size:17px}
+.ig-post-header{display:flex;align-items:center;gap:9px;padding:10px 13px;font-size:14px}
+.ig-post-avatar{width:34px;height:34px;border-radius:50%}
+.ig-post-image{width:100%;aspect-ratio:1;max-height:450px}
+.ig-post-likes{display:flex;align-items:center;gap:9px;padding:14px 15px 5px;font-size:15px}
+.ig-post-likes span{font-size:26px;color:#ff284b}
+.ig-post-caption{padding:5px 15px;font-size:14px;line-height:1.55;white-space:pre-wrap}
+.ig-post-date{padding:8px 15px 25px;font-size:12px;color:#9ca3b1}
