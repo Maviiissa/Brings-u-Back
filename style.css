@@ -16,3 +16,13 @@
 .note-list-item small{font-size:12px;letter-spacing:0}
 .notes-list{background:#f4f5f8}
 .note-editor{padding-top:17px}
+
+/* Lock screen — image-only entrance, no passcode. Photo contains a clock;
+   the requested date is a separate overlay, not burned into the wallpaper. */
+.lock-screen{background-color:#241b1c;background-position:center;background-size:cover;touch-action:pan-y;color:#fa828d;user-select:none;cursor:grab;transition:transform .33s cubic-bezier(.2,.8,.2,1),opacity .33s ease,filter .33s ease}
+.lock-screen.unlocking{transform:translateY(-22%);filter:blur(7px);opacity:0}
+.lock-date{position:absolute;top:10.85%;left:0;right:0;text-align:center;font-size:clamp(17px,5vw,26px);font-weight:600;color:#fb8392;text-shadow:0 1px 3px #180e0e88;z-index:2}
+.lock-hint{position:absolute;bottom:5.4%;left:0;right:0;text-align:center;font-size:12px;color:#fff9;letter-spacing:.03em;text-shadow:0 1px 6px #000a;animation:lockHint 2.6s ease-in-out infinite;pointer-events:none}
+.unlock-homebar{position:absolute;bottom:0;left:25%;width:50%;height:36px;z-index:3;color:transparent}
+@keyframes lockHint{0%,100%{opacity:.55;transform:translateY(2px)}50%{opacity:1;transform:translateY(-4px)}}
+@media (min-width:441px){.lock-date{font-size:23px}}
