@@ -351,6 +351,34 @@
     area.append(avatar(null),label,done);
     root.append(area);host.append(root);
   }
+  function smsPlot4(){
+    const root=appShell('Messages','home');
+    const contact=elem('div','sms-contact');
+    contact.append(avatar(null),click(saved.storyContactName||'Unknown Number','sms-number sms-name-button',()=>setPage('sms-contact')),elem('div','sms-meta',cfg.sms.service));
+    root.append(contact);
+    const messages=elem('div','scroll chat-view sms-chat');
+    const history=[...(cfg.sms.messages||[])];
+    if(saved.storyFirstSmsDelivered)history.push(cfg.story.firstMessage);
+    if(saved.storyPlayerReplied)history.push({from:'me',text:cfg.story.playerReply});
+    if(saved.storyStrangerReplied)history.push({from:'them',text:cfg.story.strangerReply});
+    if(saved.storySecondSmsDelivered)history.push({type:'date',text:'October 28, 2027'},cfg.story.secondMessage);
+    if(saved.storySecondPlayerReplied)history.push({from:'me',text:cfg.story.secondPlayerReply});
+    if(saved.storySecondStrangerReplied)history.push({from:'them',text:cfg.story.secondStrangerReply});
+    history.push({type:'date',text:'October 31, 2027'});
+    for(const msg of cfg.story.plot3Messages)if(msg.stage<=(saved.storyPlot3Stage||0))history.push(msg);
+    history.push({type:'date',text:'November 7, 2027'});
+    const stage=Number(saved.storyPlot4Stage)||0;
+    for(const msg of cfg.story.plot4Messages)if(msg.stage<=stage)history.push(msg);
+    renderMessages(messages,history);root.append(messages);
+    if(stage===0 || stage===2)root.append(plot4Composer(messages,stage));
+    else{
+      const idle=elem('div','composer story-composer story-composer-inactive');
+      idle.append(elem('span','composer-icon','+'),elem('div','composer-field story-readonly','Text Message'));
+      root.append(idle);
+    }
+    host.append(root);scrollDown(messages);
+    if(stage===1 || stage===3)plot4Incoming(messages,stage);
+  }
   function smsPlot3(){
     const root=appShell('Messages','home');
     const contact=elem('div','sms-contact');contact.append(avatar(null));
