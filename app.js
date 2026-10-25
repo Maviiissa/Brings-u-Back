@@ -504,6 +504,71 @@
       persist();render();
     },delivered===0?1250:1050);
   }
+  function smsPlot6(){
+    const root=appShell('Messages','home');
+    const contact=elem('div','sms-contact');
+    contact.append(smsAvatar(),click(saved.storyContactName||'Natsha','sms-number sms-name-button',()=>setPage('sms-contact')),elem('div','sms-meta',cfg.sms.service));
+    root.append(contact);
+    const messages=elem('div','scroll chat-view sms-chat');
+    const history=[...(cfg.sms.messages||[])];
+    if(saved.storyFirstSmsDelivered)history.push(cfg.story.firstMessage);
+    if(saved.storyPlayerReplied)history.push({from:'me',text:cfg.story.playerReply});
+    if(saved.storyStrangerReplied)history.push({from:'them',text:cfg.story.strangerReply});
+    if(saved.storySecondSmsDelivered)history.push({type:'date',text:'October 28, 2027'},cfg.story.secondMessage);
+    if(saved.storySecondPlayerReplied)history.push({from:'me',text:cfg.story.secondPlayerReply});
+    if(saved.storySecondStrangerReplied)history.push({from:'them',text:cfg.story.secondStrangerReply});
+    history.push({type:'date',text:'October 31, 2027'});
+    for(const msg of cfg.story.plot3Messages)if(msg.stage<=(saved.storyPlot3Stage||0))history.push(msg);
+    history.push({type:'date',text:'November 7, 2027'});
+    for(const msg of cfg.story.plot4Messages)if(msg.stage<=(saved.storyPlot4Stage||0))history.push(msg);
+    history.push({type:'date',text:'November 14, 2027'});
+    for(const msg of cfg.story.plot5Messages)if(msg.stage<=(saved.storyPlot5Stage||0))history.push(msg);
+    history.push({type:'date',text:'November 21, 2027'});
+    const stage=Number(saved.storyPlot6Stage)||0;
+    history.push(...storyVisibleMessages('plot6',stage,cfg.story.plot6Messages));
+    renderMessages(messages,history);
+    root.append(messages);
+    const allIncomingShown=(saved.storyBubbleCounts||{})['plot6:0']>=4;
+    if(stage===0 && allIncomingShown){
+      root.append(plot6Composer(messages));
+    }else{
+      const idle=elem('div','composer story-composer story-composer-inactive');
+      idle.append(elem('span','composer-icon','+'),elem('div','composer-field story-readonly','Text Message'));
+      root.append(idle);
+    }
+    host.append(root);scrollDown(messages);
+    if(stage===0 && !allIncomingShown)storyIncomingSequence(messages,'plot6',0);
+  }
+  function plot6Composer(messages){
+    const form=elem('div','composer story-composer plot6-composer');
+    form.append(elem('span','composer-icon','+'));
+    const field=click('Text Message · SMS','composer-field story-scripted-input',()=>{
+      if(field.disabled)return;
+      field.disabled=true;
+      const replies=cfg.story.plot6Messages.filter(msg=>msg.from==='me').map(msg=>msg.text);
+      const next=(index)=>{
+        plot3Type(field,replies[index],()=>{
+          scheduleStoryUi(()=>{
+            if(page!=='sms')return;
+            if(index+1<replies.length){
+              const row=elem('div','chat-row me');
+              row.append(elem('div','bubble',replies[index]));
+              messages.append(row);scrollDown(messages);
+              field.textContent='';field.classList.remove('story-typing-active');
+              scheduleStoryUi(()=>next(index+1),500);
+            }else{
+              saved.storyPlot6Stage=1;
+              persist();render();
+            }
+          },650);
+        });
+      };
+      next(0);
+    });
+    field.setAttribute('aria-label','Tap to type scripted reply');
+    form.append(field,elem('span','story-send-decoration','↑'));
+    return form;
+  }
   function smsPlot5(){
     const root=appShell('Messages','home');
     const contact=elem('div','sms-contact');
