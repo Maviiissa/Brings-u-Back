@@ -142,7 +142,7 @@
     main.append(elem('div','photo-label','Photos'));
     const grid=elem('div','home-grid');const cal=click('','calendar-card',()=>setPage('calendar'));
     cal.append(elem('div','cal-weekday',cfg.phone.date.weekday),elem('div','cal-day',cfg.phone.date.day),elem('div','cal-detail',cfg.phone.date.detail));grid.append(cal);
-    grid.append(appTile('Camera','camera'),appTile('Instagram','instagram'),appTile('LINE','line'),appTile('Notes','notes'));
+    grid.append(appTile('Camera','camera'),appTile('Instagram','instagram'),appTile('LINE','line','',null,'line-list'),appTile('Notes','notes'));
     main.append(grid);main.append(elem('div','home-search','⌕  Search'));root.append(main);
     const dock=elem('div','dock');dock.append(appTile('','phoneicon','☎',cfg.phone.unreadPhone,'phone'),appTile('','safari','◉',null,'safari'),appTile('','messagesicon','●',cfg.phone.unreadMessages,'sms'),appTile('','music','♫',null,'music'));
     root.append(dock);host.append(root);
@@ -152,8 +152,46 @@
     if(src){const photo=img(src,'Kiddo');photo.onload=()=>{a.textContent='';a.append(photo)};photo.onerror=()=>{};}
     return a;
   }
+
+  // LINE inbox: tapping LINE on the home screen opens the contact list first.
+  function lineList(){
+    const root=appShell('LINE','home');
+    root.classList.add('line-inbox-page');
+    const top=elem('div','line-inbox-header');
+    top.append(elem('h1','line-inbox-heading','Chats'));
+    const search=elem('div','line-inbox-search','⌕  Search chats');
+    root.append(top,search);
+    const list=elem('div','scroll line-inbox-list');
+    const conversation=click('','line-conversation',()=>setPage('line'));
+    conversation.setAttribute('aria-label','Open chat with Kiddo');
+    conversation.append(avatar(cfg.line.avatar,'line-inbox-avatar'));
+    const details=elem('div','line-conversation-details');
+    details.append(elem('strong','line-conversation-name',cfg.line.name));
+    const entries=[...(cfg.line.messages||[]),...saved.lineSent].filter(x=>x.from==='me'||x.from==='them');
+    const last=entries.length?entries[entries.length-1].text:'';
+    details.append(elem('span','line-conversation-preview',last));
+    conversation.append(details);
+    const when=elem('div','line-conversation-date','25 Nov 2027');
+    conversation.append(when);
+    list.append(conversation);
+    root.append(list);
+    host.append(root);
+  }
+  // Explicit inline bubble styling avoids a stale or conflicting CSS selector
+  // silently stripping the white/green backgrounds in GitHub Pages.
+  function styleLineBubble(bubble,from){
+    bubble.style.setProperty('background-color',from==='me'?'#b7e76d':'#ffffff','important');
+    bubble.style.setProperty('color','#141414','important');
+    bubble.style.setProperty('border-radius',from==='me'?'18px 18px 5px 18px':'18px 18px 18px 5px');
+    bubble.style.setProperty('padding','11px 14px');
+    bubble.style.setProperty('display','block');
+    bubble.style.setProperty('width','fit-content');
+    bubble.style.setProperty('max-width','76%');
+    bubble.style.setProperty('box-shadow','0 1px 2px rgba(30,40,70,.15)');
+    bubble.style.setProperty('font-family','-apple-system, BlinkMacSystemFont, "Segoe UI", "Apple Color Emoji", "Segoe UI Emoji", sans-serif');
+  }
   function line(){
-    const root=appShell('', 'home');const navTitle=root.querySelector('.nav-center');
+    const root=appShell('', 'line-list');const navTitle=root.querySelector('.nav-center');
     navTitle.replaceChildren();const profile=click('','nav-center',()=>setPage('kiddo-profile'));
     profile.append(avatar(cfg.line.avatar),elem('div','nav-title',cfg.line.name));navTitle.replaceWith(profile);
     const right=root.querySelector('.nav-right');right.append(click('⌕','',()=>{const sc=root.querySelector('.scroll');sc?.scrollTo({top:0,behavior:'smooth'})}),click('☰','',()=>setPage('kiddo-profile')));
@@ -178,6 +216,7 @@
         const row=elem('div','chat-row '+item.from);
         const bubble=elem('div','bubble',item.text);
         if(container.classList.contains('line-chat')){
+          styleLineBubble(bubble,item.from);
           const meta=elem('div','line-message-meta');
           if(item.read)meta.append(elem('span','line-read','Read'));
           if(item.time)meta.append(elem('span','line-time',item.time));
@@ -203,6 +242,7 @@
         const row=elem('div','chat-row me');
         const bubble=elem('div','bubble',text);
         if(kind==='line'){
+          styleLineBubble(bubble,'me');
           const meta=elem('div','line-message-meta');
           meta.append(elem('span','line-read','Read'));
           row.append(meta,bubble);
@@ -273,6 +313,6 @@
   function phoneApp(){const root=appShell('Phone','home');const content=elem('div','app-list');for(const p of cfg.phoneLog){const item=click('','list-item',()=>alert('This is a fictional call log.'));const t=elem('div');t.append(elem('strong','',p.name),elem('small','',p.subtitle));item.append(t,elem('div','','ⓘ'));content.append(item)}root.append(content);host.append(root)}
   function safari(){const root=appShell('Safari','home');const content=elem('div','scroll');for(const p of cfg.safari){content.append(elem('div','safari-address',p.url));const card=elem('div','app-list');card.append(elem('h2','',p.title),elem('p','',p.body));content.append(card)}root.append(content);host.append(root)}
   function music(){const root=appShell('Music','home');const list=elem('div','app-list');for(const track of cfg.music){const b=click('','list-item',()=>{saved.favoriteTrack=track.title;persist();render()});const l=elem('div');l.append(elem('strong','',track.title),elem('small','',track.artist));b.append(l,elem('div','',saved.favoriteTrack===track.title?'♥':'♡'));list.append(b)}list.append(elem('p','empty-app','No audio is included yet. Tracks can be added when you supply files.'));root.append(list);host.append(root)}
-  function render(){host.replaceChildren();switch(page){case'lock':return lockScreen();case'home':return home();case'line':return line();case'sms':return sms();case'kiddo-profile':return kiddoProfile();case'notes':return notes();case'note-editor':return noteEditor();case'photos':return photos();case'photo-detail':return photoDetail();case'instagram':return instagram();case'calendar':return calendar();case'camera':return camera();case'phone':return phoneApp();case'safari':return safari();case'music':return music();default:return home()}}
+  function render(){host.replaceChildren();switch(page){case'lock':return lockScreen();case'home':return home();case'line-list':return lineList();case'line':return line();case'sms':return sms();case'kiddo-profile':return kiddoProfile();case'notes':return notes();case'note-editor':return noteEditor();case'photos':return photos();case'photo-detail':return photoDetail();case'instagram':return instagram();case'calendar':return calendar();case'camera':return camera();case'phone':return phoneApp();case'safari':return safari();case'music':return music();default:return home()}}
   render();
 })();
