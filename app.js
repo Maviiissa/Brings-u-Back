@@ -475,7 +475,10 @@
     return items.filter(item=>{
       if(item.stage<stage)return true;
       if(item.stage>stage)return false;
-      if(item.from!=='them')return true;
+      // A scripted outgoing reply must not appear in the history while the
+      // player is still watching it type. Only completed stages are replayed.
+      // Plot 3's final draft and Plot 6's final reply are terminal stages.
+      if(item.from==='me')return (plot==='plot3' && stage===7) || (plot==='plot6' && stage===1);
       return currentSeen++<delivered;
     });
   }
