@@ -3,10 +3,17 @@
   const cfg = window.PHONE_STORY;
   const host = document.querySelector('#screen');
   const STORE = 'miu-fiction-v3-local';
+  // DEVELOPMENT MODE: refresh always starts a fresh playthrough.
+  // Switch to false at launch to restore per-browser saves.
+  const DEV_RESET_ON_REFRESH = true;
   const initial = () => ({lineSent:[],smsSent:[],noteEdits:{},favoriteTrack:null,photosExtra:[]});
-  let saved;
-  try { saved = {...initial(), ...JSON.parse(localStorage.getItem(STORE)||'{}')}; }
-  catch { saved = initial(); }
+  let saved = initial();
+  if(DEV_RESET_ON_REFRESH){
+    try { localStorage.removeItem(STORE); } catch {}
+  } else {
+    try { saved = {...initial(), ...JSON.parse(localStorage.getItem(STORE)||'{}')}; }
+    catch { saved = initial(); }
+  }
   let page = 'lock';
   let selected = null;
   let draft = '';
@@ -17,7 +24,10 @@
   let storyUiTimers = [];
   const scheduleStoryUi = (callback,delay) => {const id=window.setTimeout(callback,delay);storyUiTimers.push(id);return id;};
   const clearStoryUi = () => {storyUiTimers.forEach(window.clearTimeout);storyUiTimers=[];};
-  const persist = () => {try{localStorage.setItem(STORE,JSON.stringify(saved));}catch{}};
+  const persist = () => {
+    if(DEV_RESET_ON_REFRESH)return;
+    try {localStorage.setItem(STORE,JSON.stringify(saved));}catch{}
+  };
   const elem = (tag,cls='',text) => {const el=document.createElement(tag);if(cls)el.className=cls;if(text!==undefined)el.textContent=text;return el;};
   const click = (text,cls,action) => {const b=elem('button',cls,text);b.type='button';b.addEventListener('click',action);return b;};
   const img = (src,alt='') => {const i=elem('img');i.src=src;i.alt=alt;return i;};
