@@ -64,57 +64,76 @@
     root.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '||e.key==='ArrowUp'){e.preventDefault();unlock();}});
     host.append(root);
   }
-  // Immersive iPhone-style cover. Swipe upwards (or press Enter / use
-  // the accessibility control) to reveal the home screen; no passcode.
+  // Fictional iPhone lock screen. All interface elements are rendered
+  // separately from the original photo, so there is no duplicated UI.
   function lockScreen(){
     const root=elem('section','page lock-screen');
     const scene=elem('div','lock-scene');
-    const wallpaper=img(cfg.lockScreen.wallpaper,'');
-    wallpaper.className='lock-wallpaper';
-    wallpaper.draggable=false;
-    wallpaper.onerror=()=>{wallpaper.src=cfg.phone.homePhoto;};
-    scene.append(wallpaper);
-    const date=elem('div','lock-date',cfg.lockScreen.date);
-    scene.append(date);
-    // The original lock-screen photograph includes a clock, status indicators,
-    // torch/camera controls, and home bar. Keep them part of the photo.
-    const unlock=click('Swipe up to unlock','lock-unlock',()=>completeUnlock());
-    unlock.setAttribute('aria-label','Unlock phone without passcode');
-    scene.append(unlock);
+    const backdrop=img(cfg.lockScreen.wallpaper,'');
+    backdrop.className='lock-backdrop';
+    backdrop.draggable=false;
+    const portrait=img(cfg.lockScreen.wallpaper,'Lock screen portrait');
+    portrait.className='lock-portrait';
+    portrait.draggable=false;
+    scene.append(backdrop,portrait);
+
+    const indicators=elem('div','lock-indicators');
+    indicators.innerHTML=svg('signal')+svg('wifi');
+    const battery=elem('div','lock-battery',cfg.phone.battery);
+    indicators.append(battery);
+    scene.append(indicators);
+    scene.append(elem('div','lock-date',cfg.lockScreen.date));
+    scene.append(elem('div','lock-clock',cfg.lockScreen.time));
+
+    const hint=click('Swipe up to unlock','lock-unlock',unlock);
+    hint.setAttribute('aria-label','Unlock phone without a password');
+    const bar=click('','lock-homebar',unlock);
+    bar.setAttribute('aria-label','Unlock phone');
+    scene.append(hint,bar);
     root.append(scene);
     host.append(root);
+
     let startY=null;
-    let locked=false;
-    function completeUnlock(){
-      if(locked)return;
-      locked=true;
+    let unlocking=false;
+    function unlock(){
+      if(unlocking)return;
+      unlocking=true;
       scene.classList.add('unlocking');
-      window.setTimeout(()=>setPage('home'),380);
+      window.setTimeout(()=>setPage('home'),330);
     }
-    function onStart(e){
-      if(e.pointerType==='mouse'&&e.button!==0)return;
-      startY=e.clientY;
-      if(root.setPointerCapture)try{root.setPointerCapture(e.pointerId)}catch{}
-    }
-    function onMove(e){
-      if(startY===null||locked)return;
-      const upwards=Math.max(0,startY-e.clientY);
-      scene.style.setProperty('--swipe-up',Math.min(upwards,130)+'px');
-    }
-    function onEnd(e){
+    root.addEventListener('pointerdown',event=>{
+      if(event.pointerType==='mouse' && event.button!==0)return;
+      startY=event.clientY;
+      try{root.setPointerCapture(event.pointerId)}catch{}
+    });
+    root.addEventListener('pointermove',event=>{
+      if(startY===null || unlocking)return;
+      const delta=Math.max(0,startY-event.clientY);
+      scene.style.setProperty('--swipe-up',Math.min(delta,125)+'px');
+    });
+    root.addEventListener('pointerup',event=>{
       if(startY===null)return;
-      const upwards=startY-e.clientY;
+      const delta=startY-event.clientY;
       startY=null;
-      if(upwards>=65){completeUnlock();return;}
+      if(delta>=45){unlock();return;}
       scene.style.setProperty('--swipe-up','0px');
-    }
-    root.addEventListener('pointerdown',onStart);
-    root.addEventListener('pointermove',onMove);
-    root.addEventListener('pointerup',onEnd);
-    root.addEventListener('pointercancel',()=>{startY=null;scene.style.setProperty('--swipe-up','0px')});
+    });
+    root.addEventListener('pointercancel',()=>{
+      startY=null;
+      scene.style.setProperty('--swipe-up','0px');
+    });
+    // Desktop visitors can click anywhere, scroll up, or press Enter.
+    root.addEventListener('click',unlock);
+    root.addEventListener('wheel',event=>{
+      if(event.deltaY>18)unlock();
+    },{passive:true});
     root.tabIndex=0;
-    root.setAttribute('aria-label','Locked phone. Swipe up or press Enter to unlock.');
-    root.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();completeUnlock()}});
+    root.setAttribute('aria-label','Locked phone. Swipe up, click, or press Enter to unlock.');
+    root.addEventListener('keydown',event=>{
+      if(event.key==='Enter'||event.key===' '||event.key==='ArrowUp'){
+        event.preventDefault();unlock();
+      }
+    });
   }
   function home(){
     const root=elem('section','page home');root.append(status(cfg.phone.time,true));
