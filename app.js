@@ -335,6 +335,22 @@
   }
   // Plot 3 is a small, resumable state machine. Each stage is committed only
   // when a message is sent/received, never while a draft is being animated.
+  function smsContact(){
+    const root=appShell('Contact','sms');
+    const area=elem('div','sms-contact-editor');
+    const label=elem('label','sms-contact-label','Name');
+    const field=elem('input','sms-contact-input');
+    field.type='text';field.value=saved.storyContactName||'';
+    field.placeholder='Unknown Number';field.maxLength=60;
+    label.append(field);
+    const done=click('Done','sms-contact-done',()=>{
+      const name=field.value.trim();
+      if(name){saved.storyContactName=name;persist();}
+      setPage('sms');
+    });
+    area.append(avatar(null),label,done);
+    root.append(area);host.append(root);
+  }
   function smsPlot3(){
     const root=appShell('Messages','home');
     const contact=elem('div','sms-contact');contact.append(avatar(null));
