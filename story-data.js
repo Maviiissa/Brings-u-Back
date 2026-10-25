@@ -10,6 +10,7 @@
  * NOT sent to any server or real person.
  */
 window.PHONE_STORY = {
+  lock: { dateLabel: 'Thu 25 Nov', fullDate: 'November 25, 2027', time: '22:16' },
   phone: {
     time: '21:10',
     battery: '36',
