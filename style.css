@@ -252,3 +252,24 @@
 .ig-post-likes span{font-size:26px;color:#ff284b}
 .ig-post-caption{padding:5px 15px;font-size:14px;line-height:1.55;white-space:pre-wrap}
 .ig-post-date{padding:8px 15px 25px;font-size:12px;color:#9ca3b1}
+
+/* FIRST STORY BEAT — an iOS-style incoming Messages banner */
+.story-notification{
+  position:absolute;z-index:90;top:58px;left:11px;right:11px;
+  width:calc(100% - 22px);display:block;text-align:left;
+  border:1px solid #ffffff99;border-radius:19px;
+  padding:11px 14px 13px;color:#17191d;
+  background:rgba(246,247,250,.96);backdrop-filter:blur(22px);
+  -webkit-backdrop-filter:blur(22px);
+  box-shadow:0 9px 28px #0004;
+  opacity:0;transform:translateY(-110%);
+  transition:transform .48s cubic-bezier(.2,.8,.2,1),opacity .3s ease;
+}
+.story-notification-visible{opacity:1;transform:translateY(0)}
+.story-notification-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+.story-notification-app{font-size:10px;font-weight:750;color:#5c626c;letter-spacing:.45px}
+.story-notification-time{font-size:11px;color:#747981}
+.story-notification-sender{font-size:14px;font-weight:720;line-height:1.35}
+.story-notification-body{font-size:13px;line-height:1.4;margin-top:2px}
+.sms-message-time{font-size:11px;color:#93949b;text-align:center;padding:14px 0 3px}
+@media (prefers-reduced-motion:reduce){.story-notification{transition:none}}
