@@ -74,7 +74,7 @@
       persist();
     }
     // Plot 5: opening Notes after the kiddo exchange reveals the next entry.
-    if(p==='notes' && (saved.storyPlot4Stage||0)>=4 && !saved.storyPlot5NoteAdded){
+    if(p==='notes' && (saved.storyPlot4Stage||0)>=5 && !saved.storyPlot5NoteAdded){
       saved.storyPlot5NoteAdded=true;persist();
     }
     if(p==='home' && previous==='notes' && saved.storyPlot5NoteAdded && !saved.storyFifthSmsDelivered){
@@ -444,6 +444,45 @@
       persist();render();
     },cfg.story.strangerTypingDelayMs);
   }
+  // Deliver each incoming SMS bubble separately, with a short typing pause.
+  // Persist the number already delivered so leaving and reopening Messages
+  // never repeats a bubble within the current session.
+  function storyVisibleMessages(plot,stage,items){
+    const key=plot+':'+stage;
+    const delivered=(saved.storyBubbleCounts||{})[key]||0;
+    let currentSeen=0;
+    return items.filter(item=>{
+      if(item.stage<stage)return true;
+      if(item.stage>stage)return false;
+      if(item.from!=='them')return true;
+      return currentSeen++<delivered;
+    });
+  }
+  function storyIncomingSequence(messages,plot,stage,nextStage=null){
+    const items=cfg.story[plot+'Messages'].filter(item=>item.stage===stage && item.from==='them');
+    const key=plot+':'+stage;
+    const delivered=(saved.storyBubbleCounts||{})[key]||0;
+    if(delivered>=items.length){
+      if(nextStage!==null)scheduleStoryUi(()=>{
+        if(page!=='sms' || (saved['story'+plot[0].toUpperCase()+plot.slice(1)+'Stage']||0)!==stage)return;
+        saved['story'+plot[0].toUpperCase()+plot.slice(1)+'Stage']=nextStage;
+        persist();render();
+      },650);
+      return;
+    }
+    const indicator=elem('div','story-typing-row');
+    indicator.setAttribute('aria-label',(saved.storyContactName||'Unknown Number')+' is typing');
+    const bubble=elem('div','story-typing-bubble');
+    for(let i=0;i<3;i++)bubble.append(elem('span','story-typing-dot'));
+    indicator.append(bubble,elem('span','story-typing-label',(saved.storyContactName||'Unknown Number')+' is typing…'));
+    messages.append(indicator);scrollDown(messages);
+    scheduleStoryUi(()=>{
+      if(page!=='sms')return;
+      if(!saved.storyBubbleCounts)saved.storyBubbleCounts={};
+      saved.storyBubbleCounts[key]=delivered+1;
+      persist();render();
+    },delivered===0?1250:1050);
+  }
   function smsPlot5(){
     const root=appShell('Messages','home');
     const contact=elem('div','sms-contact');
@@ -463,15 +502,16 @@
     for(const msg of cfg.story.plot4Messages)if(msg.stage<=(saved.storyPlot4Stage||0))history.push(msg);
     history.push({type:'date',text:'November 14, 2027'});
     const stage=Number(saved.storyPlot5Stage)||0;
-    for(const msg of cfg.story.plot5Messages)if(msg.stage<=stage)history.push(msg);
+    history.push(...storyVisibleMessages('plot5',stage,cfg.story.plot5Messages));
     renderMessages(messages,history);root.append(messages);
-    if(stage===0 || stage===2)root.append(plot5Composer(messages,stage));
+    if((stage===0 && (saved.storyBubbleCounts||{})['plot5:0']>=2) || stage===2 && false)root.append(plot5Composer(messages,stage));
     else{
       const idle=elem('div','composer story-composer story-composer-inactive');
       idle.append(elem('span','composer-icon','+'),elem('div','composer-field story-readonly','Text Message'));
       root.append(idle);
     }
     host.append(root);scrollDown(messages);
+    if(stage===0 || stage===2)storyIncomingSequence(messages,'plot5',stage,stage===2?3:null);
     if(stage===1)plot5Incoming(messages);
   }
   function plot5Composer(messages,stage){
@@ -534,16 +574,17 @@
     for(const msg of cfg.story.plot3Messages)if(msg.stage<=(saved.storyPlot3Stage||0))history.push(msg);
     history.push({type:'date',text:'November 7, 2027'});
     const stage=Number(saved.storyPlot4Stage)||0;
-    for(const msg of cfg.story.plot4Messages)if(msg.stage<=stage)history.push(msg);
+    history.push(...storyVisibleMessages('plot4',stage,cfg.story.plot4Messages));
     renderMessages(messages,history);root.append(messages);
-    if(stage===0 || stage===2)root.append(plot4Composer(messages,stage));
+    if(stage===0 && (saved.storyBubbleCounts||{})['plot4:0']>=2 || stage===3)root.append(plot4Composer(messages,stage));
     else{
       const idle=elem('div','composer story-composer story-composer-inactive');
       idle.append(elem('span','composer-icon','+'),elem('div','composer-field story-readonly','Text Message'));
       root.append(idle);
     }
     host.append(root);scrollDown(messages);
-    if(stage===1 || stage===3)plot4Incoming(messages,stage);
+    if(stage===0 || stage===2 || stage===4)storyIncomingSequence(messages,'plot4',stage,stage===0?null:stage+1);
+    if(stage===1)plot4Incoming(messages,stage);
   }
   function smsPlot3(){
     const root=appShell('Messages','home');
@@ -563,12 +604,10 @@
     if(saved.storySecondStrangerReplied)history.push({from:'them',text:cfg.story.secondStrangerReply});
     history.push({type:'date',text:'October 31, 2027'});
     const stage=Number(saved.storyPlot3Stage)||0;
-    for(const msg of cfg.story.plot3Messages){
-      if(msg.stage<=stage)history.push({from:msg.from,text:msg.text});
-    }
+    history.push(...storyVisibleMessages('plot3',stage,cfg.story.plot3Messages));
     renderMessages(messages,history);
     root.append(messages);
-    if(stage===0 || stage===3 || stage===6){
+    if(stage===0 && (saved.storyBubbleCounts||{})['plot3:0']>=2 || stage===3 || stage===6){
       root.append(plot3Composer(stage));
     }else{
       const inactive=elem('div','composer story-composer story-composer-inactive');
@@ -576,7 +615,8 @@
       root.append(inactive);
     }
     host.append(root);scrollDown(messages);
-    if([1,2,4,5].includes(stage))plot3Incoming(messages,stage);
+    if([0,2,5].includes(stage))storyIncomingSequence(messages,'plot3',stage,stage===0?null:stage+1);
+    if([1,4].includes(stage))plot3Incoming(messages,stage);
     if(stage===6)plot3FinalDraft(root);
   }
   function plot3Composer(stage){
