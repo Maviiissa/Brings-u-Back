@@ -134,6 +134,27 @@ window.PHONE_STORY = {
     ],
     plot3Drafts: ['？？Do you have any nicknames?', 'Miu？', 'Glad to meet you, Natsha ☺️'],
     plot3ReactionPauseMs: 3000,
+    plot4Note: {
+      id: 'plot4-2027-11-07',
+      title: 'Natsha.',
+      date: 'November 7, 2027 at 2:23 PM',
+      body: "Natsha.\n\nI can feel my heart skipped a beat looking at the name appear on my screen. It is the very name I ache to hear.\n\nIt’s been a while of heavy silence from Miu, I don't know what I did wrong and she won't give me a chance to explain. Yet somehow, this stranger arrived out of nowhere, carrying the exact same name....\n\nI don't know why the universe sent her to my inbox today, but I am so endlessly grateful for this."
+    },
+    plot4Date: {weekday:'SUNDAY',day:'7',month:'November',time:'14:23'},
+    plot4HomeDelayMs: 5000,
+    plot4Notification: {
+      from:'them',sender:'Natsha',time:'2:23 PM',
+      text:'Guess what? I forced myself to get out of bed early today, but I failed the pancake test again... 🥞🤦‍♀️'
+    },
+    plot4Messages: [
+      {stage:0,from:'them',text:'Guess what? I forced myself to get out of bed early today, but I failed the pancake test again... 🥞🤦‍♀️'},
+      {stage:0,from:'them',text:"Tutoring classes are annoying... I'm so exhausted today 😭"},
+      {stage:1,from:'me',text:'Tutoring class? You must be pretty young.'},
+      {stage:2,from:'them',text:"Just turned 18! I'm applying to Chulalongkorn University, so I'm grinding IELTS every single day... 🥲🥲"},
+      {stage:3,from:'me',text:'Chulalongkorn?'},
+      {stage:3,from:'me',text:'Take a deep breath, kiddo. 18 is a tough age, but you’re doing great.'},
+      {stage:4,from:'them',text:'Did you just call me kiddo? No one has ever called me that before... 😳'}
+    ],
     firstMessage: {
       from: 'them',
       sender: 'Unknown Number',
