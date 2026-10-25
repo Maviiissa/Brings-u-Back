@@ -91,7 +91,12 @@ window.PHONE_STORY = {
   // Story beat 1: unlocked-phone browsing, then an unsolicited text after ~60 seconds.
   // Later beats can be added to this timeline without changing the phone UI.
   story: {
-    firstMessageDelayMs: 60000,
+    firstMessageDelayMs: 30000,
+    notesTriggerDelayMs: 10000,
+    playerReply: 'Wrong number, but pancakes sound like the correct decision.',
+    strangerReply: 'Sorry!',
+    replyTypingIntervalMs: 48,
+    strangerTypingDelayMs: 2300,
     firstMessage: {
       from: 'them',
       sender: 'Unknown Number',
