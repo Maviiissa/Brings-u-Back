@@ -336,7 +336,6 @@
     overview.append(bio);
     overview.append(elem('div','ig-link','↗  linktr.ee/lalinalena'));
     const tags=elem('div','ig-tags');tags.append(elem('span','','◎ lalinalena'),elem('span','','LaLi’sLoveLetters 💌 📮'));overview.append(tags);
-    overview.append(elem('div','ig-followers','Followed by jellyjelly5555, supassra_sp and 12 others'));
     const actions=elem('div','ig-actions');actions.append(elem('div','','Following ⌄'),elem('div','','Message'),elem('div','','♙'));overview.append(actions);
     const highlights=elem('div','ig-highlights');
     [['🪩','👯'],['·ᴥ·','🤍'],['♡','💗'],['💪','🌷'],['LLN','🌊']].forEach(([label,emoji])=>{
