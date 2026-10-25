@@ -341,3 +341,7 @@
 .sms-contact-input{width:100%;box-sizing:border-box;border:1px solid #dadce2;border-radius:12px;background:#f6f6f8;padding:13px 14px;font-size:17px;color:#202124;outline:none}
 .sms-contact-input:focus{border-color:#4285f4}
 .sms-contact-done{border:0;background:#3478f6;color:white;padding:11px 28px;border-radius:20px;font-size:15px;font-weight:600;cursor:pointer}
+
+/* Contact rename scene: tap the name field to animate the scripted name. */
+.sms-contact-input[readonly]{cursor:pointer}
+.sms-contact-input.story-contact-typing{caret-color:transparent}
