@@ -10,11 +10,17 @@
  * NOT sent to any server or real person.
  */
 window.PHONE_STORY = {
+  lockScreen: {
+    date: 'Thu 25 Nov',
+    year: '2027',
+    wallpaper: 'assets/lockscreen-wallpaper.jpg',
+    time: '22:16'
+  },
   lock: { dateLabel: 'Thu 25 Nov', fullDate: 'November 25, 2027', time: '22:16' },
   phone: {
-    time: '21:10',
-    battery: '36',
-    date: { weekday: 'SUNDAY', day: '25', detail: 'No Events Today' },
+    time: '22:16',
+    battery: '31',
+    date: { weekday: 'THURSDAY', day: '25', detail: 'No Events Today' },
     unreadPhone: '1',
     unreadMessages: '2,290',
     homePhoto: 'assets/home-photo.jpg'
