@@ -109,7 +109,11 @@ window.PHONE_STORY = {
     { id:'memory-1', src:'assets/home-photo.jpg', title:'Photos', caption:'这是一张临时照片；你之后可以换成自己的素材。' }
   ],
   instagram: [
-    { handle:'@kiddo', image:'assets/home-photo.jpg', caption:'Instagram post placeholder' }
+    {caption:'Wandering with you🤍',date:'7 October',likes:'428K'},
+    {caption:'Art, lunch, you. ❤️',date:'5 October',likes:'386K'},
+    {caption:'Just a girl missing Paris 🖤 @chanelofficial',date:'29 September',likes:'537K'},
+    {caption:'⋆｡°✩ 🥐 ⋆｡°✩ 🥖',date:'16 September',likes:'427K'},
+    {caption:'Bits from diary ⋆. 🧁🥰',date:'1 July',likes:'229K'}
   ],
   calendar: [
     { date:'2026-11-25', title:'Last LINE conversation' }
