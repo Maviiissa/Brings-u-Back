@@ -124,7 +124,7 @@ window.PHONE_STORY = {
     plot3Messages: [
       {stage:0,from:'them',text:'Happy Sunday! ☀️'},
       {stage:0,from:'them',text:"Bangkok is literally burning hot today, I feel like I'm melting into the pavement... 🫠"},
-      {stage:1,from:'me',text:"Haha, stay indoors and stay hydrated! Don't melt away on me just yet."},
+      {stage:1,from:'me',text:"Haha, stay indoors and stay hydrated!"},
       {stage:2,from:'them',text:'hydrated def matters！'},
       {stage:3,from:'them',text:"I still don't know ur name, stranger！👀"},
       {stage:4,from:'me',text:'Lena'},
