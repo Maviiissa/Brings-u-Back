@@ -362,3 +362,17 @@
 .statusbar.light .battery.battery-full,.lock-indicators .lock-battery.battery-full{
   border-color:#fff;color:#fff;background:#fff;
 }
+
+/* Plot 5: a dedicated photo-message bubble; actual photo can be supplied later. */
+.sms-chat .chat-row .sms-photo-bubble{
+  padding:0;overflow:hidden;background:transparent;max-width:74%;border-radius:17px;
+}
+.sms-photo-placeholder{
+  width:205px;max-width:100%;height:165px;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:9px;
+  background:linear-gradient(140deg,#e8e9ed,#cfd3dc);
+  border:1px solid #c4c8d0;border-radius:17px;color:#717785;
+}
+.sms-photo-symbol{font-size:34px;line-height:1}
+.sms-photo-caption{font-size:13px;font-weight:600;letter-spacing:.3px}
+.sms-story-photo{display:block;max-width:100%;width:205px;height:auto;max-height:275px;object-fit:cover;border-radius:17px}
