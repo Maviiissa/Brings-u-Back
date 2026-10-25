@@ -308,9 +308,18 @@
   function photoDetail(){const p=cfg.photos.find(p=>p.id===selected)||cfg.photos[0];const root=appShell(p.title,'photos');const contents=elem('div','scroll photo-detail');contents.append(img(p.src,p.title),elem('p','',p.caption));root.append(contents);host.append(root)}
   function instaPhoto(index, cls=''){
     const p=elem('div','ig-photo '+cls);
+    const avatarMode=cls.includes('avatar');
+    const source=avatarMode ? cfg.instagramAvatar : cfg.instagram[index]?.src;
     p.style.setProperty('--ig-col',index%3);
     p.style.setProperty('--ig-row',Math.floor(index/3));
     p.style.backgroundPosition=['0%','50%','100%'][index%3]+' '+(Math.floor(index/3)*100)+'%';
+    if(source){
+      const photo=img(source,avatarMode?'lalinalena profile photo':'Instagram post photo');
+      photo.className='ig-photo-image';
+      photo.loading=avatarMode?'eager':'lazy';
+      photo.onerror=()=>photo.remove();
+      p.append(photo);
+    }
     return p;
   }
   function instagram(){
