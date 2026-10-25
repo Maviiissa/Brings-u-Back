@@ -59,7 +59,7 @@
     if(p==='note-editor' && id===cfg.story.plot3Note.id && saved.storyPlot3NoteAdded){
       saved.storyPlot3NoteViewed=true;persist();
     }
-    if(p==='home' && previous==='notes' && saved.storyPlot3NoteViewed && !saved.storyThirdSmsDelivered){
+    if(p==='home' && previous==='notes' && saved.storyPlot3NoteAdded && !saved.storyThirdSmsDelivered){
       saved.storyPlot3Ready=true;
       saved.storyPlot3DateChanged=true;
       persist();
