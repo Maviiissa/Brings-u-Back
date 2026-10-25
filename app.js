@@ -335,20 +335,49 @@
   }
   // Plot 3 is a small, resumable state machine. Each stage is committed only
   // when a message is sent/received, never while a draft is being animated.
+  function smsAvatar(){
+    const a=avatar(null);
+    a.textContent=(saved.storyContactName||'K').charAt(0).toUpperCase();
+    return a;
+  }
   function smsContact(){
     const root=appShell('Contact','sms');
     const area=elem('div','sms-contact-editor');
     const label=elem('label','sms-contact-label','Name');
     const field=elem('input','sms-contact-input');
     field.type='text';field.value=saved.storyContactName||'';
-    field.placeholder='Unknown Number';field.maxLength=60;
-    label.append(field);
+    field.placeholder='Tap to enter name';field.maxLength=60;
+    field.readOnly=true;
+    field.setAttribute('aria-label','Tap to automatically type Natsha');
+    const initial=smsAvatar();
+    let typing=false;
     const done=click('Done','sms-contact-done',()=>{
+      if(typing)return;
       const name=field.value.trim();
       if(name){saved.storyContactName=name;persist();}
       setPage('sms');
     });
-    area.append(avatar(null),label,done);
+    const begin=()=>{
+      if(typing || field.value==='Natsha')return;
+      typing=true;field.value='';
+      field.classList.add('story-contact-typing');
+      let index=0;
+      const tick=()=>{
+        if(page!=='sms-contact')return;
+        field.value='Natsha'.slice(0,++index);
+        if(index<6)scheduleStoryUi(tick,115);
+        else{
+          typing=false;
+          field.classList.remove('story-contact-typing');
+          initial.textContent='N';
+        }
+      };
+      scheduleStoryUi(tick,200);
+    };
+    field.addEventListener('click',begin);
+    field.addEventListener('focus',begin);
+    label.append(field);
+    area.append(initial,label,done);
     root.append(area);host.append(root);
   }
   function plot4Composer(messages,stage){
@@ -397,7 +426,7 @@
   function smsPlot4(){
     const root=appShell('Messages','home');
     const contact=elem('div','sms-contact');
-    contact.append(avatar(null),click(saved.storyContactName||'Unknown Number','sms-number sms-name-button',()=>setPage('sms-contact')),elem('div','sms-meta',cfg.sms.service));
+    contact.append(smsAvatar(),click(saved.storyContactName||'Unknown Number','sms-number sms-name-button',()=>setPage('sms-contact')),elem('div','sms-meta',cfg.sms.service));
     root.append(contact);
     const messages=elem('div','scroll chat-view sms-chat');
     const history=[...(cfg.sms.messages||[])];
@@ -424,7 +453,7 @@
   }
   function smsPlot3(){
     const root=appShell('Messages','home');
-    const contact=elem('div','sms-contact');contact.append(avatar(null));
+    const contact=elem('div','sms-contact');contact.append(smsAvatar());
     const nameButton=click(saved.storyContactName||cfg.sms.name,'sms-number sms-name-button',()=>setPage('sms-contact'));
     contact.append(nameButton,elem('div','sms-meta',cfg.sms.service));
     root.append(contact);
@@ -542,7 +571,7 @@
     if(saved.storyFourthSmsDelivered)return smsPlot4();
     if(saved.storyThirdSmsDelivered)return smsPlot3();
     const root=appShell('Messages','home');
-    const contact=elem('div','sms-contact');contact.append(avatar(null));
+    const contact=elem('div','sms-contact');contact.append(smsAvatar());
     contact.append(click(saved.storyContactName||cfg.sms.name,'sms-number sms-name-button',()=>setPage('sms-contact')),elem('div','sms-meta',cfg.sms.service));root.append(contact);
     const messages=elem('div','scroll chat-view sms-chat');
     const history=[...(cfg.sms.messages||[])];
