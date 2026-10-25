@@ -376,3 +376,12 @@
 .sms-photo-symbol{font-size:34px;line-height:1}
 .sms-photo-caption{font-size:13px;font-weight:600;letter-spacing:.3px}
 .sms-story-photo{display:block;max-width:100%;width:205px;height:auto;max-height:275px;object-fit:cover;border-radius:17px}
+
+/* Crop the padding baked into the original Instagram avatar screenshot.
+   Keep the portrait filling the circular mask on profile and post headers. */
+.ig-avatar,.ig-post-avatar{overflow:hidden;background:#dedede}
+.ig-avatar .ig-photo-image,.ig-post-avatar .ig-photo-image{
+  transform:scale(1.29) translateY(-5.3%);
+  transform-origin:50% 50%;
+  object-fit:cover;
+}
