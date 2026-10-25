@@ -420,7 +420,7 @@
               field.textContent='';field.classList.remove('story-typing-active');
               scheduleStoryUi(()=>next(index+1),450);
             }else{
-              saved.storyPlot4Stage=stage===0?1:3;
+              saved.storyPlot4Stage=stage===0?1:4;
               persist();render();
             }
           },600);
@@ -504,7 +504,7 @@
     const stage=Number(saved.storyPlot5Stage)||0;
     history.push(...storyVisibleMessages('plot5',stage,cfg.story.plot5Messages));
     renderMessages(messages,history);root.append(messages);
-    if((stage===0 && (saved.storyBubbleCounts||{})['plot5:0']>=2) || stage===2 && false)root.append(plot5Composer(messages,stage));
+    if((stage===0 && (saved.storyBubbleCounts||{})['plot5:0']>=2) || stage===3)root.append(plot5Composer(messages,stage));
     else{
       const idle=elem('div','composer story-composer story-composer-inactive');
       idle.append(elem('span','composer-icon','+'),elem('div','composer-field story-readonly','Text Message'));
@@ -533,7 +533,7 @@
               field.textContent='';field.classList.remove('story-typing-active');
               scheduleStoryUi(()=>next(index+1),500);
             }else{
-              saved.storyPlot5Stage=stage===0?1:3;
+              saved.storyPlot5Stage=stage===0?1:4;
               persist();render();
             }
           },650);
