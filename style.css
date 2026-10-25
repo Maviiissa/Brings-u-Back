@@ -26,3 +26,15 @@
 .unlock-homebar{position:absolute;bottom:0;left:25%;width:50%;height:36px;z-index:3;color:transparent}
 @keyframes lockHint{0%,100%{opacity:.55;transform:translateY(2px)}50%{opacity:1;transform:translateY(-4px)}}
 @media (min-width:441px){.lock-date{font-size:23px}}
+
+/* LOCK SCREEN — swipe up with touch or mouse, no password */
+.lock-screen{background:#171011;color:#f8d4d8;touch-action:none;user-select:none;-webkit-user-select:none;cursor:grab}
+.lock-screen:active{cursor:grabbing}
+.lock-scene{position:absolute;inset:0;--swipe-up:0px;transform:translateY(calc(-1 * var(--swipe-up)));transition:transform .3s cubic-bezier(.25,.8,.2,1),opacity .3s ease,filter .3s ease;will-change:transform,opacity}
+.lock-scene.unlocking{transform:translateY(-110%);opacity:0;filter:blur(8px)}
+.lock-wallpaper{width:100%;height:100%;object-fit:cover;object-position:center;display:block;pointer-events:none}
+.lock-date{position:absolute;top:11.35%;left:0;right:0;text-align:center;font-size:clamp(21px,7.3vw,32px);font-weight:520;line-height:1.2;letter-spacing:-.6px;color:#f07a8a;text-shadow:0 1px 3px #2a111866;pointer-events:none}
+.lock-unlock{position:absolute;bottom:0;left:22%;width:56%;height:9%;font-size:0;color:transparent;background:transparent;z-index:3;cursor:pointer}
+.lock-unlock:focus-visible{outline:3px solid #f68b99;outline-offset:-8px;border-radius:15px}
+@media(min-width:441px){.lock-date{font-size:29px}}
+@media(prefers-reduced-motion:reduce){.lock-scene{transition:none!important}}
