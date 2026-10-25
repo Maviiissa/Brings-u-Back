@@ -154,7 +154,7 @@ window.PHONE_STORY = {
       from:'them',sender:'Natsha',time:'3:15 PM',text:'Having my dinner hehehe'
     },
     plot5Messages: [
-      {stage:0,from:'them',type:'photo',text:'Image'},
+      {stage:0,from:'them',type:'photo',text:'Image',src:'assets/IMG_3248.webp'},
       {stage:0,from:'them',text:'Having my dinner hehehe'},
       {stage:1,from:'me',text:'100% Brown food? That must be your favourite'},
       {stage:2,from:'them',text:'How do you know?!!!😆'},
