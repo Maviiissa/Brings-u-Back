@@ -73,7 +73,17 @@
       saved.storyPlot4DateChanged=true;
       persist();
     }
+    // Plot 5: opening Notes after the kiddo exchange reveals the next entry.
+    if(p==='notes' && (saved.storyPlot4Stage||0)>=4 && !saved.storyPlot5NoteAdded){
+      saved.storyPlot5NoteAdded=true;persist();
+    }
+    if(p==='home' && previous==='notes' && saved.storyPlot5NoteAdded && !saved.storyFifthSmsDelivered){
+      saved.storyPlot5Ready=true;
+      saved.storyPlot5DateChanged=true;
+      persist();
+    }
     if(p==='sms'){
+      if(saved.storyFifthSmsDelivered)saved.storyFifthSmsOpened=true;
       if(saved.storyFourthSmsDelivered)saved.storyFourthSmsOpened=true;
       if(saved.storyThirdSmsDelivered)saved.storyThirdSmsOpened=true;
       if(saved.storySecondSmsDelivered && !saved.storySecondSmsOpened){
@@ -106,6 +116,16 @@
         showStoryNotification();
       },cfg.story.plot4HomeDelayMs);
     }
+    if(p==='home' && saved.storyPlot5Ready && !saved.storyFifthSmsDelivered){
+      scheduleStoryUi(()=>{
+        if(page!=='home' || saved.storyFifthSmsDelivered)return;
+        saved.storyFifthSmsDelivered=true;
+        saved.storyPlot5Stage=0;
+        notificationVisible=true;
+        persist();
+        showStoryNotification();
+      },cfg.story.plot5HomeDelayMs);
+    }
   };
   // Browsing time only accumulates while the phone is unlocked and the tab is visible.
   // The event fires once per saved playthrough, including across page navigation.
@@ -135,12 +155,13 @@
   function showStoryNotification(){
     document.querySelector('.story-notification')?.remove();
     if(!notificationVisible || page==='lock')return;
+    const fifth=saved.storyFifthSmsDelivered && !saved.storyFifthSmsOpened;
     const fourth=saved.storyFourthSmsDelivered && !saved.storyFourthSmsOpened;
     const third=saved.storyThirdSmsDelivered && !saved.storyThirdSmsOpened;
     const second=saved.storySecondSmsDelivered && !saved.storySecondSmsOpened;
     const first=saved.storyFirstSmsDelivered && !saved.storyFirstSmsOpened;
-    if(!fourth && !third && !second && !first)return;
-    const msg=fourth?cfg.story.plot4Notification:(third?cfg.story.plot3Message:(second?cfg.story.secondMessage:cfg.story.firstMessage));
+    if(!fifth && !fourth && !third && !second && !first)return;
+    const msg=fifth?cfg.story.plot5Notification:(fourth?cfg.story.plot4Notification:(third?cfg.story.plot3Message:(second?cfg.story.secondMessage:cfg.story.firstMessage)));
     const banner=click('','story-notification',()=>setPage('sms'));
     banner.setAttribute('aria-label','Open text message from '+msg.sender);
     const head=elem('div','story-notification-head');
@@ -154,7 +175,7 @@
     if(name==='wifi')return `<svg width="20" height="16" viewBox="0 0 20 16" aria-hidden="true"><path d="M2 5C6 1 14 1 18 5M5 8c3-3 7-3 10 0M8 11c1.5-1.3 2.5-1.3 4 0" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="10" cy="14" r="1.4" fill="currentColor"/></svg>`;
     return '';
   };
-  function status(time=(saved.storyPlot4DateChanged?cfg.story.plot4Date.time:(saved.storyPlot3DateChanged?cfg.story.plot3Date.time:(saved.storyPlot2DateChanged?cfg.story.plot2Date.time:cfg.phone.time))),light=false){
+  function status(time=(saved.storyPlot5DateChanged?cfg.story.plot5Date.time:(saved.storyPlot4DateChanged?cfg.story.plot4Date.time:(saved.storyPlot3DateChanged?cfg.story.plot3Date.time:(saved.storyPlot2DateChanged?cfg.story.plot2Date.time:cfg.phone.time)))),light=false){
     const b=elem('div','statusbar'+(light?' light':''));b.append(elem('span','',time));
     const icons=elem('div','status-icons');icons.innerHTML=svg('signal')+svg('wifi');
     const battery=elem('div','battery battery-full');battery.setAttribute('aria-label','Battery full');icons.append(battery);b.append(icons);return b;
@@ -269,13 +290,13 @@
     });
   }
   function home(){
-    const root=elem('section','page home');root.append(status(saved.storyPlot4DateChanged?cfg.story.plot4Date.time:(saved.storyPlot3DateChanged?cfg.story.plot3Date.time:(saved.storyPlot2DateChanged?cfg.story.plot2Date.time:cfg.phone.time)),true));
+    const root=elem('section','page home');root.append(status(saved.storyPlot5DateChanged?cfg.story.plot5Date.time:(saved.storyPlot4DateChanged?cfg.story.plot4Date.time:(saved.storyPlot3DateChanged?cfg.story.plot3Date.time:(saved.storyPlot2DateChanged?cfg.story.plot2Date.time:cfg.phone.time))),true));
     const main=elem('div','home-content');
     const imageButton=click('','photo-widget',()=>setPage('photos'));imageButton.append(img(cfg.phone.homePhoto,'Photos'));main.append(imageButton);
     main.append(elem('div','photo-label','Photos'));
     const grid=elem('div','home-grid');const cal=click('','calendar-card',()=>setPage('calendar'));
-    const homeDate=saved.storyPlot4DateChanged?cfg.story.plot4Date:(saved.storyPlot3DateChanged?cfg.story.plot3Date:(saved.storyPlot2DateChanged?cfg.story.plot2Date:cfg.phone.date));
-    cal.append(elem('div','cal-weekday',homeDate.weekday),elem('div','cal-day',homeDate.day),elem('div','cal-detail',(saved.storyPlot2DateChanged||saved.storyPlot3DateChanged||saved.storyPlot4DateChanged)?homeDate.month:homeDate.detail));grid.append(cal);
+    const homeDate=saved.storyPlot5DateChanged?cfg.story.plot5Date:(saved.storyPlot4DateChanged?cfg.story.plot4Date:(saved.storyPlot3DateChanged?cfg.story.plot3Date:(saved.storyPlot2DateChanged?cfg.story.plot2Date:cfg.phone.date)));
+    cal.append(elem('div','cal-weekday',homeDate.weekday),elem('div','cal-day',homeDate.day),elem('div','cal-detail',(saved.storyPlot2DateChanged||saved.storyPlot3DateChanged||saved.storyPlot4DateChanged||saved.storyPlot5DateChanged)?homeDate.month:homeDate.detail));grid.append(cal);
     grid.append(appTile('Camera','camera'),appTile('Instagram','instagram'),appTile('LINE','line','',null,'line-list'),appTile('Notes','notes'));
     main.append(grid);main.append(elem('div','home-search','⌕  Search'));root.append(main);
     const dock=elem('div','dock');dock.append(appTile('','phoneicon','☎',cfg.phone.unreadPhone,'phone'),appTile('','safari','◉',null,'safari'),appTile('','messagesicon','●',cfg.phone.unreadMessages,'sms'),appTile('','music','♫',null,'music'));
@@ -568,6 +589,7 @@
     },cfg.story.plot3ReactionPauseMs);
   }
   function sms(){
+    if(saved.storyFifthSmsDelivered)return smsPlot5();
     if(saved.storyFourthSmsDelivered)return smsPlot4();
     if(saved.storyThirdSmsDelivered)return smsPlot3();
     const root=appShell('Messages','home');
@@ -723,13 +745,15 @@
     const plot2Notes=saved.storyPlot2NoteAdded?[cfg.story.plot2Note]:[];
     const plot3Notes=saved.storyPlot3NoteAdded?[cfg.story.plot3Note]:[];
     const plot4Notes=saved.storyPlot4NoteAdded?[cfg.story.plot4Note]:[];
+    const plot5Notes=saved.storyPlot5NoteAdded?[cfg.story.plot5Note]:[];
     const entries=[
+      ...plot5Notes.map(n=>({...n,...saved.noteEdits[n.id],id:n.id,isStoryNote:true})),
       ...plot4Notes.map(n=>({...n,...saved.noteEdits[n.id],id:n.id,isStoryNote:true})),
       ...plot3Notes.map(n=>({...n,...saved.noteEdits[n.id],id:n.id,isStoryNote:true})),
       ...plot2Notes.map(n=>({...n,...saved.noteEdits[n.id],id:n.id,isStoryNote:true})),
       ...cfg.notes.map(n=>({ ...n, ...saved.noteEdits[n.id], id:n.id, date:n.date, isStoryNote:true })),
       ...Object.entries(saved.noteEdits)
-        .filter(([id])=>!cfg.notes.some(n=>n.id===id) && id!==cfg.story.plot2Note.id && id!==cfg.story.plot3Note.id && id!==cfg.story.plot4Note.id)
+        .filter(([id])=>!cfg.notes.some(n=>n.id===id) && id!==cfg.story.plot2Note.id && id!==cfg.story.plot3Note.id && id!==cfg.story.plot4Note.id && id!==cfg.story.plot5Note.id)
         .map(([id,n])=>({id,...n,date:'Personal note',isStoryNote:false}))
     ];
     entries.forEach(n=>{
@@ -744,6 +768,7 @@
   }
   function noteEditor(){
     const config=cfg.notes.find(n=>n.id===selected)
+      || (saved.storyPlot5NoteAdded && selected===cfg.story.plot5Note.id?cfg.story.plot5Note:null)
       || (saved.storyPlot4NoteAdded && selected===cfg.story.plot4Note.id?cfg.story.plot4Note:null)
       || (saved.storyPlot3NoteAdded && selected===cfg.story.plot3Note.id?cfg.story.plot3Note:null)
       || (saved.storyPlot2NoteAdded && selected===cfg.story.plot2Note.id?cfg.story.plot2Note:null);
