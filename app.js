@@ -175,7 +175,16 @@
       if(item.type==='date')container.append(elem('div','fake-date',item.text));
       else if(item.type==='notice')container.append(elem('div','inline-notice',item.text));
       else if(item.from==='me'||item.from==='them'){
-        const row=elem('div','chat-row '+item.from);row.append(elem('div','bubble',item.text));container.append(row);
+        const row=elem('div','chat-row '+item.from);
+        const bubble=elem('div','bubble',item.text);
+        if(container.classList.contains('line-chat')){
+          const meta=elem('div','line-message-meta');
+          if(item.read)meta.append(elem('span','line-read','Read'));
+          if(item.time)meta.append(elem('span','line-time',item.time));
+          if(item.from==='me')row.append(meta,bubble);
+          else row.append(bubble,meta);
+        }else row.append(bubble);
+        container.append(row);
       }
     }
   }
@@ -187,10 +196,19 @@
     input.addEventListener('input',()=>send.disabled=!input.value.trim());
     form.addEventListener('submit',event=>{
       event.preventDefault();const text=input.value.trim();if(!text)return;
-      const key=kind==='line'?'lineSent':'smsSent';saved[key].push({from:'me',text});persist();
+      const key=kind==='line'?'lineSent':'smsSent';saved[key].push({from:'me',text,...(kind==='line'?{read:true}:{})});persist();
       input.value='';send.disabled=true;
       const container=form.previousElementSibling?.classList.contains('scroll')?form.previousElementSibling:form.parentElement.querySelector('.chat-view');
-      if(container){const row=elem('div','chat-row me');row.append(elem('div','bubble',text));container.append(row);scrollDown(container);}
+      if(container){
+        const row=elem('div','chat-row me');
+        const bubble=elem('div','bubble',text);
+        if(kind==='line'){
+          const meta=elem('div','line-message-meta');
+          meta.append(elem('span','line-read','Read'));
+          row.append(meta,bubble);
+        }else row.append(bubble);
+        container.append(row);scrollDown(container);
+      }
       input.focus();
     });
     form.append(input,send);return form;
