@@ -277,3 +277,34 @@
 /* Correct SMS bubble selectors: the sender class is on .chat-row. */
 .sms-chat .chat-row.them .bubble{background:#e9e9eb;color:#171717}
 .sms-chat .chat-row.me .bubble{background:#65cf6b;color:#fff}
+
+/* Plot 1: player can only tap to animate the predetermined SMS reply. */
+.story-composer .story-scripted-input{
+  display:block;text-align:left;overflow:hidden;white-space:nowrap;
+  text-overflow:ellipsis;line-height:39px;cursor:pointer;color:#b1b2b8;
+}
+.story-composer .story-scripted-input:disabled{
+  opacity:1;color:#202127;cursor:default;
+}
+.story-composer .story-typing-active::after{
+  content:"";display:inline-block;height:18px;border-right:2px solid #2581ed;
+  margin-left:2px;vertical-align:-3px;animation:story-caret .75s steps(1) infinite;
+}
+@keyframes story-caret{50%{border-color:transparent}}
+.story-composer .story-readonly{
+  display:flex;align-items:center;overflow:hidden;white-space:nowrap;
+  color:#a6a7ad;cursor:default;
+}
+.story-send-decoration{
+  width:28px;height:28px;border-radius:50%;background:#d8d9dc;
+  display:grid;place-items:center;color:#fff;font-size:20px;font-weight:700;flex-shrink:0;
+}
+.story-typing-row{display:flex;justify-content:flex-start;margin:7px 0}
+.story-typing-bubble{
+  height:35px;min-width:65px;border-radius:18px 18px 18px 5px;
+  background:#e9e9eb;display:flex;align-items:center;justify-content:center;gap:5px;
+}
+.story-typing-dot{width:7px;height:7px;border-radius:50%;background:#8d8e95;animation:story-dots 1.15s infinite ease-in-out}
+.story-typing-dot:nth-child(2){animation-delay:.16s}
+.story-typing-dot:nth-child(3){animation-delay:.32s}
+@keyframes story-dots{0%,65%,100%{transform:translateY(0);opacity:.45}32%{transform:translateY(-4px);opacity:1}}
