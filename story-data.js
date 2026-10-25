@@ -88,14 +88,22 @@ window.PHONE_STORY = {
       {"from":"me","time":null,"text":"How have you been?","read":true}
     ]
   },
+  // Story beat 1: unlocked-phone browsing, then an unsolicited text after ~60 seconds.
+  // Later beats can be added to this timeline without changing the phone UI.
+  story: {
+    firstMessageDelayMs: 60000,
+    firstMessage: {
+      from: 'them',
+      sender: 'Unknown Number',
+      time: '9:28 AM',
+      text: 'Are we still getting pancakes at 10?'
+    }
+  },
   sms: {
     name: 'Unknown Number',
     number: 'Unknown Number',
     service: 'Text Message · SMS',
-    messages: [
-      { type: 'date', text: 'PAST · MESSAGE ARCHIVE' },
-      { type: 'notice', text: '过去的 Miu 发来的短信将显示在这里。' }
-    ]
+    messages: []
   },
   // Notes in reverse chronological order. The timestamps are fictional story content.
   notes: [
