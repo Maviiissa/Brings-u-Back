@@ -482,27 +482,67 @@
   function storyIncomingSequence(messages,plot,stage,nextStage=null){
     const items=cfg.story[plot+'Messages'].filter(item=>item.stage===stage && item.from==='them');
     const key=plot+':'+stage;
-    const delivered=(saved.storyBubbleCounts||{})[key]||0;
-    if(delivered>=items.length){
-      if(nextStage!==null)scheduleStoryUi(()=>{
-        if(page!=='sms' || (saved['story'+plot[0].toUpperCase()+plot.slice(1)+'Stage']||0)!==stage)return;
-        saved['story'+plot[0].toUpperCase()+plot.slice(1)+'Stage']=nextStage;
-        persist();render();
-      },650);
-      return;
-    }
+    const stageKey='story'+plot[0].toUpperCase()+plot.slice(1)+'Stage';
+    let delivered=(saved.storyBubbleCounts||{})[key]||0;
+    if(delivered>=items.length)return;
+
+    // Keep the same message list mounted during a batch. Rebuilding the
+    // entire screen for every bubble caused scroll jumps and delayed replies.
     const indicator=elem('div','story-typing-row');
     indicator.setAttribute('aria-label',(saved.storyContactName||'Unknown Number')+' is typing');
-    const bubble=elem('div','story-typing-bubble');
-    for(let i=0;i<3;i++)bubble.append(elem('span','story-typing-dot'));
-    indicator.append(bubble,elem('span','story-typing-label',(saved.storyContactName||'Unknown Number')+' is typing…'));
-    messages.append(indicator);scrollDown(messages);
-    scheduleStoryUi(()=>{
-      if(page!=='sms')return;
-      if(!saved.storyBubbleCounts)saved.storyBubbleCounts={};
-      saved.storyBubbleCounts[key]=delivered+1;
-      persist();render();
-    },delivered===0?1250:1050);
+    const typingBubble=elem('div','story-typing-bubble');
+    for(let i=0;i<3;i++)typingBubble.append(elem('span','story-typing-dot'));
+    indicator.append(typingBubble,elem('span','story-typing-label',(saved.storyContactName||'Unknown Number')+' is typing…'));
+
+    const stillHere=()=>page==='sms' && messages.isConnected && (saved[stageKey]||0)===stage;
+    const finish=()=>{
+      if(!stillHere())return;
+      indicator.remove();
+      // The reply field only becomes clickable after the final incoming
+      // bubble has actually appeared and had a moment to settle.
+      scheduleStoryUi(()=>{
+        if(!stillHere())return;
+        if(nextStage!==null){
+          saved[stageKey]=nextStage;
+          persist();
+          render();
+          return;
+        }
+        const idle=messages.parentElement?.querySelector('.story-composer-inactive');
+        if(!idle)return;
+        let composer=null;
+        if(plot==='plot3' && stage===0)composer=plot3Composer(0);
+        if(plot==='plot4' && stage===0)composer=plot4Composer(messages,0);
+        if(plot==='plot5' && stage===0)composer=plot5Composer(messages,0);
+        if(plot==='plot6' && stage===0)composer=plot6Composer(messages);
+        if(composer)idle.replaceWith(composer);
+      },480);
+    };
+    const showNext=()=>{
+      if(!stillHere())return;
+      if(delivered>=items.length){finish();return;}
+      messages.append(indicator);
+      scrollDown(messages);
+      scheduleStoryUi(()=>{
+        if(!stillHere())return;
+        indicator.remove();
+        const item=items[delivered];
+        renderMessages(messages,[item]);
+        const row=messages.lastElementChild;
+        if(row?.classList.contains('chat-row'))row.classList.add('story-bubble-enter');
+        delivered++;
+        if(!saved.storyBubbleCounts)saved.storyBubbleCounts={};
+        saved.storyBubbleCounts[key]=delivered;
+        persist();
+        scrollDown(messages);
+        if(delivered<items.length){
+          scheduleStoryUi(showNext,380);
+        }else{
+          finish();
+        }
+      },delivered===0?850:720);
+    };
+    showNext();
   }
   function smsPlot6(){
     const root=appShell('Messages','home');
