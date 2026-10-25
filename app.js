@@ -306,7 +306,6 @@
         if(page!=='sms')return;
         pos++;
         field.textContent=text.slice(0,pos);
-        field.scrollLeft=field.scrollWidth;
         if(pos<text.length) scheduleStoryUi(typeNext,cfg.story.replyTypingIntervalMs);
         else scheduleStoryUi(sendReply,650);
       };
