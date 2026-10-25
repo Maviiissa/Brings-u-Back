@@ -64,6 +64,58 @@
     root.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '||e.key==='ArrowUp'){e.preventDefault();unlock();}});
     host.append(root);
   }
+  // Immersive iPhone-style cover. Swipe upwards (or press Enter / use
+  // the accessibility control) to reveal the home screen; no passcode.
+  function lockScreen(){
+    const root=elem('section','page lock-screen');
+    const scene=elem('div','lock-scene');
+    const wallpaper=img(cfg.lockScreen.wallpaper,'');
+    wallpaper.className='lock-wallpaper';
+    wallpaper.draggable=false;
+    wallpaper.onerror=()=>{wallpaper.src=cfg.phone.homePhoto;};
+    scene.append(wallpaper);
+    const date=elem('div','lock-date',cfg.lockScreen.date);
+    scene.append(date);
+    // The original lock-screen photograph includes a clock, status indicators,
+    // torch/camera controls, and home bar. Keep them part of the photo.
+    const unlock=click('Swipe up to unlock','lock-unlock',()=>completeUnlock());
+    unlock.setAttribute('aria-label','Unlock phone without passcode');
+    scene.append(unlock);
+    root.append(scene);
+    host.append(root);
+    let startY=null;
+    let locked=false;
+    function completeUnlock(){
+      if(locked)return;
+      locked=true;
+      scene.classList.add('unlocking');
+      window.setTimeout(()=>setPage('home'),380);
+    }
+    function onStart(e){
+      if(e.pointerType==='mouse'&&e.button!==0)return;
+      startY=e.clientY;
+      if(root.setPointerCapture)try{root.setPointerCapture(e.pointerId)}catch{}
+    }
+    function onMove(e){
+      if(startY===null||locked)return;
+      const upwards=Math.max(0,startY-e.clientY);
+      scene.style.setProperty('--swipe-up',Math.min(upwards,130)+'px');
+    }
+    function onEnd(e){
+      if(startY===null)return;
+      const upwards=startY-e.clientY;
+      startY=null;
+      if(upwards>=65){completeUnlock();return;}
+      scene.style.setProperty('--swipe-up','0px');
+    }
+    root.addEventListener('pointerdown',onStart);
+    root.addEventListener('pointermove',onMove);
+    root.addEventListener('pointerup',onEnd);
+    root.addEventListener('pointercancel',()=>{startY=null;scene.style.setProperty('--swipe-up','0px')});
+    root.tabIndex=0;
+    root.setAttribute('aria-label','Locked phone. Swipe up or press Enter to unlock.');
+    root.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();completeUnlock()}});
+  }
   function home(){
     const root=elem('section','page home');root.append(status(cfg.phone.time,true));
     const main=elem('div','home-content');
