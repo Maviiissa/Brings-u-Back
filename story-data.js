@@ -97,6 +97,21 @@ window.PHONE_STORY = {
     strangerReply: 'Sorry!',
     replyTypingIntervalMs: 48,
     strangerTypingDelayMs: 2300,
+    plot2Note: {
+      id: 'plot2-2027-10-28',
+      title: "I've been trying my best to keep my life together.",
+      date: 'October 28, 2027 at 9:00am.',
+      body: "I've been trying my best to keep my life together. I'm trying not to stay up late anymore, and I'm forcing myself to wake up early.\n\nI received a weird message...I received a weird message today. Pancakes were always Miu’s absolute favourite.\n\nI miss her so much."
+    },
+    plot2Date: {weekday:'THURSDAY',day:'28',month:'October',time:'9:00'},
+    secondMessage: {
+      from:'them',
+      sender:'Unknown Number',
+      time:'Now',
+      text:'Pancake update: They were TERRIBLE!!!🥲🥲🥲'
+    },
+    secondPlayerReply: "I've been worried all week",
+    secondStrangerReply: '555555 anyways Thank you for replying! 😽',
     firstMessage: {
       from: 'them',
       sender: 'Unknown Number',
