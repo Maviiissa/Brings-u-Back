@@ -14,13 +14,19 @@
   let storyTimer = null;
   let storyLastTick = 0;
   let notificationVisible = false;
+  let storyUiTimers = [];
+  const scheduleStoryUi = (callback,delay) => {const id=window.setTimeout(callback,delay);storyUiTimers.push(id);return id;};
+  const clearStoryUi = () => {storyUiTimers.forEach(window.clearTimeout);storyUiTimers=[];};
   const persist = () => {try{localStorage.setItem(STORE,JSON.stringify(saved));}catch{}};
   const elem = (tag,cls='',text) => {const el=document.createElement(tag);if(cls)el.className=cls;if(text!==undefined)el.textContent=text;return el;};
   const click = (text,cls,action) => {const b=elem('button',cls,text);b.type='button';b.addEventListener('click',action);return b;};
   const img = (src,alt='') => {const i=elem('img');i.src=src;i.alt=alt;return i;};
   const setPage = (p, id=null) => {
     const unlocking = page==='lock' && p==='home';
-    page=p; selected=id;draft='';render();
+    clearStoryUi();
+    page=p; selected=id;draft='';
+    if(p==='notes' && !saved.storyNotesOpenedAt && !saved.storyFirstSmsDelivered){saved.storyNotesOpenedAt=Date.now();persist();}
+    render();
     if(unlocking) startStoryBrowsing();
     if(p==='sms' && saved.storyFirstSmsDelivered){
       saved.storyFirstSmsOpened=true;
@@ -42,7 +48,9 @@
       storyLastTick=now;
       if(document.hidden || page==='lock')return;
       saved.storyBrowseMs+=Math.max(0,elapsed);
-      if(saved.storyBrowseMs>=cfg.story.firstMessageDelayMs){
+      // Either a 30-second browse or 10 seconds after first opening Notes.
+      const notesReady=Number.isFinite(saved.storyNotesOpenedAt) && now-saved.storyNotesOpenedAt>=cfg.story.notesTriggerDelayMs;
+      if(saved.storyBrowseMs>=cfg.story.firstMessageDelayMs || notesReady){
         window.clearInterval(storyTimer);storyTimer=null;
         saved.storyFirstSmsDelivered=true;
         notificationVisible=true;
@@ -258,9 +266,68 @@
     contact.append(elem('div','sms-number',cfg.sms.number||cfg.sms.name),elem('div','sms-meta',cfg.sms.service));root.append(contact);
     const messages=elem('div','scroll chat-view sms-chat');
     const incoming=saved.storyFirstSmsDelivered?[cfg.story.firstMessage]:[];
-    renderMessages(messages,[...(cfg.sms.messages||[]),...incoming,...saved.smsSent]);root.append(messages);
-    root.append(elem('div','sms-footer-note','Messages sent here are fictional and stored only in this browser.'));
-    root.append(composer('sms','Text Message · SMS'));host.append(root);scrollDown(messages);
+    const player=saved.storyPlayerReplied?[{from:'me',text:cfg.story.playerReply}]:[];
+    const stranger=saved.storyStrangerReplied?[{from:'them',text:cfg.story.strangerReply}]:[];
+    renderMessages(messages,[...(cfg.sms.messages||[]),...incoming,...player,...stranger]);
+    root.append(messages);
+    if(saved.storyFirstSmsDelivered && !saved.storyPlayerReplied){
+      root.append(storySmsComposer(messages));
+    }else{
+      const inactive=elem('div','composer story-composer story-composer-inactive');
+      inactive.append(elem('span','composer-icon','+'),elem('div','composer-field story-readonly',saved.storyPlayerReplied?'Text Message':'Waiting for message…'));
+      root.append(inactive);
+    }
+    host.append(root);scrollDown(messages);
+  }
+  function storySmsComposer(messages){
+    const form=elem('div','composer story-composer');
+    form.append(elem('span','composer-icon','+'));
+    const field=click('Text Message · SMS','composer-field story-scripted-input',()=>{
+      if(field.disabled || saved.storyPlayerReplied)return;
+      field.disabled=true;
+      field.textContent='';
+      field.classList.add('story-typing-active');
+      const text=cfg.story.playerReply;
+      let pos=0;
+      const typeNext=()=>{
+        if(page!=='sms')return;
+        pos++;
+        field.textContent=text.slice(0,pos);
+        field.scrollLeft=field.scrollWidth;
+        if(pos<text.length) scheduleStoryUi(typeNext,cfg.story.replyTypingIntervalMs);
+        else scheduleStoryUi(sendReply,650);
+      };
+      const sendReply=()=>{
+        if(page!=='sms')return;
+        saved.storyPlayerReplied=true;persist();
+        field.classList.remove('story-typing-active');
+        const row=elem('div','chat-row me');
+        row.append(elem('div','bubble',text));
+        messages.append(row);scrollDown(messages);
+        field.textContent='Text Message';
+        field.classList.remove('story-scripted-input');
+        field.classList.add('story-readonly');
+        const indicator=elem('div','story-typing-row');
+        indicator.setAttribute('aria-label','Unknown Number is typing');
+        const bubble=elem('div','story-typing-bubble');
+        for(let i=0;i<3;i++)bubble.append(elem('span','story-typing-dot'));
+        indicator.append(bubble);
+        messages.append(indicator);scrollDown(messages);
+        scheduleStoryUi(()=>{
+          if(page!=='sms')return;
+          indicator.remove();
+          saved.storyStrangerReplied=true;persist();
+          const replyRow=elem('div','chat-row them');
+          replyRow.append(elem('div','bubble',cfg.story.strangerReply));
+          messages.append(replyRow);scrollDown(messages);
+        },cfg.story.strangerTypingDelayMs);
+      };
+      scheduleStoryUi(typeNext,250);
+    });
+    field.setAttribute('aria-label','Tap to automatically type the scripted reply');
+    form.append(field);
+    form.append(elem('span','story-send-decoration','↑'));
+    return form;
   }
   function renderMessages(container,messages){
     for(const item of messages){
