@@ -112,6 +112,28 @@ window.PHONE_STORY = {
     },
     secondPlayerReply: "I've been worried all week",
     secondStrangerReply: '555555 anyways Thank you for replying! 😽',
+    plot3Note: {
+      id: 'plot3-2027-10-31',
+      title: 'I received another message from the number again...',
+      date: 'October 31, 2027 at 10:36 am',
+      body: "I received another message from the number again... It sounds entirely, hauntingly like her. Like the Miu I once knew before the silence grew between us.\n\nWe are all just collectors of phantom echoes, aren't we? Searching for the person of who we used to love in the margins of everyday text messages, foolishly hoping that time might rewind itself if we just hold our breath long enough."
+    },
+    plot3Date: {weekday:'SUNDAY',day:'31',month:'October',time:'10:36'},
+    plot3HomeDelayMs: 10000,
+    plot3Message: {from:'them',sender:'Unknown Number',time:'10:36 AM',text:'Happy Sunday! ☀️'},
+    plot3Messages: [
+      {stage:0,from:'them',text:'Happy Sunday! ☀️'},
+      {stage:0,from:'them',text:"Bangkok is literally burning hot today, I feel like I'm melting into the pavement... 🫠"},
+      {stage:1,from:'me',text:"Haha, stay indoors and stay hydrated! Don't melt away on me just yet."},
+      {stage:2,from:'them',text:'hydrated def matters！'},
+      {stage:3,from:'them',text:"I still don't know ur name, stranger！👀"},
+      {stage:4,from:'me',text:'Lena'},
+      {stage:5,from:'them',text:'🥳 beautiful name'},
+      {stage:6,from:'them',text:'I am Natsha'},
+      {stage:7,from:'me',text:'Glad to meet you, Natsha ☺️'}
+    ],
+    plot3Drafts: ['？？Do you have any nicknames?', 'Miu？', 'Glad to meet you, Natsha ☺️'],
+    plot3ReactionPauseMs: 3000,
     firstMessage: {
       from: 'them',
       sender: 'Unknown Number',
