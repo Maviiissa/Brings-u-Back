@@ -197,3 +197,17 @@
 .line-chat .chat-row.them .bubble{background:#fff!important;color:#111!important;border-bottom-left-radius:5px}
 .line-chat .chat-row.me .bubble{background:#b7e76d!important;color:#111!important;border-bottom-right-radius:5px}
 .line-chat .chat-row .line-message-meta{max-width:55px;min-width:36px}
+
+/* LINE inbox — a separate screen between home and Kiddo's conversation. */
+.line-inbox-page{background:#fff}
+.line-inbox-header{padding:15px 22px 7px}
+.line-inbox-heading{margin:0;font-size:27px;font-weight:750;letter-spacing:-.5px}
+.line-inbox-search{margin:9px 17px 11px;padding:11px 15px;border-radius:12px;background:#f2f3f5;color:#92949c;font-size:14px}
+.line-inbox-list{border-top:1px solid #eeeeef;background:#fff}
+.line-conversation{width:100%;padding:15px 18px;display:flex;gap:13px;align-items:center;text-align:left;border-bottom:1px solid #ececef;background:#fff}
+.line-conversation:active{background:#f5f6f7}
+.line-conversation .avatar{width:54px;height:54px}
+.line-conversation-details{display:flex;flex-direction:column;min-width:0;flex:1;gap:6px}
+.line-conversation-name{font-size:17px;font-weight:700}
+.line-conversation-preview{font-size:13px;color:#8d9098;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.line-conversation-date{font-size:11px;color:#a2a4ac;align-self:flex-start;white-space:nowrap;margin-top:3px}
