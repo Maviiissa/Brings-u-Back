@@ -273,3 +273,7 @@
 .story-notification-body{font-size:13px;line-height:1.4;margin-top:2px}
 .sms-message-time{font-size:11px;color:#93949b;text-align:center;padding:14px 0 3px}
 @media (prefers-reduced-motion:reduce){.story-notification{transition:none}}
+
+/* Correct SMS bubble selectors: the sender class is on .chat-row. */
+.sms-chat .chat-row.them .bubble{background:#e9e9eb;color:#171717}
+.sms-chat .chat-row.me .bubble{background:#65cf6b;color:#fff}
