@@ -159,7 +159,7 @@ window.PHONE_STORY = {
       {stage:1,from:'me',text:'100% Brown food? That must be your favourite'},
       {stage:2,from:'them',text:'How do you know?!!!😆'},
       {stage:2,from:'them',text:'Oh, and good news! I officially passed my exams and got into Chulalongkorn University! 🎉'},
-      {stage:2,from:'them',text:"I'm thinking of joining the campus club! The Drum Major has this senior... OMG she is so prettyyyyyy 🫣"},
+      {stage:2,from:'them',text:"I'm thinking of joining the campus club! The Drum Major... OMG she is so prettyyyyyy 🫣"},
       {stage:3,from:'me',text:'Congratulations on Chula, kiddo! I am so happy for you ☺️'},
       {stage:3,from:'me',text:'Make sure you get some rest after celebrating 🤍'}
     ],
