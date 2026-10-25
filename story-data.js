@@ -11,7 +11,7 @@
  */
 window.PHONE_STORY = {
   lockScreen: {
-    date: 'Thu 25 Nov',
+    date: 'Thu 25 Nov 2027',
     year: '2027',
     wallpaper: 'assets/lockscreen-wallpaper.jpg',
     time: '22:16'
