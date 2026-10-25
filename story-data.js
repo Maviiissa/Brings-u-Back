@@ -202,11 +202,11 @@ window.PHONE_STORY = {
   ],
   instagramAvatar: 'assets/IMG_3246.jpg',
   instagram: [
-    {src:'assets/IMG_3241.jpg',caption:'Wandering with you🤍',date:'7 October',likes:'428K'},
-    {src:'assets/IMG_3242.jpg',caption:'Art, lunch, you. ❤️',date:'5 October',likes:'386K'},
-    {src:'assets/IMG_3243.jpg',caption:'Just a girl missing Paris 🖤 @chanelofficial',date:'29 September',likes:'537K'},
-    {src:'assets/IMG_3244.jpg',caption:'⋆｡°✩ 🥐 ⋆｡°✩ 🥖',date:'16 September',likes:'427K'},
-    {src:'assets/IMG_3245.jpg',caption:'Bits from diary ⋆. 🧁🥰',date:'1 July',likes:'229K'}
+    {src:'assets/IMG_3241.jpg',caption:'Wandering with you🤍',date:'7 October 2026',likes:'428K'},
+    {src:'assets/IMG_3242.jpg',caption:'Art, lunch, you. ❤️',date:'5 October 2026',likes:'386K'},
+    {src:'assets/IMG_3243.jpg',caption:'Just a girl missing Paris 🖤 @chanelofficial',date:'29 September 2026',likes:'537K'},
+    {src:'assets/IMG_3244.jpg',caption:'⋆｡°✩ 🥐 ⋆｡°✩ 🥖',date:'16 September 2026',likes:'427K'},
+    {src:'assets/IMG_3245.jpg',caption:'Bits from diary ⋆. 🧁🥰',date:'1 July 2026',likes:'229K'}
   ],
   calendar: [
     { date:'2026-11-25', title:'Last LINE conversation' }
