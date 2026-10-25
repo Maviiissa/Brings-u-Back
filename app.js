@@ -270,6 +270,9 @@
     const stranger=saved.storyStrangerReplied?[{from:'them',text:cfg.story.strangerReply}]:[];
     renderMessages(messages,[...(cfg.sms.messages||[]),...incoming,...player,...stranger]);
     root.append(messages);
+    if(saved.storyPlayerReplied && !saved.storyStrangerReplied){
+      showStrangerTyping(messages);
+    }
     if(saved.storyFirstSmsDelivered && !saved.storyPlayerReplied){
       root.append(storySmsComposer(messages));
     }else{
@@ -307,20 +310,7 @@
         field.textContent='Text Message';
         field.classList.remove('story-scripted-input');
         field.classList.add('story-readonly');
-        const indicator=elem('div','story-typing-row');
-        indicator.setAttribute('aria-label','Unknown Number is typing');
-        const bubble=elem('div','story-typing-bubble');
-        for(let i=0;i<3;i++)bubble.append(elem('span','story-typing-dot'));
-        indicator.append(bubble);
-        messages.append(indicator);scrollDown(messages);
-        scheduleStoryUi(()=>{
-          if(page!=='sms')return;
-          indicator.remove();
-          saved.storyStrangerReplied=true;persist();
-          const replyRow=elem('div','chat-row them');
-          replyRow.append(elem('div','bubble',cfg.story.strangerReply));
-          messages.append(replyRow);scrollDown(messages);
-        },cfg.story.strangerTypingDelayMs);
+        showStrangerTyping(messages);
       };
       scheduleStoryUi(typeNext,250);
     });
@@ -328,6 +318,23 @@
     form.append(field);
     form.append(elem('span','story-send-decoration','↑'));
     return form;
+  }
+  function showStrangerTyping(messages){
+    if(messages.querySelector('.story-typing-row') || saved.storyStrangerReplied)return;
+    const indicator=elem('div','story-typing-row');
+    indicator.setAttribute('aria-label','Unknown Number is typing');
+    const bubble=elem('div','story-typing-bubble');
+    for(let i=0;i<3;i++)bubble.append(elem('span','story-typing-dot'));
+    indicator.append(bubble,elem('span','story-typing-label','Unknown Number is typing…'));
+    messages.append(indicator);scrollDown(messages);
+    scheduleStoryUi(()=>{
+      if(page!=='sms')return;
+      indicator.remove();
+      saved.storyStrangerReplied=true;persist();
+      const replyRow=elem('div','chat-row them');
+      replyRow.append(elem('div','bubble',cfg.story.strangerReply));
+      messages.append(replyRow);scrollDown(messages);
+    },cfg.story.strangerTypingDelayMs);
   }
   function renderMessages(container,messages){
     for(const item of messages){
