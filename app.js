@@ -388,7 +388,7 @@
     cal.append(elem('div','cal-weekday',homeDate.weekday),elem('div','cal-day',homeDate.day),elem('div','cal-detail',(saved.storyPlot2DateChanged||saved.storyPlot3DateChanged||saved.storyPlot4DateChanged||saved.storyPlot5DateChanged||saved.storyPlot6DateChanged||saved.storyPlot7DateChanged||saved.storyPlot8DateChanged||saved.storyPlot9DateChanged||saved.storyPlot10DateChanged)?homeDate.month:homeDate.detail));grid.append(cal);
     grid.append(appTile('Camera','camera'),appTile('Instagram','instagram'),appTile('LINE','line','',null,'line-list'),appTile('Notes','notes'));
     main.append(grid);main.append(elem('div','home-search','⌕  Search'));root.append(main);
-    const dock=elem('div','dock');dock.append(appTile('','phoneicon','☎',cfg.phone.unreadPhone,'phone'),appTile('','safari','◉',null,'safari'),appTile('','messagesicon','●',cfg.phone.unreadMessages,'sms'),appTile('','music','♫',null,'music'));
+    const dock=elem('div','dock');dock.append(appTile('','phoneicon','☎',null,'phone'),appTile('','safari','◉',null,'safari'),appTile('','messagesicon','●',cfg.phone.unreadMessages,'sms'),appTile('','music','♫',null,'music'));
     root.append(dock);host.append(root);
   }
   function avatar(src, sizeClass=''){
