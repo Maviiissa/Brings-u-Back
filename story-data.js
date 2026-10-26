@@ -14,11 +14,11 @@ window.PHONE_STORY = {
     date: 'Thu 25 Nov 2027',
     year: '2027',
     wallpaper: 'assets/lockscreen-wallpaper.jpg',
-    time: '22:16'
+    time: '9:00'
   },
-  lock: { dateLabel: 'Thu 25 Nov', fullDate: 'November 25, 2027', time: '22:16' },
+  lock: { dateLabel: 'Thu 25 Nov', fullDate: 'November 25, 2027', time: '9:00' },
   phone: {
-    time: '22:16',
+    time: '9:00',
     battery: '31',
     date: { weekday: 'THURSDAY', day: '25', detail: 'No Events Today' },
     unreadPhone: '1',
@@ -98,12 +98,12 @@ window.PHONE_STORY = {
     replyTypingIntervalMs: 48,
     strangerTypingDelayMs: 2300,
     plot2Note: {
-      id: 'plot2-2027-10-28',
+      id: 'plot2-2027-11-28',
       title: "I've been trying my best to keep my life together.",
-      date: 'October 28, 2027 at 9:00am.',
+      date: 'November 28, 2027 at 7:54am.',
       body: "I've been trying my best to keep my life together. I'm trying not to stay up late anymore, and I'm forcing myself to wake up early.\n\nI received a weird message...I received a weird message today. Pancakes were always Miu’s absolute favourite.\n\nI miss her so much."
     },
-    plot2Date: {weekday:'THURSDAY',day:'28',month:'October',time:'9:00'},
+    plot2Date: {weekday:'SUNDAY',day:'28',month:'November',time:'7:54'},
     secondMessage: {
       from:'them',
       sender:'Unknown Number',
@@ -113,12 +113,12 @@ window.PHONE_STORY = {
     secondPlayerReply: "I've been worried all week",
     secondStrangerReply: '555555 anyways Thank you for replying! 😽',
     plot3Note: {
-      id: 'plot3-2027-10-31',
+      id: 'plot3-2027-12-05',
       title: 'I received another message from the number again...',
-      date: 'October 31, 2027 at 10:36 am',
+      date: 'December 5, 2027 at 10:36 am',
       body: "I received another message from the number again... It sounds entirely, hauntingly like her. Like the Miu I once knew before the silence grew between us.\n\nWe are all just collectors of phantom echoes, aren't we? Searching for the person of who we used to love in the margins of everyday text messages, foolishly hoping that time might rewind itself if we just hold our breath long enough."
     },
-    plot3Date: {weekday:'SUNDAY',day:'31',month:'October',time:'10:36'},
+    plot3Date: {weekday:'SUNDAY',day:'5',month:'December',time:'10:36'},
     plot3HomeDelayMs: 10000,
     plot3Message: {from:'them',sender:'Unknown Number',time:'10:36 AM',text:'Happy Sunday! ☀️'},
     plot3Messages: [
@@ -135,20 +135,20 @@ window.PHONE_STORY = {
     plot3Drafts: ['？？Do you have any nicknames?', 'Miu？', 'Glad to meet you, Natsha ☺️'],
     plot3ReactionPauseMs: 3000,
     plot4Note: {
-      id: 'plot4-2027-11-07',
+      id: 'plot4-2027-12-12',
       title: 'Natsha.',
-      date: 'November 7, 2027 at 2:23 PM',
+      date: 'December 12, 2027 at 2:23 PM',
       body: "Natsha.\n\nI can feel my heart skipped a beat looking at the name appear on my screen. It is the very name I ache to hear.\n\nIt’s been a while of heavy silence from Miu, I don't know what I did wrong and she won't give me a chance to explain. Yet somehow, this stranger arrived out of nowhere, carrying the exact same name....\n\nI don't know why the universe sent her to my inbox today, but I am so endlessly grateful for this."
     },
-    plot4Date: {weekday:'SUNDAY',day:'7',month:'November',time:'14:23'},
+    plot4Date: {weekday:'SUNDAY',day:'12',month:'December',time:'14:23'},
     plot4HomeDelayMs: 5000,
     plot6Note: {
-      id: 'plot6-2027-11-21',
+      id: 'plot6-2027-12-26',
       title: "I couldn't help but smile reading her messages",
-      date: 'November 21, 2027 at 4:20 PM',
+      date: 'December 26, 2027 at 4:20 PM',
       body: "I couldn't help but smile reading her messages about that \"senior\" in the marching band.\n\nMiu used to tell me how shy and tongue-tied she was when we first met. Listening to 18-year-old Miu ramble on about her campus life feels like unearthing lost fragments of a past I was never there to witness.\n\nI wish I had been there. I wish I had understood my own heart back then."
     },
-    plot6Date: {weekday:'SUNDAY',day:'21',month:'November',time:'16:20'},
+    plot6Date: {weekday:'SUNDAY',day:'26',month:'December',time:'16:20'},
     plot6HomeDelayMs: 5000,
     plot6Notification: {
       from:'them',sender:'Natsha',time:'4:20 PM',
@@ -163,12 +163,12 @@ window.PHONE_STORY = {
       {stage:1,from:'me',text:"Don't stress too much about midterms, study hard and take care of yourself."}
     ],
     plot5Note: {
-      id: 'plot5-2027-11-14',
+      id: 'plot5-2027-12-19',
       title: 'Kiddo. I couldn’t help myself calling her that…',
-      date: 'November 14, 2027 at 3:15 PM',
+      date: 'December 19, 2027 at 3:15 PM',
       body: "Kiddo. I couldn’t help myself calling her that…\n\nThe moment I typed that word, my hands were shaking.\n\nIt isn't just a resemblance. The girl on the other end of this line is Miu. It's her, eight years ago, back in 2019.\n\nI don't know how this miraculous bridge was built. She has no idea who I am in her future, but here I am, holding her past in the palm of my hand."
     },
-    plot5Date: {weekday:'SUNDAY',day:'14',month:'November',time:'15:15'},
+    plot5Date: {weekday:'SUNDAY',day:'19',month:'December',time:'15:15'},
     plot5HomeDelayMs: 5000,
     plot5Notification: {
       from:'them',sender:'Natsha',time:'3:15 PM',text:'Having my dinner hehehe'
