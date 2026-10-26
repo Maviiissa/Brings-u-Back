@@ -91,7 +91,17 @@
       saved.storyPlot6DateChanged=true;
       persist();
     }
+    // Plot 7 unlocks after both scripted Plot 6 replies have been sent.
+    if(p==='notes' && (saved.storyPlot6Stage||0)>=1 && !saved.storyPlot7NoteAdded){
+      saved.storyPlot7NoteAdded=true;persist();
+    }
+    if(p==='home' && previous==='notes' && saved.storyPlot7NoteAdded && !saved.storySeventhSmsDelivered){
+      saved.storyPlot7Ready=true;
+      saved.storyPlot7DateChanged=true;
+      persist();
+    }
     if(p==='sms'){
+      if(saved.storySeventhSmsDelivered)saved.storySeventhSmsOpened=true;
       if(saved.storySixthSmsDelivered)saved.storySixthSmsOpened=true;
       if(saved.storyFifthSmsDelivered)saved.storyFifthSmsOpened=true;
       if(saved.storyFourthSmsDelivered)saved.storyFourthSmsOpened=true;
@@ -146,6 +156,16 @@
         showStoryNotification();
       },cfg.story.plot6HomeDelayMs);
     }
+    if(p==='home' && saved.storyPlot7Ready && !saved.storySeventhSmsDelivered){
+      scheduleStoryUi(()=>{
+        if(page!=='home' || saved.storySeventhSmsDelivered)return;
+        saved.storySeventhSmsDelivered=true;
+        saved.storyPlot7Stage=0;
+        notificationVisible=true;
+        persist();
+        showStoryNotification();
+      },cfg.story.plot7HomeDelayMs);
+    }
   };
   // Browsing time only accumulates while the phone is unlocked and the tab is visible.
   // The event fires once per saved playthrough, including across page navigation.
@@ -175,14 +195,15 @@
   function showStoryNotification(){
     document.querySelector('.story-notification')?.remove();
     if(!notificationVisible || page==='lock')return;
+    const seventh=saved.storySeventhSmsDelivered && !saved.storySeventhSmsOpened;
     const sixth=saved.storySixthSmsDelivered && !saved.storySixthSmsOpened;
     const fifth=saved.storyFifthSmsDelivered && !saved.storyFifthSmsOpened;
     const fourth=saved.storyFourthSmsDelivered && !saved.storyFourthSmsOpened;
     const third=saved.storyThirdSmsDelivered && !saved.storyThirdSmsOpened;
     const second=saved.storySecondSmsDelivered && !saved.storySecondSmsOpened;
     const first=saved.storyFirstSmsDelivered && !saved.storyFirstSmsOpened;
-    if(!sixth && !fifth && !fourth && !third && !second && !first)return;
-    const msg=sixth?cfg.story.plot6Notification:(fifth?cfg.story.plot5Notification:(fourth?cfg.story.plot4Notification:(third?cfg.story.plot3Message:(second?cfg.story.secondMessage:cfg.story.firstMessage))));
+    if(!seventh && !sixth && !fifth && !fourth && !third && !second && !first)return;
+    const msg=seventh?cfg.story.plot7Notification:(sixth?cfg.story.plot6Notification:(fifth?cfg.story.plot5Notification:(fourth?cfg.story.plot4Notification:(third?cfg.story.plot3Message:(second?cfg.story.secondMessage:cfg.story.firstMessage)))));
     const banner=click('','story-notification',()=>setPage('sms'));
     banner.setAttribute('aria-label','Open text message from '+msg.sender);
     const head=elem('div','story-notification-head');
@@ -196,7 +217,7 @@
     if(name==='wifi')return `<svg width="20" height="16" viewBox="0 0 20 16" aria-hidden="true"><path d="M2 5C6 1 14 1 18 5M5 8c3-3 7-3 10 0M8 11c1.5-1.3 2.5-1.3 4 0" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="10" cy="14" r="1.4" fill="currentColor"/></svg>`;
     return '';
   };
-  function status(time=(saved.storyPlot6DateChanged?cfg.story.plot6Date.time:(saved.storyPlot5DateChanged?cfg.story.plot5Date.time:(saved.storyPlot4DateChanged?cfg.story.plot4Date.time:(saved.storyPlot3DateChanged?cfg.story.plot3Date.time:(saved.storyPlot2DateChanged?cfg.story.plot2Date.time:(saved.storyFirstSmsDelivered?'9:28':cfg.phone.time)))))),light=false){
+  function status(time=(saved.storyPlot7DateChanged?cfg.story.plot7Date.time:(saved.storyPlot6DateChanged?cfg.story.plot6Date.time:(saved.storyPlot5DateChanged?cfg.story.plot5Date.time:(saved.storyPlot4DateChanged?cfg.story.plot4Date.time:(saved.storyPlot3DateChanged?cfg.story.plot3Date.time:(saved.storyPlot2DateChanged?cfg.story.plot2Date.time:(saved.storyFirstSmsDelivered?'9:28':cfg.phone.time))))))),light=false){
     const b=elem('div','statusbar'+(light?' light':''));b.append(elem('span','',time));
     const icons=elem('div','status-icons');icons.innerHTML=svg('signal')+svg('wifi');
     const battery=elem('div','battery battery-full');battery.setAttribute('aria-label','Battery full');icons.append(battery);b.append(icons);return b;
@@ -311,13 +332,13 @@
     });
   }
   function home(){
-    const root=elem('section','page home');root.append(status(saved.storyPlot6DateChanged?cfg.story.plot6Date.time:(saved.storyPlot5DateChanged?cfg.story.plot5Date.time:(saved.storyPlot4DateChanged?cfg.story.plot4Date.time:(saved.storyPlot3DateChanged?cfg.story.plot3Date.time:(saved.storyPlot2DateChanged?cfg.story.plot2Date.time:(saved.storyFirstSmsDelivered?'9:28':cfg.phone.time))))),true));
+    const root=elem('section','page home');root.append(status(saved.storyPlot7DateChanged?cfg.story.plot7Date.time:(saved.storyPlot6DateChanged?cfg.story.plot6Date.time:(saved.storyPlot5DateChanged?cfg.story.plot5Date.time:(saved.storyPlot4DateChanged?cfg.story.plot4Date.time:(saved.storyPlot3DateChanged?cfg.story.plot3Date.time:(saved.storyPlot2DateChanged?cfg.story.plot2Date.time:(saved.storyFirstSmsDelivered?'9:28':cfg.phone.time)))))),true));
     const main=elem('div','home-content');
     const imageButton=click('','photo-widget',()=>setPage('photos'));imageButton.append(img(cfg.phone.homePhoto,'Photos'));main.append(imageButton);
     main.append(elem('div','photo-label','Photos'));
     const grid=elem('div','home-grid');const cal=click('','calendar-card',()=>setPage('calendar'));
-    const homeDate=saved.storyPlot6DateChanged?cfg.story.plot6Date:(saved.storyPlot5DateChanged?cfg.story.plot5Date:(saved.storyPlot4DateChanged?cfg.story.plot4Date:(saved.storyPlot3DateChanged?cfg.story.plot3Date:(saved.storyPlot2DateChanged?cfg.story.plot2Date:cfg.phone.date))));
-    cal.append(elem('div','cal-weekday',homeDate.weekday),elem('div','cal-day',homeDate.day),elem('div','cal-detail',(saved.storyPlot2DateChanged||saved.storyPlot3DateChanged||saved.storyPlot4DateChanged||saved.storyPlot5DateChanged||saved.storyPlot6DateChanged)?homeDate.month:homeDate.detail));grid.append(cal);
+    const homeDate=saved.storyPlot7DateChanged?cfg.story.plot7Date:(saved.storyPlot6DateChanged?cfg.story.plot6Date:(saved.storyPlot5DateChanged?cfg.story.plot5Date:(saved.storyPlot4DateChanged?cfg.story.plot4Date:(saved.storyPlot3DateChanged?cfg.story.plot3Date:(saved.storyPlot2DateChanged?cfg.story.plot2Date:cfg.phone.date)))) );
+    cal.append(elem('div','cal-weekday',homeDate.weekday),elem('div','cal-day',homeDate.day),elem('div','cal-detail',(saved.storyPlot2DateChanged||saved.storyPlot3DateChanged||saved.storyPlot4DateChanged||saved.storyPlot5DateChanged||saved.storyPlot6DateChanged||saved.storyPlot7DateChanged)?homeDate.month:homeDate.detail));grid.append(cal);
     grid.append(appTile('Camera','camera'),appTile('Instagram','instagram'),appTile('LINE','line','',null,'line-list'),appTile('Notes','notes'));
     main.append(grid);main.append(elem('div','home-search','⌕  Search'));root.append(main);
     const dock=elem('div','dock');dock.append(appTile('','phoneicon','☎',cfg.phone.unreadPhone,'phone'),appTile('','safari','◉',null,'safari'),appTile('','messagesicon','●',cfg.phone.unreadMessages,'sms'),appTile('','music','♫',null,'music'));
@@ -831,6 +852,7 @@
     },cfg.story.plot3ReactionPauseMs);
   }
   function sms(){
+    if(saved.storySeventhSmsDelivered)return smsPlot7();
     if(saved.storySixthSmsDelivered)return smsPlot6();
     if(saved.storyFifthSmsDelivered)return smsPlot5();
     if(saved.storyFourthSmsDelivered)return smsPlot4();
@@ -1004,7 +1026,9 @@
     const plot4Notes=saved.storyPlot4NoteAdded?[cfg.story.plot4Note]:[];
     const plot5Notes=saved.storyPlot5NoteAdded?[cfg.story.plot5Note]:[];
     const plot6Notes=saved.storyPlot6NoteAdded?[cfg.story.plot6Note]:[];
+    const plot7Notes=saved.storyPlot7NoteAdded?[cfg.story.plot7Note]:[];
     const entries=[
+      ...plot7Notes.map(n=>({...n,...saved.noteEdits[n.id],id:n.id,isStoryNote:true})),
       ...plot6Notes.map(n=>({...n,...saved.noteEdits[n.id],id:n.id,isStoryNote:true})),
       ...plot5Notes.map(n=>({...n,...saved.noteEdits[n.id],id:n.id,isStoryNote:true})),
       ...plot4Notes.map(n=>({...n,...saved.noteEdits[n.id],id:n.id,isStoryNote:true})),
@@ -1012,7 +1036,7 @@
       ...plot2Notes.map(n=>({...n,...saved.noteEdits[n.id],id:n.id,isStoryNote:true})),
       ...cfg.notes.map(n=>({ ...n, ...saved.noteEdits[n.id], id:n.id, date:n.date, isStoryNote:true })),
       ...Object.entries(saved.noteEdits)
-        .filter(([id])=>!cfg.notes.some(n=>n.id===id) && id!==cfg.story.plot2Note.id && id!==cfg.story.plot3Note.id && id!==cfg.story.plot4Note.id && id!==cfg.story.plot5Note.id && id!==cfg.story.plot6Note.id)
+        .filter(([id])=>!cfg.notes.some(n=>n.id===id) && id!==cfg.story.plot2Note.id && id!==cfg.story.plot3Note.id && id!==cfg.story.plot4Note.id && id!==cfg.story.plot5Note.id && id!==cfg.story.plot6Note.id && id!==cfg.story.plot7Note.id)
         .map(([id,n])=>({id,...n,date:'Personal note',isStoryNote:false}))
     ];
     entries.forEach(n=>{
@@ -1027,6 +1051,7 @@
   }
   function noteEditor(){
     const config=cfg.notes.find(n=>n.id===selected)
+      || (saved.storyPlot7NoteAdded && selected===cfg.story.plot7Note.id?cfg.story.plot7Note:null)
       || (saved.storyPlot6NoteAdded && selected===cfg.story.plot6Note.id?cfg.story.plot6Note:null)
       || (saved.storyPlot5NoteAdded && selected===cfg.story.plot5Note.id?cfg.story.plot5Note:null)
       || (saved.storyPlot4NoteAdded && selected===cfg.story.plot4Note.id?cfg.story.plot4Note:null)
