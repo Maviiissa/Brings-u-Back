@@ -307,6 +307,20 @@ window.PHONE_STORY = {
     { id: 'note-2026-11-25', title: 'Happy beloved birthdays to us 🤍 🩶', date: 'November 25, 2026 at 00:36 am', body: 'Happy beloved birthdays to us 🤍 🩶 I will always be your partner in crime, my kiddo.' },
     { id: 'note-2026-10-23', title: 'Kiddo, "I really do love you“ as well.', date: 'October 23, 2026 at 00:36 am', body: 'Kiddo, "I really do love you“ as well.' }
   ],
+  secretAlbum: {
+    title: '🦋💗🧸',
+    photos: [
+      { id:'secret-1', src:'assets/secret-album-01.jpg', date:"January 24, 2028 at 13:14 pm" },
+      { id:'secret-2', src:'assets/secret-album-02.jpg', date:"January 29, 2028 at 17:28 pm" },
+      { id:'secret-3', src:'assets/secret-album-03.jpg', date:"February 15, 2028 at 11:27 am" },
+      { id:'secret-4', src:'assets/secret-album-04.jpg', date:"March 24, 2028 at 12:33 pm" },
+      { id:'secret-5', src:'assets/secret-album-05.jpg', date:"April 6, 2028 at 21:48 pm" },
+      { id:'secret-6', src:'assets/secret-album-06.jpg', date:"April 15, 2028 at 23:58 pm" },
+      { id:'secret-7', src:'assets/secret-album-07.jpg', date:"May 18, 2028 at 18:21 pm" },
+      { id:'secret-8', src:'assets/secret-album-08.jpg', date:"August 31, 2028 at 19:26 pm" },
+      { id:'secret-9', src:'assets/secret-album-09.jpg', date:"November 24, 2028 at 23:55 pm" }
+    ]
+  },
   photos: [
     { id:'memory-1', src:'assets/home-photo.jpg', title:'Photos', caption:'这是一张临时照片；你之后可以换成自己的素材。' }
   ],
