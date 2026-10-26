@@ -553,7 +553,7 @@
         const idle=messages.parentElement?.querySelector('.story-composer-inactive');
         if(!idle)return;
         let composer=null;
-        if(plot==='plot3' && (stage===0 || stage===6))composer=plot3Composer(stage);
+        if(plot==='plot3' && (stage===0 || stage===3 || stage===6))composer=plot3Composer(stage);
         if(plot==='plot4' && stage===0)composer=plot4Composer(messages,0);
         if(plot==='plot5' && stage===0)composer=plot5Composer(messages,0);
         if(plot==='plot6' && stage===0)composer=plot6Composer(messages);
@@ -847,7 +847,7 @@
     history.push(...storyVisibleMessages('plot3',stage,cfg.story.plot3Messages));
     renderMessages(messages,history);
     root.append(messages);
-    if(stage===0 && (saved.storyBubbleCounts||{})['plot3:0']>=2 || stage===3){
+    if(stage===0 && (saved.storyBubbleCounts||{})['plot3:0']>=2 || stage===3 && (saved.storyBubbleCounts||{})['plot3:3']>=1){
       root.append(plot3Composer(stage));
     }else{
       const inactive=elem('div','composer story-composer story-composer-inactive');
@@ -855,7 +855,7 @@
       root.append(inactive);
     }
     host.append(root);scrollDown(messages);
-    if([0,2,5,6].includes(stage))storyIncomingSequence(messages,'plot3',stage,stage===0 || stage===6?null:stage+1);
+    if([0,2,3,5,6].includes(stage))storyIncomingSequence(messages,'plot3',stage,[0,3,6].includes(stage)?null:stage+1);
     if([1,4].includes(stage))plot3Incoming(messages,stage);
     // Stage 6's three-second reaction starts after the "I am Natsha" bubble
     // is actually mounted, not when the prior "beautiful name" bubble ends.
