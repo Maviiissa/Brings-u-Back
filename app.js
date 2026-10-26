@@ -196,7 +196,7 @@
     if(name==='wifi')return `<svg width="20" height="16" viewBox="0 0 20 16" aria-hidden="true"><path d="M2 5C6 1 14 1 18 5M5 8c3-3 7-3 10 0M8 11c1.5-1.3 2.5-1.3 4 0" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="10" cy="14" r="1.4" fill="currentColor"/></svg>`;
     return '';
   };
-  function status(time=(saved.storyPlot6DateChanged?cfg.story.plot6Date.time:(saved.storyPlot5DateChanged?cfg.story.plot5Date.time:(saved.storyPlot4DateChanged?cfg.story.plot4Date.time:(saved.storyPlot3DateChanged?cfg.story.plot3Date.time:(saved.storyPlot2DateChanged?cfg.story.plot2Date.time:cfg.phone.time))))),light=false){
+  function status(time=(saved.storyPlot6DateChanged?cfg.story.plot6Date.time:(saved.storyPlot5DateChanged?cfg.story.plot5Date.time:(saved.storyPlot4DateChanged?cfg.story.plot4Date.time:(saved.storyPlot3DateChanged?cfg.story.plot3Date.time:(saved.storyPlot2DateChanged?cfg.story.plot2Date.time:(saved.storyFirstSmsDelivered?'9:28':cfg.phone.time)))))),light=false){
     const b=elem('div','statusbar'+(light?' light':''));b.append(elem('span','',time));
     const icons=elem('div','status-icons');icons.innerHTML=svg('signal')+svg('wifi');
     const battery=elem('div','battery battery-full');battery.setAttribute('aria-label','Battery full');icons.append(battery);b.append(icons);return b;
@@ -311,7 +311,7 @@
     });
   }
   function home(){
-    const root=elem('section','page home');root.append(status(saved.storyPlot6DateChanged?cfg.story.plot6Date.time:(saved.storyPlot5DateChanged?cfg.story.plot5Date.time:(saved.storyPlot4DateChanged?cfg.story.plot4Date.time:(saved.storyPlot3DateChanged?cfg.story.plot3Date.time:(saved.storyPlot2DateChanged?cfg.story.plot2Date.time:cfg.phone.time)))),true));
+    const root=elem('section','page home');root.append(status(saved.storyPlot6DateChanged?cfg.story.plot6Date.time:(saved.storyPlot5DateChanged?cfg.story.plot5Date.time:(saved.storyPlot4DateChanged?cfg.story.plot4Date.time:(saved.storyPlot3DateChanged?cfg.story.plot3Date.time:(saved.storyPlot2DateChanged?cfg.story.plot2Date.time:(saved.storyFirstSmsDelivered?'9:28':cfg.phone.time))))),true));
     const main=elem('div','home-content');
     const imageButton=click('','photo-widget',()=>setPage('photos'));imageButton.append(img(cfg.phone.homePhoto,'Photos'));main.append(imageButton);
     main.append(elem('div','photo-label','Photos'));
@@ -554,19 +554,19 @@
     root.append(contact);
     const messages=elem('div','scroll chat-view sms-chat');
     const history=[...(cfg.sms.messages||[])];
-    if(saved.storyFirstSmsDelivered)history.push(cfg.story.firstMessage);
+    if(saved.storyFirstSmsDelivered)history.push({type:'date',text:'November 25, 2027'},cfg.story.firstMessage);
     if(saved.storyPlayerReplied)history.push({from:'me',text:cfg.story.playerReply});
     if(saved.storyStrangerReplied)history.push({from:'them',text:cfg.story.strangerReply});
-    if(saved.storySecondSmsDelivered)history.push({type:'date',text:'October 28, 2027'},cfg.story.secondMessage);
+    if(saved.storySecondSmsDelivered)history.push({type:'date',text:'November 28, 2027'},cfg.story.secondMessage);
     if(saved.storySecondPlayerReplied)history.push({from:'me',text:cfg.story.secondPlayerReply});
     if(saved.storySecondStrangerReplied)history.push({from:'them',text:cfg.story.secondStrangerReply});
-    history.push({type:'date',text:'October 31, 2027'});
+    history.push({type:'date',text:'December 5, 2027'});
     for(const msg of cfg.story.plot3Messages)if(msg.stage<=(saved.storyPlot3Stage||0))history.push(msg);
-    history.push({type:'date',text:'November 7, 2027'});
+    history.push({type:'date',text:'December 12, 2027'});
     for(const msg of cfg.story.plot4Messages)if(msg.stage<=(saved.storyPlot4Stage||0))history.push(msg);
-    history.push({type:'date',text:'November 14, 2027'});
+    history.push({type:'date',text:'December 19, 2027'});
     for(const msg of cfg.story.plot5Messages)if(msg.stage<=(saved.storyPlot5Stage||0))history.push(msg);
-    history.push({type:'date',text:'November 21, 2027'});
+    history.push({type:'date',text:'December 26, 2027'});
     const stage=Number(saved.storyPlot6Stage)||0;
     history.push(...storyVisibleMessages('plot6',stage,cfg.story.plot6Messages));
     renderMessages(messages,history);
@@ -619,17 +619,17 @@
     root.append(contact);
     const messages=elem('div','scroll chat-view sms-chat');
     const history=[...(cfg.sms.messages||[])];
-    if(saved.storyFirstSmsDelivered)history.push(cfg.story.firstMessage);
+    if(saved.storyFirstSmsDelivered)history.push({type:'date',text:'November 25, 2027'},cfg.story.firstMessage);
     if(saved.storyPlayerReplied)history.push({from:'me',text:cfg.story.playerReply});
     if(saved.storyStrangerReplied)history.push({from:'them',text:cfg.story.strangerReply});
-    if(saved.storySecondSmsDelivered)history.push({type:'date',text:'October 28, 2027'},cfg.story.secondMessage);
+    if(saved.storySecondSmsDelivered)history.push({type:'date',text:'November 28, 2027'},cfg.story.secondMessage);
     if(saved.storySecondPlayerReplied)history.push({from:'me',text:cfg.story.secondPlayerReply});
     if(saved.storySecondStrangerReplied)history.push({from:'them',text:cfg.story.secondStrangerReply});
-    history.push({type:'date',text:'October 31, 2027'});
+    history.push({type:'date',text:'December 5, 2027'});
     for(const msg of cfg.story.plot3Messages)if(msg.stage<=(saved.storyPlot3Stage||0))history.push(msg);
-    history.push({type:'date',text:'November 7, 2027'});
+    history.push({type:'date',text:'December 12, 2027'});
     for(const msg of cfg.story.plot4Messages)if(msg.stage<=(saved.storyPlot4Stage||0))history.push(msg);
-    history.push({type:'date',text:'November 14, 2027'});
+    history.push({type:'date',text:'December 19, 2027'});
     const stage=Number(saved.storyPlot5Stage)||0;
     history.push(...storyVisibleMessages('plot5',stage,cfg.story.plot5Messages));
     renderMessages(messages,history);root.append(messages);
@@ -693,15 +693,15 @@
     root.append(contact);
     const messages=elem('div','scroll chat-view sms-chat');
     const history=[...(cfg.sms.messages||[])];
-    if(saved.storyFirstSmsDelivered)history.push(cfg.story.firstMessage);
+    if(saved.storyFirstSmsDelivered)history.push({type:'date',text:'November 25, 2027'},cfg.story.firstMessage);
     if(saved.storyPlayerReplied)history.push({from:'me',text:cfg.story.playerReply});
     if(saved.storyStrangerReplied)history.push({from:'them',text:cfg.story.strangerReply});
-    if(saved.storySecondSmsDelivered)history.push({type:'date',text:'October 28, 2027'},cfg.story.secondMessage);
+    if(saved.storySecondSmsDelivered)history.push({type:'date',text:'November 28, 2027'},cfg.story.secondMessage);
     if(saved.storySecondPlayerReplied)history.push({from:'me',text:cfg.story.secondPlayerReply});
     if(saved.storySecondStrangerReplied)history.push({from:'them',text:cfg.story.secondStrangerReply});
-    history.push({type:'date',text:'October 31, 2027'});
+    history.push({type:'date',text:'December 5, 2027'});
     for(const msg of cfg.story.plot3Messages)if(msg.stage<=(saved.storyPlot3Stage||0))history.push(msg);
-    history.push({type:'date',text:'November 7, 2027'});
+    history.push({type:'date',text:'December 12, 2027'});
     const stage=Number(saved.storyPlot4Stage)||0;
     history.push(...storyVisibleMessages('plot4',stage,cfg.story.plot4Messages));
     renderMessages(messages,history);root.append(messages);
@@ -723,15 +723,15 @@
     root.append(contact);
     const messages=elem('div','scroll chat-view sms-chat');
     const history=[...(cfg.sms.messages||[])];
-    if(saved.storyFirstSmsDelivered)history.push(cfg.story.firstMessage);
+    if(saved.storyFirstSmsDelivered)history.push({type:'date',text:'November 25, 2027'},cfg.story.firstMessage);
     if(saved.storyPlayerReplied)history.push({from:'me',text:cfg.story.playerReply});
     if(saved.storyStrangerReplied)history.push({from:'them',text:cfg.story.strangerReply});
     if(saved.storySecondSmsDelivered){
-      history.push({type:'date',text:'October 28, 2027'},cfg.story.secondMessage);
+      history.push({type:'date',text:'November 28, 2027'},cfg.story.secondMessage);
     }
     if(saved.storySecondPlayerReplied)history.push({from:'me',text:cfg.story.secondPlayerReply});
     if(saved.storySecondStrangerReplied)history.push({from:'them',text:cfg.story.secondStrangerReply});
-    history.push({type:'date',text:'October 31, 2027'});
+    history.push({type:'date',text:'December 5, 2027'});
     const stage=Number(saved.storyPlot3Stage)||0;
     history.push(...storyVisibleMessages('plot3',stage,cfg.story.plot3Messages));
     renderMessages(messages,history);
@@ -840,11 +840,11 @@
     contact.append(click(saved.storyContactName||cfg.sms.name,'sms-number sms-name-button',()=>setPage('sms-contact')),elem('div','sms-meta',cfg.sms.service));root.append(contact);
     const messages=elem('div','scroll chat-view sms-chat');
     const history=[...(cfg.sms.messages||[])];
-    if(saved.storyFirstSmsDelivered)history.push(cfg.story.firstMessage);
+    if(saved.storyFirstSmsDelivered)history.push({type:'date',text:'November 25, 2027'},cfg.story.firstMessage);
     if(saved.storyPlayerReplied)history.push({from:'me',text:cfg.story.playerReply});
     if(saved.storyStrangerReplied)history.push({from:'them',text:cfg.story.strangerReply});
     if(saved.storySecondSmsDelivered){
-      history.push({type:'date',text:'October 28, 2027'});
+      history.push({type:'date',text:'November 28, 2027'});
       history.push(cfg.story.secondMessage);
     }
     if(saved.storySecondPlayerReplied)history.push({from:'me',text:cfg.story.secondPlayerReply});
