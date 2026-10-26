@@ -397,3 +397,34 @@
 @media(prefers-reduced-motion:reduce){
   .sms-chat .chat-row.story-bubble-enter{animation:none}
 }
+
+/* Final act: LINE confession, read receipt, incoming typing, and epilogue. */
+.plot10-read{
+  align-self:flex-end;margin:4px 2px 0;color:#fff;
+  font-size:11px;font-weight:650;text-shadow:0 1px 2px #3a527570;
+}
+.plot10-line-typing{
+  flex:0 0 auto;text-align:center;padding:8px 12px;
+  background:rgba(255,255,255,.87);color:#4c627f;
+  font-size:12px;font-weight:600;letter-spacing:.015em;
+  animation:story-typing-pulse 1.15s ease-in-out infinite;
+}
+@keyframes story-typing-pulse{50%{opacity:.48}}
+.plot10-line-composer .composer-field{
+  white-space:normal;overflow:hidden;overflow-wrap:anywhere;
+  height:auto;min-height:40px;max-height:105px;
+  padding:9px 13px;text-align:left;line-height:1.35;
+}
+.story-ending{
+  display:flex;flex-direction:column;align-items:center;
+  gap:12px;padding:30px 12px 48px;text-align:center;
+}
+.story-ending-heart{font-size:25px}
+.story-ending-title{
+  font-family:Georgia,serif;font-size:28px;letter-spacing:.18em;
+  color:#fff;font-weight:400;
+}
+.story-ending-subtitle{
+  color:#b4b8c5;font-family:Georgia,serif;font-size:13px;
+  font-style:italic;letter-spacing:.08em;
+}
