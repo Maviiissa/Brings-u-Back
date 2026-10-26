@@ -463,7 +463,7 @@
     if(saved.storyPlot10NoteAdded){
       history.push({type:'date',text:'January 22, 2028'});
       const count=Math.min(saved.storyPlot10LineSentCount||0,cfg.story.plot10LineReplies.length);
-      for(let i=0;i<count;i++)history.push({from:'me',text:cfg.story.plot10LineReplies[i]});
+      for(let i=0;i<count;i++)history.push({from:'me',text:cfg.story.plot10LineReplies[i],plot10:true});
       if((saved.storyPlot10LineStage||0)>=2)history.push({from:'them',text:cfg.story.plot10LineAnswer});
     }
     renderMessages(messages,history);root.append(messages);
@@ -497,7 +497,7 @@
       if(index>=replies.length)return;
       send.disabled=true;field.dataset.ready='no';
       send.classList.remove('story-send-ready');
-      renderMessages(messages,[{from:'me',text:replies[index]}]);
+      renderMessages(messages,[{from:'me',text:replies[index],plot10:true}]);
       messages.lastElementChild?.classList.add('story-bubble-enter');
       saved.storyPlot10LineSentCount=index+1;persist();
       field.textContent='Message...';scrollDown(messages);
@@ -511,12 +511,18 @@
     return form;
   }
   function markPlot10Read(messages){
-    if(messages.querySelector('.plot10-read'))return;
-    const rows=[...messages.querySelectorAll('.chat-row.me')];
-    const last=rows[rows.length-1];
-    if(!last)return;
-    const mark=elem('div','plot10-read','Read');
-    last.append(mark);
+    // No individual Read receipts while the six-message confession is in progress.
+    // Once all six have been sent, reveal all six receipts together.
+    const total=cfg.story.plot10LineReplies.length;
+    if((saved.storyPlot10LineSentCount||0)<total)return;
+    const rows=[...messages.querySelectorAll('.chat-row.me.plot10-outgoing')];
+    if(rows.length!==total)return;
+    rows.forEach(row=>{
+      if(row.querySelector('.plot10-read'))return;
+      const meta=row.querySelector('.line-message-meta');
+      const mark=elem('span','plot10-read','Read');
+      (meta||row).append(mark);
+    });
   }
   function plot10LineReadAndAnswer(messages){
     if(page!=='line' || !messages.isConnected || (saved.storyPlot10LineStage||0)!==1)return;
@@ -1193,6 +1199,7 @@
       }
       else if(item.from==='me'||item.from==='them'){
         const row=elem('div','chat-row '+item.from);
+        if(item.plot10)row.classList.add('plot10-outgoing');
         const bubble=elem('div','bubble',item.text);
         if(container.classList.contains('line-chat')){
           styleLineBubble(bubble,item.from);
