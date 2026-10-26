@@ -580,14 +580,7 @@
     root.append(area);host.append(root);
   }
   function plot4Composer(messages,stage){
-    const form=elem('div','composer story-composer plot4-composer');
-    form.append(elem('span','composer-icon','+'));
-    const field=click('Text Message · SMS','composer-field story-scripted-input',()=>{
-      storySendReplies({plot:'plot4',stage,messageStage:stage===0?1:3,nextStage:stage===0?1:4,messages,field});
-    });
-    field.setAttribute('aria-label','Tap to type scripted reply');
-    form.append(field,elem('span','story-send-decoration','↑'));
-    return form;
+    return storyReplyComposer({plot:'plot4',stage,messageStage:stage===0?1:3,nextStage:stage===0?1:4,messages,className:'plot4-composer'});
   }
   function plot4Incoming(messages,stage){
     const indicator=elem('div','story-typing-row');
@@ -632,45 +625,62 @@
       return false;
     });
   }
-  // Shared sender for Plots 4–7. Never rerender while a reply is typing:
-  // append the finished bubble, clear the input, then type the next reply.
-  function storySendReplies({plot,stage,messageStage,nextStage,messages,field,delay=480}){
-    if(field.disabled)return;
-    const stageKey='story'+plot[0].toUpperCase()+plot.slice(1)+'Stage';
-    if((saved[stageKey]||0)!==stage)return;
-    const key=plot+':'+messageStage+':sent';
-    const replies=cfg.story[plot+'Messages'].filter(m=>m.stage===messageStage && m.from==='me');
-    if(!replies.length)return;
-    field.disabled=true;
-    const stillHere=()=>page==='sms' && messages.isConnected && (saved[stageKey]||0)===stage;
-    let index=(saved.storyBubbleCounts||{})[key]||0;
-    const sendNext=()=>{
-      if(!stillHere())return;
-      if(index>=replies.length){
-        saved[stageKey]=nextStage;
-        persist();
-        render();
-        return;
+  // A scripted draft is never sent until the player taps the arrow.
+  function storySendArrow(form,onSend){
+    const send=click('↑','story-send-arrow',onSend);
+    send.disabled=true;
+    send.setAttribute('aria-label','Send message');
+    form.append(send);
+    return send;
+  }
+  function storyDraft(field,text,send,valid=()=>true,context='sms'){
+    if(field.dataset.typing==='yes'||field.dataset.ready==='yes')return;
+    field.dataset.typing='yes';field.dataset.ready='no';
+    field.classList.add('story-typing-active');field.textContent='';
+    send.disabled=true;let pos=0;
+    const step=()=>{
+      if(page!==context||!field.isConnected||!valid())return;
+      pos++;field.textContent=text.slice(0,pos);
+      if(pos<text.length)scheduleStoryUi(step,cfg.story.replyTypingIntervalMs);
+      else{
+        field.dataset.typing='no';field.dataset.ready='yes';
+        send.disabled=false;field.classList.remove('story-typing-active');
+        send.classList.add('story-send-ready');
       }
-      const item=replies[index];
-      plot3Type(field,item.text,()=>{
-        scheduleStoryUi(()=>{
-          if(!stillHere())return;
-          renderMessages(messages,[item]);
-          const row=messages.lastElementChild;
-          if(row?.classList.contains('chat-row'))row.classList.add('story-bubble-enter');
-          index++;
-          if(!saved.storyBubbleCounts)saved.storyBubbleCounts={};
-          saved.storyBubbleCounts[key]=index;
-          persist();
-          field.textContent='';
-          field.classList.remove('story-typing-active');
-          scrollDown(messages);
-          scheduleStoryUi(sendNext,index<replies.length?delay:330);
-        },260);
-      });
     };
-    sendNext();
+    scheduleStoryUi(step,130);
+  }
+  function storyReplyComposer({plot,stage,messageStage,nextStage,messages,className}){
+    const form=elem('div','composer story-composer '+className);
+    form.append(elem('span','composer-icon','+'));
+    const field=click('Text Message · SMS','composer-field story-scripted-input',()=>startDraft());
+    const key=plot+':'+messageStage+':sent';
+    const replies=cfg.story[plot+'Messages'].filter(m=>m.stage===messageStage&&m.from==='me');
+    const stageKey='story'+plot[0].toUpperCase()+plot.slice(1)+'Stage';
+    const count=()=>((saved.storyBubbleCounts||{})[key]||0);
+    const valid=()=>page==='sms'&&(saved[stageKey]||0)===stage;
+    const send=storySendArrow(form,()=>{
+      if(!valid()||field.dataset.ready!=='yes'||send.disabled)return;
+      const index=count(),item=replies[index];if(!item)return;
+      send.disabled=true;send.classList.remove('story-send-ready');
+      field.dataset.ready='no';field.textContent='Text Message · SMS';
+      renderMessages(messages,[item]);
+      const row=messages.lastElementChild;
+      if(row?.classList.contains('chat-row'))row.classList.add('story-bubble-enter');
+      if(!saved.storyBubbleCounts)saved.storyBubbleCounts={};
+      saved.storyBubbleCounts[key]=index+1;persist();scrollDown(messages);
+      if(index+1>=replies.length)scheduleStoryUi(()=>{
+        if(!valid())return;
+        saved[stageKey]=nextStage;persist();render();
+      },420);
+    });
+    function startDraft(){
+      if(!valid()||count()>=replies.length)return;
+      storyDraft(field,replies[count()].text,send,valid);
+    }
+    field.setAttribute('aria-label','Tap to type reply, then tap Send');
+    form.insertBefore(field,send);
+    return form;
   }
   function storyIncomingSequence(messages,plot,stage,nextStage=null){
     const items=cfg.story[plot+'Messages'].filter(item=>item.stage===stage && item.from==='them');
@@ -793,14 +803,7 @@
     if(stage===0 || stage===2)storyIncomingSequence(messages,plot,stage,stage===0?1:3);
   }
   function finalArcComposer(messages,plot,stage){
-    const form=elem('div','composer story-composer final-arc-composer');
-    form.append(elem('span','composer-icon','+'));
-    const field=click('Text Message · SMS','composer-field story-scripted-input',()=>{
-      storySendReplies({plot,stage,messageStage:1,nextStage:2,messages,field,delay:550});
-    });
-    field.setAttribute('aria-label','Tap to type the next scripted reply');
-    form.append(field,elem('span','story-send-decoration','↑'));
-    return form;
+    return storyReplyComposer({plot,stage,messageStage:1,nextStage:2,messages,className:'final-arc-composer'});
   }
   function smsPlot7(){
     const root=appShell('Messages','home');
@@ -841,14 +844,7 @@
     }
   }
   function plot7Composer(messages,stage){
-    const form=elem('div','composer story-composer plot7-composer');
-    form.append(elem('span','composer-icon','+'));
-    const field=click('Text Message · SMS','composer-field story-scripted-input',()=>{
-      storySendReplies({plot:'plot7',stage,messageStage:stage,nextStage:stage+1,messages,field});
-    });
-    field.setAttribute('aria-label','Tap to type scripted reply');
-    form.append(field,elem('span','story-send-decoration','↑'));
-    return form;
+    return storyReplyComposer({plot:'plot7',stage,messageStage:stage,nextStage:stage+1,messages,className:'plot7-composer'});
   }
   function smsPlot6(){
     const root=appShell('Messages','home');
@@ -886,14 +882,7 @@
     if(stage===0 && !allIncomingShown)storyIncomingSequence(messages,'plot6',0);
   }
   function plot6Composer(messages){
-    const form=elem('div','composer story-composer plot6-composer');
-    form.append(elem('span','composer-icon','+'));
-    const field=click('Text Message · SMS','composer-field story-scripted-input',()=>{
-      storySendReplies({plot:'plot6',stage:0,messageStage:1,nextStage:1,messages,field});
-    });
-    field.setAttribute('aria-label','Tap to type scripted reply');
-    form.append(field,elem('span','story-send-decoration','↑'));
-    return form;
+    return storyReplyComposer({plot:'plot6',stage:0,messageStage:1,nextStage:1,messages,className:'plot6-composer'});
   }
   function smsPlot5(){
     const root=appShell('Messages','home');
@@ -927,14 +916,7 @@
     if(stage===1)plot5Incoming(messages);
   }
   function plot5Composer(messages,stage){
-    const form=elem('div','composer story-composer plot5-composer');
-    form.append(elem('span','composer-icon','+'));
-    const field=click('Text Message · SMS','composer-field story-scripted-input',()=>{
-      storySendReplies({plot:'plot5',stage,messageStage:stage===0?1:3,nextStage:stage===0?1:4,messages,field});
-    });
-    field.setAttribute('aria-label','Tap to type scripted reply');
-    form.append(field,elem('span','story-send-decoration','↑'));
-    return form;
+    return storyReplyComposer({plot:'plot5',stage,messageStage:stage===0?1:3,nextStage:stage===0?1:4,messages,className:'plot5-composer'});
   }
   function plot5Incoming(messages){
     const indicator=elem('div','story-typing-row');
