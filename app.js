@@ -276,6 +276,16 @@
     const right=elem('div','nav-right');actions.forEach(a=>right.append(a));nav.append(right);
     root.append(nav);return root;
   }
+  // A journal update stays unread until its entry is actually opened.
+  // Opening the Notes list alone must not clear the indicator.
+  function unreadStoryNotes(){
+    const read=new Set(saved.readStoryNoteIds||[]);
+    return [2,3,4,5,6,7,8,9,10]
+      .filter(n=>saved['storyPlot'+n+'NoteAdded'])
+      .map(n=>cfg.story['plot'+n+'Note'])
+      .filter(n=>n&&!read.has(n.id));
+  }
+  function hasUnreadStoryNotes(){return unreadStoryNotes().length>0;}
   function appTile(label,type,graphic,count,target=type){
     const b=click('','home-app',()=>setPage(target));const icon=elem('div','tile '+type); if(graphic)icon.append(elem('span','',graphic));
     if(count){icon.append(elem('span','app-count',count));}b.append(icon,elem('div','app-caption',label));return b;
@@ -386,7 +396,13 @@
     const grid=elem('div','home-grid');const cal=click('','calendar-card',()=>setPage('calendar'));
     const homeDate=storyCalendarDate();
     cal.append(elem('div','cal-weekday',homeDate.weekday),elem('div','cal-day',homeDate.day),elem('div','cal-detail',(saved.storyPlot2DateChanged||saved.storyPlot3DateChanged||saved.storyPlot4DateChanged||saved.storyPlot5DateChanged||saved.storyPlot6DateChanged||saved.storyPlot7DateChanged||saved.storyPlot8DateChanged||saved.storyPlot9DateChanged||saved.storyPlot10DateChanged)?homeDate.month:homeDate.detail));grid.append(cal);
-    grid.append(appTile('Camera','camera'),appTile('Instagram','instagram'),appTile('LINE','line','',null,'line-list'),appTile('Notes','notes'));
+    const notesTile=appTile('Notes','notes');
+    if(hasUnreadStoryNotes()){
+      const redDot=elem('span','notes-home-unread-dot');
+      redDot.setAttribute('aria-label','Unread journal update');
+      notesTile.querySelector('.tile')?.append(redDot);
+    }
+    grid.append(appTile('Camera','camera'),appTile('Instagram','instagram'),appTile('LINE','line','',null,'line-list'),notesTile);
     main.append(grid);main.append(elem('div','home-search','⌕  Search'));root.append(main);
     const dock=elem('div','dock');dock.append(appTile('','phoneicon','☎',null,'phone'),appTile('','safari','◉',null,'safari'),appTile('','messagesicon','●',cfg.phone.unreadMessages,'sms'),appTile('','music','♫',null,'music'));
     root.append(dock);host.append(root);
@@ -1241,9 +1257,16 @@
       const b=click('','list-item note-list-item',()=>setPage('note-editor',n.id));
       const detail=elem('div','note-list-copy');
       const preview=(n.body||'').trim();
-      detail.append(elem('strong','',preview.split(/\\r?\\n/)[0]||n.title||'Note'),
+      detail.append(elem('strong','',preview.split(/\r?\n/)[0]||n.title||'Note'),
         elem('small','',n.date||'Note'));
-      b.append(detail,elem('div','chevron','›'));
+      b.append(detail);
+      if(unreadStoryNotes().some(entry=>entry.id===n.id)){
+        const dot=elem('span','note-list-unread-dot');
+        dot.setAttribute('aria-label','Unread');
+        b.append(dot);
+        b.setAttribute('aria-label',(n.title||'Journal entry')+' · Unread');
+      }
+      b.append(elem('div','chevron','›'));
       list.append(b);
     });
     root.append(list);host.append(root);
@@ -1255,6 +1278,10 @@
         .map(n=>cfg.story['plot'+n+'Note'])
         .find(n=>n.id===selected);
     if(!config){setPage('notes');return;}
+    if(unreadStoryNotes().some(n=>n.id===config.id)){
+      saved.readStoryNoteIds=[...new Set([...(saved.readStoryNoteIds||[]),config.id])];
+      persist();
+    }
     const root=appShell('Notes','notes');
     root.append(elem('div','note-timestamp',config.date||''));
     const body=elem('div','note-readonly',config.body||'');
