@@ -47,6 +47,13 @@
   const persist = () => {
     try {localStorage.setItem(STORE,JSON.stringify(saved));}catch{}
   };
+  // Restore the secret note for players who already received this exact LINE reply.
+  const kiddoSecretTrigger='hehehe I love you toooooo xxooxo';
+  if(!saved.kiddoSecretNoteUnlocked && saved.storyValentineUnlocked &&
+     saved.lineEasterMessages?.some(item=>item.from==='them'&&item.text===kiddoSecretTrigger)){
+    saved.kiddoSecretNoteUnlocked=true;
+    persist();
+  }
   const elem = (tag,cls='',text) => {const el=document.createElement(tag);if(cls)el.className=cls;if(text!==undefined)el.textContent=text;return el;};
   const click = (text,cls,action) => {const b=elem('button',cls,text);b.type='button';b.addEventListener('click',action);return b;};
   const img = (src,alt='') => {const i=elem('img');i.src=src;i.alt=alt;return i;};
@@ -302,10 +309,11 @@
   // Opening the Notes list alone must not clear the indicator.
   function unreadStoryNotes(){
     const read=new Set(saved.readStoryNoteIds||[]);
-    return [2,3,4,5,6,7,8,9,10]
+    const notes=[2,3,4,5,6,7,8,9,10]
       .filter(n=>saved['storyPlot'+n+'NoteAdded'])
-      .map(n=>cfg.story['plot'+n+'Note'])
-      .filter(n=>n&&!read.has(n.id));
+      .map(n=>cfg.story['plot'+n+'Note']);
+    if(saved.kiddoSecretNoteUnlocked)notes.push(cfg.story.kiddoSecretNote);
+    return notes.filter(n=>n&&!read.has(n.id));
   }
   function hasUnreadStoryNotes(){return unreadStoryNotes().length>0;}
   function appTile(label,type,graphic,count,target=type){
@@ -552,6 +560,10 @@
       const next=pending.replies.shift();
       const response={from:'them',text:next.text};
       saved.lineEasterMessages.push(response);
+      // Unlock only after Kiddo's special second "I love you" response arrives.
+      if(saved.storyValentineUnlocked && next.text===kiddoSecretTrigger){
+        saved.kiddoSecretNoteUnlocked=true;
+      }
       if(pending.replies.length){
         const isLastUniverseReply=pending.universe && pending.replies.length===1;
         pending.nextAt=Date.now()+(isLastUniverseReply?2000:1200);
@@ -1425,7 +1437,10 @@
     const storyNotes=[10,9,8,7,6,5,4,3,2]
       .filter(n=>saved['storyPlot'+n+'NoteAdded'])
       .map(n=>cfg.story['plot'+n+'Note']);
-    const entries=[...storyNotes,...cfg.notes];
+    const entries=[
+      ...(saved.kiddoSecretNoteUnlocked?[cfg.story.kiddoSecretNote]:[]),
+      ...storyNotes,...cfg.notes
+    ];
     entries.forEach(n=>{
       const b=click('','list-item note-list-item',()=>setPage('note-editor',n.id));
       const detail=elem('div','note-list-copy');
@@ -1446,6 +1461,8 @@
   }
   function noteEditor(){
     const config=cfg.notes.find(n=>n.id===selected)
+      || (saved.kiddoSecretNoteUnlocked && cfg.story.kiddoSecretNote.id===selected
+          ? cfg.story.kiddoSecretNote : null)
       || [10,9,8,7,6,5,4,3,2]
         .filter(n=>saved['storyPlot'+n+'NoteAdded'])
         .map(n=>cfg.story['plot'+n+'Note'])
