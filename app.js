@@ -1344,10 +1344,15 @@
     p.style.setProperty('--ig-row',Math.floor(index/3));
     p.style.backgroundPosition=['0%','50%','100%'][index%3]+' '+(Math.floor(index/3)*100)+'%';
     if(source){
+      const isEnding=!avatarMode && saved.storyValentineUnlocked && index===0;
+      if(isEnding)p.classList.add('ig-valentine-photo');
       const photo=img(source,avatarMode?'lalinalena profile photo':'Instagram post photo');
       photo.className='ig-photo-image';
       photo.loading=avatarMode?'eager':'lazy';
-      photo.onerror=()=>photo.remove();
+      photo.onerror=()=>{
+        photo.remove();
+        if(isEnding)p.append(elem('div','ig-valentine-placeholder','🤍🤎'));
+      };
       p.append(photo);
     }
     return p;
