@@ -497,7 +497,7 @@
     "Hehehe. What is my girlfriend up to now?",
     "I'll reply properly after one kiss. That's the rule."
   ];
-  const lineEasterNormalize=value=>value.toLowerCase().replace(/[’‘]/g,"'").replace(/[^a-z0-9\s']/g,' ').replace(/\s+/g,' ').trim();
+  const lineEasterNormalize=value=>value.toLowerCase().replace(/[^a-z0-9\s]/g,' ').replace(/\s+/g,' ').trim();
   // Phrase-aware matching prevents "miss" matching unrelated words such as "dismiss".
   const lineEasterHas=(normalized,...phrases)=>phrases.some(phrase=>(' '+normalized+' ').includes(' '+phrase+' '));
   function lineEasterReplies(message){
