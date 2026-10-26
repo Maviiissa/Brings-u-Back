@@ -528,3 +528,23 @@
   align-self:flex-end;white-space:nowrap;
   color:#fff;font-size:10px;font-weight:650;line-height:1.2;
 }
+
+/* Hidden 🦋💗🧸 album: appears only after the ending. */
+.secret-album-page,.secret-photo-page{background:#fff}
+.secret-album-scroll{background:#fff;padding:0 0 24px}
+.secret-album-count{padding:16px 15px 12px;color:#8b8d94;font-size:13px;text-align:center}
+.secret-album-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:2px;width:100%}
+.secret-album-tile{display:block;position:relative;aspect-ratio:1;min-width:0;padding:0;border:0;background:#eef0f2;overflow:hidden}
+.secret-album-tile img{display:block;width:100%;height:100%;object-fit:cover}
+.secret-album-card{width:calc(100% - 28px);margin:18px 14px 22px;padding:0;border:0;background:#fff;display:flex;gap:12px;align-items:center;text-align:left}
+.secret-album-card>img{width:84px;height:84px;flex:0 0 84px;object-fit:cover;border-radius:8px;background:#edf0f3}
+.secret-album-card-info{display:flex;flex-direction:column;gap:5px}
+.secret-album-card-info strong{font-size:18px;color:#202124;font-weight:600}
+.secret-album-card-info small{font-size:13px;color:#888b94}
+.secret-photo-viewer{display:flex;flex:1;min-height:0;flex-direction:column;background:#fff}
+.secret-photo-date{font-size:13px;color:#42444a;text-align:center;padding:16px 12px 12px;flex:0 0 auto}
+.secret-photo-frame{display:flex;flex:1;min-height:0;align-items:center;justify-content:center;background:#101010;overflow:hidden;touch-action:pan-y}
+.secret-photo-frame img{display:block;max-width:100%;max-height:100%;width:auto;height:auto;object-fit:contain;user-select:none;-webkit-user-select:none}
+.secret-photo-footer{display:flex;flex:0 0 58px;align-items:center;justify-content:space-between;padding:0 22px;background:#fff}
+.secret-photo-arrow{border:0;background:transparent;color:#2c6bda;font-size:34px;line-height:1;padding:6px 14px}
+.secret-photo-counter{font-size:12px;color:#90939b;letter-spacing:.02em}
