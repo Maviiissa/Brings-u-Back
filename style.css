@@ -511,3 +511,13 @@
   box-shadow:none;pointer-events:none;
 }
 .notes-list .note-list-item .chevron{flex-shrink:0}
+
+/* Scripted drafts are black while typing and once ready to send.
+   Only the untouched Text Message placeholder stays grey. */
+.story-composer .story-scripted-input[data-typing="yes"],
+.story-composer .story-scripted-input[data-ready="yes"],
+.story-composer .story-scripted-input.story-typing-active{
+  color:#171717!important;
+  -webkit-text-fill-color:#171717;
+  opacity:1;
+}
