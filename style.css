@@ -468,3 +468,20 @@
   box-shadow:0 1px 2px rgba(0,0,0,.08);
 }
 .home .home-grid .tile.camera{background-size:100% 100%}
+
+/* Explicit player-controlled Send action for every scripted SMS/LINE draft. */
+.story-composer .story-send-arrow{
+  appearance:none;-webkit-appearance:none;border:0;flex:0 0 30px;
+  width:30px;height:30px;border-radius:50%;display:grid;place-items:center;
+  padding:0;background:#33c66c;color:#fff;font-size:23px;font-weight:750;
+  line-height:1;cursor:pointer;transition:background .16s ease,transform .16s ease;
+  touch-action:manipulation;
+}
+.story-composer .story-send-arrow:disabled{
+  background:#d8d9dc;color:#fff;cursor:default;opacity:1;
+}
+.story-composer .story-send-arrow.story-send-ready:not(:disabled){
+  background:#2fc565;box-shadow:0 0 0 2px rgba(47,197,101,.12);
+}
+.story-composer .story-send-arrow:active:not(:disabled){transform:scale(.92)}
+.story-composer .story-scripted-input{min-width:0}
