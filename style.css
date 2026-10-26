@@ -431,3 +431,40 @@
 
 .ig-valentine-photo{background:#27212b!important;background-image:none!important;display:flex;align-items:center;justify-content:center}
 .ig-valentine-placeholder{font-size:36px;display:flex;align-items:center;justify-content:center;width:100%;height:100%}
+
+/* Home-screen icon calibration against the supplied iOS references.
+   Keep each icon square, aligned and independently clickable. */
+.home .tile.phoneicon,
+.home .tile.messagesicon,
+.home .tile.camera,
+.home .tile.safari{
+  border-radius:21.5%;
+  background-position:center;
+  background-repeat:no-repeat;
+  background-size:100% 100%;
+  box-shadow:0 2px 6px rgba(0,0,0,.13);
+}
+.home .tile.phoneicon{background-image:url('assets/home-phone.svg')}
+.home .tile.messagesicon{background-image:url('assets/home-messages.svg')}
+.home .tile.camera{background-image:url('assets/home-camera.svg')}
+.home .tile.safari{background-image:url('assets/home-safari.svg')}
+.home .tile.camera::before,
+.home .tile.safari::before,
+.home .tile.phoneicon::before,
+.home .tile.messagesicon::before{content:none}
+.home .tile.phoneicon>span:not(.app-count),
+.home .tile.messagesicon>span:not(.app-count),
+.home .tile.safari>span:not(.app-count){display:none}
+.home .dock .home-app{position:relative;overflow:visible}
+.home .dock .tile{flex-shrink:0;overflow:visible}
+.home .dock .tile.messagesicon .app-count{
+  top:-9px;right:-14px;z-index:4;
+  height:26px;min-width:61px;
+  padding:0 8px;box-sizing:border-box;
+  border-radius:18px;
+  background:linear-gradient(180deg,#ff5b62,#f8343f);
+  color:#fff;font-size:16px;font-weight:500;
+  letter-spacing:-.4px;line-height:26px;
+  box-shadow:0 1px 2px rgba(0,0,0,.08);
+}
+.home .home-grid .tile.camera{background-size:100% 100%}
