@@ -498,10 +498,39 @@
     "I'll reply properly after one kiss. That's the rule."
   ];
   const lineEasterNormalize=value=>value.toLowerCase().replace(/[’‘]/g,"'").replace(/[^a-z0-9\s']/g,' ').replace(/\s+/g,' ').trim();
+  // Phrase-aware matching prevents "miss" matching unrelated words such as "dismiss".
+  const lineEasterHas=(normalized,...phrases)=>phrases.some(phrase=>(' '+normalized+' ').includes(' '+phrase+' '));
   function lineEasterReplies(message){
-    const normalized=lineEasterNormalize(message);
+    const n=lineEasterNormalize(message);
+    const has=(...phrases)=>lineEasterHas(n,...phrases);
     const fallback=()=>[lineEasterFallbacks[Math.floor(Math.random()*lineEasterFallbacks.length)]];
-    if(normalized==='if we never met'){
+    const stage=saved.lineEasterContext||'';
+    const context=value=>{saved.lineEasterContext=value;};
+    const hug=()=>[
+      "Cominggggggg 🐙🐙🐙",
+      "*squeeeeeze 👾🫂*",
+      "Charging my Lalee... 10%",
+      "... 50%",
+      "... 99%！",
+      "Oops. Battery stuck at 99%. One kiss required to complete charging 😗"
+    ];
+    const waterReward=()=>[
+      "REALLY????",
+      "MY LALEE DRANK WATER?????",
+      "EVERYONE PLEASE CLAP 👏👏👏",
+      "Hehehe good girl. Now come get your reward 😚"
+    ];
+    // Miu is deliberately silent after a plea to skip water: only an apology ends the read-without-reply state.
+    if(stage==='water-apology'){
+      if(has('sorry','i am sorry','i m sorry','apologize','apologise','forgive me')){
+        context('water-wait');
+        return ["Okayyyy. Apology accepted, Lalee. 🥺","Now one glass of water, please. I'll wait.","Then you can have your goodnight kiss 😚"];
+      }
+      return [];
+    }
+    // Preserve the original one-time discoveries and their exact unlock text.
+    if(n==='if we never met'){
+      context('');
       if(saved.lineEasterUniverseSeen)return fallback();
       saved.lineEasterUniverseSeen=true;
       return [
@@ -512,33 +541,140 @@
         "Stop making me emotional. Come kiss meeeeee😠"
       ];
     }
-    if(normalized==='marry me')return [
-      "Lalee, I said that “I really do” years ago…",
-      "Ask me in person, I will say that again."
-    ];
-    if(normalized==='where are you')return ["???","I am right next to you on this bed?"];
-    if(normalized==='what are you doing')return ["Thinking about your bumbum 🍑😈"];
-    if(normalized==='good night')return [
-      "Good night, Laleee~",
-      "Wait!",
-      "Where’s my goodnight kiss~~~🐙"
-    ];
-    if(normalized.includes('miss'))return [
-      "Didn't I just kiss you goodbye 20 minutes ago?",
-      "......",
-      "I miss you more lalee~~~ Come home early tonight 🫣"
-    ];
-    if(normalized.includes('hungry'))return [
-      "I “fed” you last night already!!!",
-      "Babe, there is literally food in the fridge🫠"
-    ];
-    if(normalized.includes('love')){
-      if(normalized==='i love you'){
+    if(n==='marry me'){
+      context('');
+      return ["Lalee, I said that “I really do” years ago…","Ask me in person, I will say that again."];
+    }
+    // Contextual follow-ups take priority over generic yes/no, love, or cuddle triggers.
+    if(stage==='sad-choice'){
+      if(has('hug','hugs','cuddle','cuddles','hold me','squeeze me','just hold me')){
+        context('sad-recharging');return hug();
+      }
+      if(has('talk','listen','i wanna talk','i want to talk','tell you')){
+        context('sad-talk');
+        return ["Of course, babe. I'm all ears. 🧸","Did you have a long day at work again? Or did something happen?"];
+      }
+      if(has('nothing','i don t know','i dont know','idk','not sure')){
+        context('');
+        return ["That's okay na Lalee.","You don't have to explain everything to me.","Just come sit next to me, okay?","I'll hold you until your little brain stops being mean to yourself. 🤎"];
+      }
+    }
+    if(stage==='sad-talk'){
+      if(has('work','working','worked','tired','exhausted','long day','busy','stress','stressed')){
+        context('sad-food');
+        return ["My poor Lalee 🥺","Have you eaten anything today?"];
+      }
+      if(has('nothing','i don t know','i dont know','idk')){
+        context('');
+        return ["That's okay na Lalee.","You don't have to explain everything to me.","Just come sit next to me, okay?","I'll hold you until your little brain stops being mean to yourself. 🤎"];
+      }
+      context('');
+      return ["I'm listening, babe. 🧸","Come here. You don't have to handle everything by yourself."];
+    }
+    if(stage==='sad-food'){
+      if(has('no','nope','nah','not yet','haven t','havent','didn t','didnt','not eaten','i forgot')){
+        context('');
+        return ["LALEEEEEEEE 😠","I'm ordering you food. RIGHT NOW.","And don't you dare tell me you're not hungry.","You can be sad, babe. But you cannot be sad AND starving. Not on my watch."];
+      }
+      if(has('yes','yeah','yep','i did','already ate','i ate','of course')){
+        context('');
+        return ["That's more like it~~ 😌","Now come cuddle me pleassseeee!","That's an order from Ms. Schuett.😠"];
+      }
+    }
+    if(stage==='water-choice'||stage==='water-wait'){
+      if(has('coffee is water')){
+        context('water-choice');
+        return ["Lalee.","Don't make me start.","I have said a million of times...COFFEE IS NOT WATER!!! 😠"];
+      }
+      if(has('done','i drank water','drank water','had water','i had water','finished','i did it')){
+        context('');return waterReward();
+      }
+      if(has('please','pretty please','baby','babe','plsss','pleassse')){
+        context('water-apology');
+        return ["...","Don't try. 😑","One glass of water first. THEN we will talk."];
+      }
+      if(has('no','nope','nah','not yet','haven t','havent')){
+        context('water-wait');
+        return ["I KNEW IT!!!!!","Two litres of water every day! YOU PROMISED! 😤","Go get a glass RIGHT NOW.","I'll wait. Otherwise, no goodnight kiss tonight!🥱"];
+      }
+    }
+    if(stage==='flirt-kiss' && has('100 please','100','yes','yeah','yep','please','okay','ok')){
+      context('');
+      return ["MWAH MWAH MWAH MWAH 😚😚😚","That's five. 95 more to go.","Come here. This might take a while."];
+    }
+    if(stage==='mad-followup'){
+      if(has('you ignored me','ignored me','ignore me','you disappeared','disappeared')){
+        context('');
+        return ["Oh baby, I'm sorry.","I didn't mean to make you feel that way.","I should've told you I was busy instead of disappearing.","Can I make it up to you? 🥺"];
+      }
+      if(has('nothing','never mind','nevermind')){context('');return ["Okay, baby. I'm here when you're ready. 🥺"];}
+    }
+    if(stage==='sad-recharging' && has('kiss','kiss me','mwah')){
+      context('');return ["MWAHHHH 😚","Charging complete! Hehehe. Feeling a little better now, my Lalee? 🥺"];
+    }
+    // Strong, specific emotions override the ordinary romantic and teasing responses.
+    if(has('do you still love me','do you love me anymore','you still love me')){
+      context('');
+      return ["Lalee...","Of course I do.","I loved you when I was eighteen.","I loved you when I thought I couldn't have you.","And I love you even more now that I get to call you mine.","Come here naaaa. Let me kiss that overthinking brain of yours. 🦋"];
+    }
+    if(has('i m mad at you','i am mad at you','mad at you','i m angry','i am angry','i m upset with you','angry at you')){
+      context('mad-followup');
+      return ["Baby? 🥺","Did I do something wrong?","Tell me, Lalee. I'm listening.","OKAY, if you don't answer, I will be mad too!🙄"];
+    }
+    if(has('you ignored me','ignored me','you disappeared')){
+      context('');
+      return ["Oh baby, I'm sorry.","I didn't mean to make you feel that way.","I should've told you I was busy instead of disappearing.","Can I make it up to you? 🥺"];
+    }
+    if(has('jealous','jealousy')){
+      context('');
+      return ["Jealous? Why? What happened?","Is this about someone I was talking to?","Lalee, look at me.","You're my girlfriend! My one and only.","There's nobody else Ms. Schuett wanna comes home to. Just you. 🤎"];
+    }
+    if(has('sad','upset','unhappy','crying','cry','feeling down','feel down','heartbroken','feeling low')){
+      context('sad-choice');
+      return ["Laleeeee 🥺","I am here~ come over and I will give u a recharge☺️🔋","Do you wanna talk about it or do you just need a bigggg hug?🥺"];
+    }
+    if(has('coffee is water')){
+      context('water-choice');
+      return ["Lalee.","Don't make me start.","I have said a million of times...COFFEE IS NOT WATER!!! 😠"];
+    }
+    if(has('bubble tea','boba','coffee','milk tea','matcha')){
+      context('water-choice');
+      return ["NOOOOOOOOO 😠","Lalee. WATER. W-A-T-E-R.","Have you had even ONE glass of water today???"];
+    }
+    if(has('stop teasing me','stop teasing','don t tease me','dont tease me')){
+      context('');
+      return ["But it's my favourite hobby 🥺","Okay okay I'll behave.","...","For approximately 3 seconds. 😈"];
+    }
+    if(has('bumbum','your butt','your bum','booty')){
+      context('');
+      return ["LALEEEEE 😳","Why are you so obsessed with my bumbum???","...","Okay fine. I'm obsessed with yours too 🍑😈"];
+    }
+    if(has('you re cute','you are cute','so pretty','you re pretty','you are pretty','so cute','beautiful')){
+      context('');
+      return ["I know ka 😌","But you know what's even cuter?","My girlfriend when she gets all shy and her ears turn red.","Hehehehe. Is that happening right now, Lalee? 🤭"];
+    }
+    if(has('kiss me','i want a kiss','give me a kiss','i need a kiss','kisses','kiss')){
+      context('flirt-kiss');
+      return ["Just one? 🥺","You don't love me? Lalee.","I was planning on giving you at least 100."];
+    }
+    if(has('hug me','i need a hug','i want a hug','cuddle me','hold me')){
+      context('sad-recharging');return hug();
+    }
+    // Keep previously available post-ending replies.
+    if(n==='where are you'){context('');return ["???","I am right next to you on this bed?"];}
+    if(n==='what are you doing'){context('');return ["Thinking about your bumbum 🍑😈"];}
+    if(n==='good night'){context('');return ["Good night, Laleee~","Wait!","Where’s my goodnight kiss~~~🐙"];}
+    if(has('miss','missing')){context('');return ["Didn't I just kiss you goodbye 20 minutes ago?","......","I miss you more lalee~~~ Come home early tonight 🫣"];}
+    if(has('hungry')){context('');return ["I “fed” you last night already!!!","Babe, there is literally food in the fridge🫠"];}
+    if(has('love')){
+      context('');
+      if(n==='i love you'){
         saved.lineEasterLoveCount=(saved.lineEasterLoveCount||0)+1;
         if(saved.lineEasterLoveCount>=2)return ["hehehe I love you toooooo xxooxo"];
       }
       return ["I know ka","Say it one more time. I like hearing it."];
     }
+    context('');
     return fallback();
   }
   function lineEasterTyping(messages){
@@ -603,12 +739,12 @@
       if(!Array.isArray(saved.lineEasterMessages))saved.lineEasterMessages=[];
       const outgoing={from:'me',text:message,read:true};
       saved.lineEasterMessages.push(outgoing);
-      saved.lineEasterPending={replies:replies.map(text=>({text})),nextAt:Date.now()+2000,universe};
+      saved.lineEasterPending=replies.length?{replies:replies.map(text=>({text})),nextAt:Date.now()+2000,universe}:null;
       persist();
       renderMessages(messages,[outgoing]);
       messages.lastElementChild?.classList.add('story-bubble-enter');
       input.value='';refresh();scrollDown(messages);
-      lineEasterContinue(messages,refresh);
+      if(saved.lineEasterPending)lineEasterContinue(messages,refresh);
     });
     form.append(input,send);
     refresh();
