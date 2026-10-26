@@ -100,7 +100,25 @@
       saved.storyPlot7DateChanged=true;
       persist();
     }
+    // Plots 8 and 9 continue only after the previous conversation completes.
+    if(p==='notes' && (saved.storyPlot7Stage||0)>=6 && !saved.storyPlot8NoteAdded){
+      saved.storyPlot8NoteAdded=true;persist();
+    }
+    if(p==='home' && previous==='notes' && saved.storyPlot8NoteAdded && !saved.storyEighthSmsDelivered){
+      saved.storyPlot8Ready=true;saved.storyPlot8DateChanged=true;persist();
+    }
+    if(p==='notes' && (saved.storyPlot8Stage||0)>=3 && !saved.storyPlot9NoteAdded){
+      saved.storyPlot9NoteAdded=true;persist();
+    }
+    if(p==='home' && previous==='notes' && saved.storyPlot9NoteAdded && !saved.storyNinthSmsDelivered){
+      saved.storyPlot9Ready=true;saved.storyPlot9DateChanged=true;persist();
+    }
+    if(p==='notes' && (saved.storyPlot9Stage||0)>=3 && !saved.storyPlot10NoteAdded){
+      saved.storyPlot10NoteAdded=true;saved.storyPlot10DateChanged=true;persist();
+    }
     if(p==='sms'){
+      if(saved.storyNinthSmsDelivered)saved.storyNinthSmsOpened=true;
+      if(saved.storyEighthSmsDelivered)saved.storyEighthSmsOpened=true;
       if(saved.storySeventhSmsDelivered)saved.storySeventhSmsOpened=true;
       if(saved.storySixthSmsDelivered)saved.storySixthSmsOpened=true;
       if(saved.storyFifthSmsDelivered)saved.storyFifthSmsOpened=true;
@@ -166,6 +184,21 @@
         showStoryNotification();
       },cfg.story.plot7HomeDelayMs);
     }
+    for(const n of [8,9]){
+      const word=n===8?'Eighth':'Ninth';
+      const ready='storyPlot'+n+'Ready';
+      const delivered='story'+word+'SmsDelivered';
+      if(p==='home' && saved[ready] && !saved[delivered]){
+        scheduleStoryUi(()=>{
+          if(page!=='home' || saved[delivered])return;
+          saved[delivered]=true;
+          saved['storyPlot'+n+'Stage']=0;
+          notificationVisible=true;
+          persist();
+          showStoryNotification();
+        },cfg.story['plot'+n+'HomeDelayMs']);
+      }
+    }
   };
   // Browsing time only accumulates while the phone is unlocked and the tab is visible.
   // The event fires once per saved playthrough, including across page navigation.
@@ -195,6 +228,8 @@
   function showStoryNotification(){
     document.querySelector('.story-notification')?.remove();
     if(!notificationVisible || page==='lock')return;
+    const ninth=saved.storyNinthSmsDelivered && !saved.storyNinthSmsOpened;
+    const eighth=saved.storyEighthSmsDelivered && !saved.storyEighthSmsOpened;
     const seventh=saved.storySeventhSmsDelivered && !saved.storySeventhSmsOpened;
     const sixth=saved.storySixthSmsDelivered && !saved.storySixthSmsOpened;
     const fifth=saved.storyFifthSmsDelivered && !saved.storyFifthSmsOpened;
@@ -202,8 +237,8 @@
     const third=saved.storyThirdSmsDelivered && !saved.storyThirdSmsOpened;
     const second=saved.storySecondSmsDelivered && !saved.storySecondSmsOpened;
     const first=saved.storyFirstSmsDelivered && !saved.storyFirstSmsOpened;
-    if(!seventh && !sixth && !fifth && !fourth && !third && !second && !first)return;
-    const msg=seventh?cfg.story.plot7Notification:(sixth?cfg.story.plot6Notification:(fifth?cfg.story.plot5Notification:(fourth?cfg.story.plot4Notification:(third?cfg.story.plot3Message:(second?cfg.story.secondMessage:cfg.story.firstMessage)))));
+    if(!ninth && !eighth && !seventh && !sixth && !fifth && !fourth && !third && !second && !first)return;
+    const msg=ninth?cfg.story.plot9Notification:eighth?cfg.story.plot8Notification:seventh?cfg.story.plot7Notification:(sixth?cfg.story.plot6Notification:(fifth?cfg.story.plot5Notification:(fourth?cfg.story.plot4Notification:(third?cfg.story.plot3Message:(second?cfg.story.secondMessage:cfg.story.firstMessage)))));
     const banner=click('','story-notification',()=>setPage('sms'));
     banner.setAttribute('aria-label','Open text message from '+msg.sender);
     const head=elem('div','story-notification-head');
@@ -217,7 +252,19 @@
     if(name==='wifi')return `<svg width="20" height="16" viewBox="0 0 20 16" aria-hidden="true"><path d="M2 5C6 1 14 1 18 5M5 8c3-3 7-3 10 0M8 11c1.5-1.3 2.5-1.3 4 0" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="10" cy="14" r="1.4" fill="currentColor"/></svg>`;
     return '';
   };
-  function status(time=(saved.storyPlot7DateChanged?cfg.story.plot7Date.time:(saved.storyPlot6DateChanged?cfg.story.plot6Date.time:(saved.storyPlot5DateChanged?cfg.story.plot5Date.time:(saved.storyPlot4DateChanged?cfg.story.plot4Date.time:(saved.storyPlot3DateChanged?cfg.story.plot3Date.time:(saved.storyPlot2DateChanged?cfg.story.plot2Date.time:(saved.storyFirstSmsDelivered?'9:28':cfg.phone.time))))))),light=false){
+  function storyClock(){
+    for(const n of [10,9,8,7,6,5,4,3,2]){
+      if(saved['storyPlot'+n+'DateChanged'])return cfg.story['plot'+n+'Date'].time;
+    }
+    return saved.storyFirstSmsDelivered?'9:28':cfg.phone.time;
+  }
+  function storyCalendarDate(){
+    for(const n of [10,9,8,7,6,5,4,3,2]){
+      if(saved['storyPlot'+n+'DateChanged'])return cfg.story['plot'+n+'Date'];
+    }
+    return cfg.phone.date;
+  }
+  function status(time=storyClock(),light=false){
     const b=elem('div','statusbar'+(light?' light':''));b.append(elem('span','',time));
     const icons=elem('div','status-icons');icons.innerHTML=svg('signal')+svg('wifi');
     const battery=elem('div','battery battery-full');battery.setAttribute('aria-label','Battery full');icons.append(battery);b.append(icons);return b;
@@ -332,13 +379,13 @@
     });
   }
   function home(){
-    const root=elem('section','page home');root.append(status(saved.storyPlot7DateChanged?cfg.story.plot7Date.time:(saved.storyPlot6DateChanged?cfg.story.plot6Date.time:(saved.storyPlot5DateChanged?cfg.story.plot5Date.time:(saved.storyPlot4DateChanged?cfg.story.plot4Date.time:(saved.storyPlot3DateChanged?cfg.story.plot3Date.time:(saved.storyPlot2DateChanged?cfg.story.plot2Date.time:(saved.storyFirstSmsDelivered?'9:28':cfg.phone.time)))))),true));
+    const root=elem('section','page home');root.append(status(storyClock(),true));
     const main=elem('div','home-content');
     const imageButton=click('','photo-widget',()=>setPage('photos'));imageButton.append(img(cfg.phone.homePhoto,'Photos'));main.append(imageButton);
     main.append(elem('div','photo-label','Photos'));
     const grid=elem('div','home-grid');const cal=click('','calendar-card',()=>setPage('calendar'));
-    const homeDate=saved.storyPlot7DateChanged?cfg.story.plot7Date:(saved.storyPlot6DateChanged?cfg.story.plot6Date:(saved.storyPlot5DateChanged?cfg.story.plot5Date:(saved.storyPlot4DateChanged?cfg.story.plot4Date:(saved.storyPlot3DateChanged?cfg.story.plot3Date:(saved.storyPlot2DateChanged?cfg.story.plot2Date:cfg.phone.date)))) );
-    cal.append(elem('div','cal-weekday',homeDate.weekday),elem('div','cal-day',homeDate.day),elem('div','cal-detail',(saved.storyPlot2DateChanged||saved.storyPlot3DateChanged||saved.storyPlot4DateChanged||saved.storyPlot5DateChanged||saved.storyPlot6DateChanged||saved.storyPlot7DateChanged)?homeDate.month:homeDate.detail));grid.append(cal);
+    const homeDate=storyCalendarDate();
+    cal.append(elem('div','cal-weekday',homeDate.weekday),elem('div','cal-day',homeDate.day),elem('div','cal-detail',(saved.storyPlot2DateChanged||saved.storyPlot3DateChanged||saved.storyPlot4DateChanged||saved.storyPlot5DateChanged||saved.storyPlot6DateChanged||saved.storyPlot7DateChanged||saved.storyPlot8DateChanged||saved.storyPlot9DateChanged||saved.storyPlot10DateChanged)?homeDate.month:homeDate.detail));grid.append(cal);
     grid.append(appTile('Camera','camera'),appTile('Instagram','instagram'),appTile('LINE','line','',null,'line-list'),appTile('Notes','notes'));
     main.append(grid);main.append(elem('div','home-search','⌕  Search'));root.append(main);
     const dock=elem('div','dock');dock.append(appTile('','phoneicon','☎',cfg.phone.unreadPhone,'phone'),appTile('','safari','◉',null,'safari'),appTile('','messagesicon','●',cfg.phone.unreadMessages,'sms'),appTile('','music','♫',null,'music'));
@@ -914,6 +961,8 @@
     },cfg.story.plot3ReactionPauseMs);
   }
   function sms(){
+    if(saved.storyNinthSmsDelivered)return smsFinalArc(9);
+    if(saved.storyEighthSmsDelivered)return smsFinalArc(8);
     if(saved.storySeventhSmsDelivered)return smsPlot7();
     if(saved.storySixthSmsDelivered)return smsPlot6();
     if(saved.storyFifthSmsDelivered)return smsPlot5();
