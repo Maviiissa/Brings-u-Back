@@ -669,6 +669,50 @@
     };
     showNext();
   }
+  function smsFinalArc(plotNumber){
+    const plot='plot'+plotNumber;
+    const stage=Number(saved['storyPlot'+plotNumber+'Stage'])||0;
+    const root=appShell('Messages','home');
+    const contact=elem('div','sms-contact');
+    contact.append(smsAvatar(),click(saved.storyContactName||'Natsha','sms-number sms-name-button',()=>setPage('sms-contact')),elem('div','sms-meta',cfg.sms.service));
+    root.append(contact);
+    const messages=elem('div','scroll chat-view sms-chat');
+    const history=[...(cfg.sms.messages||[])];
+    if(saved.storyFirstSmsDelivered)history.push({type:'date',text:'November 25, 2027'},cfg.story.firstMessage);
+    if(saved.storyPlayerReplied)history.push({from:'me',text:cfg.story.playerReply});
+    if(saved.storyStrangerReplied)history.push({from:'them',text:cfg.story.strangerReply});
+    if(saved.storySecondSmsDelivered)history.push({type:'date',text:'November 28, 2027'},cfg.story.secondMessage);
+    if(saved.storySecondPlayerReplied)history.push({from:'me',text:cfg.story.secondPlayerReply});
+    if(saved.storySecondStrangerReplied)history.push({from:'them',text:cfg.story.secondStrangerReply});
+    const priorDates={3:'December 5, 2027',4:'December 12, 2027',5:'December 19, 2027',6:'December 26, 2027',7:'January 1, 2028',8:'January 8, 2028',9:'January 15, 2028'};
+    for(let n=3;n<=plotNumber;n++){
+      history.push({type:'date',text:priorDates[n]});
+      if(n<plotNumber)history.push(...cfg.story['plot'+n+'Messages']);
+      else history.push(...storyVisibleMessages(plot,stage,cfg.story[plot+'Messages']));
+    }
+    renderMessages(messages,history);
+    root.append(messages);
+    if(stage===1){
+      root.append(finalArcComposer(messages,plot,stage));
+    }else{
+      const idle=elem('div','composer story-composer story-composer-inactive');
+      idle.append(elem('span','composer-icon','+'),elem('div','composer-field story-readonly',stage>=3?'Text Message':'Waiting for message…'));
+      root.append(idle);
+    }
+    host.append(root);
+    scrollDown(messages);
+    if(stage===0 || stage===2)storyIncomingSequence(messages,plot,stage,stage===0?1:3);
+  }
+  function finalArcComposer(messages,plot,stage){
+    const form=elem('div','composer story-composer final-arc-composer');
+    form.append(elem('span','composer-icon','+'));
+    const field=click('Text Message · SMS','composer-field story-scripted-input',()=>{
+      storySendReplies({plot,stage,messageStage:1,nextStage:2,messages,field,delay:550});
+    });
+    field.setAttribute('aria-label','Tap to type the next scripted reply');
+    form.append(field,elem('span','story-send-decoration','↑'));
+    return form;
+  }
   function smsPlot7(){
     const root=appShell('Messages','home');
     const contact=elem('div','sms-contact');
