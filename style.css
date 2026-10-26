@@ -428,3 +428,6 @@
   color:#b4b8c5;font-family:Georgia,serif;font-size:13px;
   font-style:italic;letter-spacing:.08em;
 }
+
+.ig-valentine-photo{background:#27212b!important;background-image:none!important;display:flex;align-items:center;justify-content:center}
+.ig-valentine-placeholder{font-size:36px;display:flex;align-items:center;justify-content:center;width:100%;height:100%}
