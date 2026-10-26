@@ -1228,77 +1228,40 @@
     profile.append(elem('div','profile-name',cfg.line.name),elem('div','profile-meta','LINE contact · Remark: '+cfg.line.name),elem('div','profile-meta','Last conversation · '+cfg.line.lastChatDate));
     profile.append(click('Open chat','profile-action',()=>setPage('line')));root.append(profile);host.append(root);
   }
+  // Notes are fixed story documents. Players can read them but never add,
+  // edit, delete, or overwrite a journal entry.
   function notes(){
-    const root=appShell('Notes','home',[click('+','',()=>{const id='user-'+Date.now();saved.noteEdits[id]={title:'New Note',body:''};persist();setPage('note-editor',id)})]);
+    const root=appShell('Notes','home');
     const list=elem('div','app-list notes-list');
-    // Preloaded notes appear first, newest to oldest. User-created notes follow.
-    const plot2Notes=saved.storyPlot2NoteAdded?[cfg.story.plot2Note]:[];
-    const plot3Notes=saved.storyPlot3NoteAdded?[cfg.story.plot3Note]:[];
-    const plot4Notes=saved.storyPlot4NoteAdded?[cfg.story.plot4Note]:[];
-    const plot5Notes=saved.storyPlot5NoteAdded?[cfg.story.plot5Note]:[];
-    const plot6Notes=saved.storyPlot6NoteAdded?[cfg.story.plot6Note]:[];
-    const plot7Notes=saved.storyPlot7NoteAdded?[cfg.story.plot7Note]:[];
-    const plot8Notes=saved.storyPlot8NoteAdded?[cfg.story.plot8Note]:[];
-    const plot9Notes=saved.storyPlot9NoteAdded?[cfg.story.plot9Note]:[];
-    const plot10Notes=saved.storyPlot10NoteAdded?[cfg.story.plot10Note]:[];
-    const entries=[
-      ...plot10Notes.map(n=>({...n,...saved.noteEdits[n.id],id:n.id,isStoryNote:true})),
-      ...plot9Notes.map(n=>({...n,...saved.noteEdits[n.id],id:n.id,isStoryNote:true})),
-      ...plot8Notes.map(n=>({...n,...saved.noteEdits[n.id],id:n.id,isStoryNote:true})),
-      ...plot7Notes.map(n=>({...n,...saved.noteEdits[n.id],id:n.id,isStoryNote:true})),
-      ...plot6Notes.map(n=>({...n,...saved.noteEdits[n.id],id:n.id,isStoryNote:true})),
-      ...plot5Notes.map(n=>({...n,...saved.noteEdits[n.id],id:n.id,isStoryNote:true})),
-      ...plot4Notes.map(n=>({...n,...saved.noteEdits[n.id],id:n.id,isStoryNote:true})),
-      ...plot3Notes.map(n=>({...n,...saved.noteEdits[n.id],id:n.id,isStoryNote:true})),
-      ...plot2Notes.map(n=>({...n,...saved.noteEdits[n.id],id:n.id,isStoryNote:true})),
-      ...cfg.notes.map(n=>({ ...n, ...saved.noteEdits[n.id], id:n.id, date:n.date, isStoryNote:true })),
-      ...Object.entries(saved.noteEdits)
-        .filter(([id])=>!cfg.notes.some(n=>n.id===id) && id!==cfg.story.plot2Note.id && id!==cfg.story.plot3Note.id && id!==cfg.story.plot4Note.id && id!==cfg.story.plot5Note.id && id!==cfg.story.plot6Note.id && id!==cfg.story.plot7Note.id && id!==cfg.story.plot8Note.id && id!==cfg.story.plot9Note.id && id!==cfg.story.plot10Note.id)
-        .map(([id,n])=>({id,...n,date:'Personal note',isStoryNote:false}))
-    ];
+    const storyNotes=[10,9,8,7,6,5,4,3,2]
+      .filter(n=>saved['storyPlot'+n+'NoteAdded'])
+      .map(n=>cfg.story['plot'+n+'Note']);
+    const entries=[...storyNotes,...cfg.notes];
     entries.forEach(n=>{
       const b=click('','list-item note-list-item',()=>setPage('note-editor',n.id));
       const detail=elem('div','note-list-copy');
       const preview=(n.body||'').trim();
-      const heading=n.isStoryNote ? (preview.split('\n')[0] || n.title) : (n.title||'New Note');
-      detail.append(elem('strong','',heading),elem('small','',n.date||'Note'));
-      b.append(detail,elem('div','chevron','›'));list.append(b);
+      detail.append(elem('strong','',preview.split('\\n')[0]||n.title||'Note'),
+        elem('small','',n.date||'Note'));
+      b.append(detail,elem('div','chevron','›'));
+      list.append(b);
     });
     root.append(list);host.append(root);
   }
   function noteEditor(){
     const config=cfg.notes.find(n=>n.id===selected)
-      || (saved.storyPlot10NoteAdded && selected===cfg.story.plot10Note.id?cfg.story.plot10Note:null)
-      || (saved.storyPlot9NoteAdded && selected===cfg.story.plot9Note.id?cfg.story.plot9Note:null)
-      || (saved.storyPlot8NoteAdded && selected===cfg.story.plot8Note.id?cfg.story.plot8Note:null)
-      || (saved.storyPlot7NoteAdded && selected===cfg.story.plot7Note.id?cfg.story.plot7Note:null)
-      || (saved.storyPlot6NoteAdded && selected===cfg.story.plot6Note.id?cfg.story.plot6Note:null)
-      || (saved.storyPlot5NoteAdded && selected===cfg.story.plot5Note.id?cfg.story.plot5Note:null)
-      || (saved.storyPlot4NoteAdded && selected===cfg.story.plot4Note.id?cfg.story.plot4Note:null)
-      || (saved.storyPlot3NoteAdded && selected===cfg.story.plot3Note.id?cfg.story.plot3Note:null)
-      || (saved.storyPlot2NoteAdded && selected===cfg.story.plot2Note.id?cfg.story.plot2Note:null);
-    const record=saved.noteEdits[selected]||config||{title:'New Note',body:''};
-    const root=appShell('Notes','notes',[click('Done','pill',()=>setPage('notes'))]);
-    const isStoryNote=Boolean(config);
-    const noteTime=elem('div','note-timestamp',config?.date||'Personal note');
-    root.append(noteTime);
-    let head=null;
-    if(!isStoryNote){
-      head=elem('input','note-heading');head.value=record.title||'';head.placeholder='Title';
-      root.append(head);
-    }
-    const textarea=elem('textarea','note-editor');textarea.value=record.body||'';textarea.placeholder='Start writing...';
-    textarea.setAttribute('aria-label','Note content');
-    const save=()=>{
-      saved.noteEdits[selected]={
-        title:head?head.value:(config.title||''),
-        body:textarea.value
-      };
-      persist();
-    };
-    if(head)head.addEventListener('input',save);
-    textarea.addEventListener('input',save);
-    root.append(textarea);host.append(root);
+      || [10,9,8,7,6,5,4,3,2]
+        .filter(n=>saved['storyPlot'+n+'NoteAdded'])
+        .map(n=>cfg.story['plot'+n+'Note'])
+        .find(n=>n.id===selected);
+    if(!config){setPage('notes');return;}
+    const root=appShell('Notes','notes');
+    root.append(elem('div','note-timestamp',config.date||''));
+    const body=elem('div','note-readonly',config.body||'');
+    body.setAttribute('role','document');
+    body.setAttribute('aria-label','Read-only journal entry');
+    root.append(body);
+    host.append(root);
   }
   function photos(){const root=appShell('Photos','home');const container=elem('div','scroll');const grid=elem('div','photo-grid');for(const p of cfg.photos){const b=click('','photo-tile',()=>setPage('photo-detail',p.id));b.append(img(p.src,p.title));grid.append(b)}container.append(grid);root.append(container);host.append(root)}
   function photoDetail(){const p=cfg.photos.find(p=>p.id===selected)||cfg.photos[0];const root=appShell(p.title,'photos');const contents=elem('div','scroll photo-detail');contents.append(img(p.src,p.title),elem('p','',p.caption));root.append(contents);host.append(root)}
