@@ -496,3 +496,18 @@
   background:#fff;
   -webkit-overflow-scrolling:touch;
 }
+
+/* Unread story-journal markers: a red app-icon dot and a small grey row dot. */
+.tile.notes .notes-home-unread-dot{
+  position:absolute;top:-5px;right:-5px;z-index:5;
+  display:block;width:13px;height:13px;border-radius:50%;
+  background:#ff3b30;border:2px solid #fff;
+  box-sizing:border-box;box-shadow:0 1px 3px rgba(0,0,0,.2);
+  pointer-events:none;
+}
+.notes-list .note-list-item .note-list-unread-dot{
+  flex:0 0 7px;width:7px;height:7px;border-radius:50%;
+  background:#a6a8ae;margin-left:auto;margin-right:12px;
+  box-shadow:none;pointer-events:none;
+}
+.notes-list .note-list-item .chevron{flex-shrink:0}
