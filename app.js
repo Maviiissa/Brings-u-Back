@@ -456,6 +456,7 @@
     let last=entries.length?entries[entries.length-1].text:'';
     if((saved.storyPlot10LineStage||0)>=2)last=cfg.story.plot10LineAnswer;
     else if(saved.storyPlot10LineSentCount>0)last=cfg.story.plot10LineReplies[saved.storyPlot10LineSentCount-1];
+    if(saved.storyValentineUnlocked && saved.lineEasterMessages?.length)last=saved.lineEasterMessages[saved.lineEasterMessages.length-1].text;
     details.append(elem('span','line-conversation-preview',last));
     conversation.append(details);
     const when=elem('div','line-conversation-date',saved.storyPlot10NoteAdded?'22 Jan 2028':'25 Nov 2027');
@@ -477,6 +478,130 @@
     bubble.style.setProperty('box-shadow','0 1px 2px rgba(30,40,70,.15)');
     bubble.style.setProperty('font-family','-apple-system, BlinkMacSystemFont, "Segoe UI", "Apple Color Emoji", "Segoe UI Emoji", sans-serif');
   }
+
+  // Post-ending LINE Easter eggs: these never run during the six scripted confession messages.
+  // The outgoing messages, queued replies and one-time discoveries live in the existing local save.
+  const lineEasterFallbacks=[
+    "Laleee, you're cute when you text me for no reason.",
+    "Baby, come tell me that in person 🧸",
+    "I'm listening, my love~",
+    "You know you can just come cuddle me, right?",
+    "Hehehe. What is my girlfriend up to now?",
+    "I'll reply properly after one kiss. That's the rule."
+  ];
+  const lineEasterNormalize=value=>value.toLowerCase().replace(/[’‘]/g,"'").replace(/[^a-z0-9\s']/g,' ').replace(/\s+/g,' ').trim();
+  function lineEasterReplies(message){
+    const normalized=lineEasterNormalize(message);
+    const fallback=()=>[lineEasterFallbacks[Math.floor(Math.random()*lineEasterFallbacks.length)]];
+    if(normalized==='if we never met'){
+      if(saved.lineEasterUniverseSeen)return fallback();
+      saved.lineEasterUniverseSeen=true;
+      return [
+        "Then I would've found you in some other way.",
+        "Maybe at a coffee shop. Or on a train.",
+        "I don't know, Lalee.",
+        "But I think I would've fallen in love with you in every universe ✨",
+        "Stop making me emotional. Come kiss meeeeee😠"
+      ];
+    }
+    if(normalized==='marry me')return [
+      "Lalee, I said that “I really do” years ago…",
+      "Ask me in person, I will say that again."
+    ];
+    if(normalized==='where are you')return ["???","I am right next to you on this bed?"];
+    if(normalized==='what are you doing')return ["Thinking about your bumbum 🍑😈"];
+    if(normalized==='good night')return [
+      "Good night, Laleee~",
+      "Wait!",
+      "Where’s my goodnight kiss~~~🐙"
+    ];
+    if(normalized.includes('miss'))return [
+      "Didn't I just kiss you goodbye 20 minutes ago?",
+      "......",
+      "I miss you more lalee~~~ Come home early tonight 🫣"
+    ];
+    if(normalized.includes('hungry'))return [
+      "I “fed” you last night already!!!",
+      "Babe, there is literally food in the fridge🫠"
+    ];
+    if(normalized.includes('love')){
+      if(normalized==='i love you'){
+        saved.lineEasterLoveCount=(saved.lineEasterLoveCount||0)+1;
+        if(saved.lineEasterLoveCount>=2)return ["hehehe I love you toooooo xxooxo"];
+      }
+      return ["I know ka","Say it one more time. I like hearing it."];
+    }
+    return fallback();
+  }
+  function lineEasterTyping(messages){
+    const row=elem('div','story-typing-row line-easter-typing');
+    const bubble=elem('div','story-typing-bubble');
+    for(let i=0;i<3;i++)bubble.append(elem('span','story-typing-dot'));
+    row.append(bubble,elem('span','story-typing-label','Kiddo is typing...'));
+    messages.append(row);scrollDown(messages);
+    return row;
+  }
+  function lineEasterContinue(messages,refreshComposer){
+    if(page!=='line'||!messages.isConnected||!saved.lineEasterPending?.replies?.length)return;
+    let typing=lineEasterTyping(messages);
+    const deliver=()=>{
+      if(page!=='line'||!messages.isConnected)return;
+      const pending=saved.lineEasterPending;
+      if(!pending?.replies?.length){typing.remove();refreshComposer();return;}
+      typing.remove();
+      const next=pending.replies.shift();
+      const response={from:'them',text:next.text};
+      saved.lineEasterMessages.push(response);
+      if(pending.replies.length){
+        const isLastUniverseReply=pending.universe && pending.replies.length===1;
+        pending.nextAt=Date.now()+(isLastUniverseReply?2000:1200);
+      }else saved.lineEasterPending=null;
+      persist();
+      renderMessages(messages,[response]);
+      messages.lastElementChild?.classList.add('story-bubble-enter');
+      scrollDown(messages);
+      refreshComposer();
+      if(saved.lineEasterPending?.replies?.length){
+        typing=lineEasterTyping(messages);
+        scheduleStoryUi(deliver,Math.max(0,saved.lineEasterPending.nextAt-Date.now()));
+      }
+    };
+    scheduleStoryUi(deliver,Math.max(0,saved.lineEasterPending.nextAt-Date.now()));
+  }
+  function lineEasterComposer(messages){
+    const form=elem('form','composer');
+    form.setAttribute('autocomplete','off');
+    form.append(elem('span','composer-icon','+'));
+    const input=elem('input','composer-field');
+    input.type='text';input.placeholder='Message...';input.maxLength=2500;
+    input.autocomplete='off';input.setAttribute('aria-label','Message Kiddo');
+    const send=elem('button','send','Send');send.type='submit';
+    const refresh=()=>{
+      const busy=!!saved.lineEasterPending?.replies?.length;
+      input.disabled=busy;send.disabled=busy||!input.value.trim();
+    };
+    input.addEventListener('input',refresh);
+    form.addEventListener('submit',event=>{
+      event.preventDefault();
+      const message=input.value.trim();
+      if(!message||saved.lineEasterPending?.replies?.length)return;
+      const normalized=lineEasterNormalize(message);
+      const universe=normalized==='if we never met'&&!saved.lineEasterUniverseSeen;
+      const replies=lineEasterReplies(message);
+      if(!Array.isArray(saved.lineEasterMessages))saved.lineEasterMessages=[];
+      const outgoing={from:'me',text:message,read:true};
+      saved.lineEasterMessages.push(outgoing);
+      saved.lineEasterPending={replies:replies.map(text=>({text})),nextAt:Date.now()+2000,universe};
+      persist();
+      renderMessages(messages,[outgoing]);
+      messages.lastElementChild?.classList.add('story-bubble-enter');
+      input.value='';refresh();scrollDown(messages);
+      lineEasterContinue(messages,refresh);
+    });
+    form.append(input,send);
+    refresh();
+    return {form,refresh};
+  }
   function line(){
     const root=appShell('', 'line-list');const navTitle=root.querySelector('.nav-center');
     navTitle.replaceChildren();const profile=click('','nav-center',()=>setPage('kiddo-profile'));
@@ -491,6 +616,7 @@
       for(let i=0;i<count;i++)history.push({from:'me',text:cfg.story.plot10LineReplies[i],plot10:true});
       if((saved.storyPlot10LineStage||0)>=2)history.push({from:'them',text:cfg.story.plot10LineAnswer});
     }
+    if(saved.storyValentineUnlocked && Array.isArray(saved.lineEasterMessages))history.push(...saved.lineEasterMessages);
     renderMessages(messages,history);root.append(messages);
     if(saved.storyPlot10NoteAdded){
       const stage=saved.storyPlot10LineStage||0;
@@ -502,6 +628,14 @@
       }
       if(stage===1)scheduleStoryUi(()=>plot10LineReadAndAnswer(messages),3000);
       if(stage>=2)markPlot10Read(messages);
+      if(stage>=2 && saved.storyValentineUnlocked){
+        const easter=lineEasterComposer(messages);
+        root.lastElementChild.remove();
+        root.append(easter.form);
+        host.append(root);scrollDown(messages);
+        if(saved.lineEasterPending?.replies?.length)lineEasterContinue(messages,easter.refresh);
+        return;
+      }
     }else root.append(composer('line','Message...'));
     host.append(root);scrollDown(messages);
   }
