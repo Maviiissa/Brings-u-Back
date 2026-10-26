@@ -22,7 +22,7 @@ window.PHONE_STORY = {
     battery: '31',
     date: { weekday: 'THURSDAY', day: '25', detail: 'No Events Today' },
     unreadPhone: '1',
-    unreadMessages: '2,290',
+    unreadMessages: '2,293',
     homePhoto: 'assets/home-photo.jpg'
   },
   line: {
