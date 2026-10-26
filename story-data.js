@@ -26,7 +26,7 @@ window.PHONE_STORY = {
     homePhoto: 'assets/home-photo.jpg'
   },
   line: {
-    name: 'Kiddo',  // LINE contact's saved name / remark
+    name: 'Kiddo🧸',  // LINE contact's saved name / remark
     avatar: 'assets/kiddo-avatar.jpg', // Avatar from your second uploaded photograph
     lastChatDate: '2027/11/25',
     background: '#91aed9',
