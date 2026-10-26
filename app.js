@@ -439,9 +439,96 @@
     navTitle.replaceChildren();const profile=click('','nav-center',()=>setPage('kiddo-profile'));
     profile.append(avatar(cfg.line.avatar),elem('div','nav-title',cfg.line.name));navTitle.replaceWith(profile);
     const right=root.querySelector('.nav-right');right.append(click('⌕','',()=>{const sc=root.querySelector('.scroll');sc?.scrollTo({top:0,behavior:'smooth'})}),click('☰','',()=>setPage('kiddo-profile')));
-    const messages=elem('div','scroll chat-view line-chat');messages.style.background=cfg.line.background||'#91aed9';
-    renderMessages(messages,[...(cfg.line.messages||[]),...saved.lineSent]);root.append(messages);
-    root.append(composer('line','Message...'));host.append(root);scrollDown(messages);
+    const messages=elem('div','scroll chat-view line-chat');
+    messages.style.background=cfg.line.background||'#91aed9';
+    const history=[...(cfg.line.messages||[]),...saved.lineSent];
+    if(saved.storyPlot10NoteAdded){
+      history.push({type:'date',text:'January 22, 2028'});
+      const count=Math.min(saved.storyPlot10LineSentCount||0,cfg.story.plot10LineReplies.length);
+      for(let i=0;i<count;i++)history.push({from:'me',text:cfg.story.plot10LineReplies[i]});
+      if((saved.storyPlot10LineStage||0)>=2)history.push({from:'them',text:cfg.story.plot10LineAnswer});
+    }
+    renderMessages(messages,history);root.append(messages);
+    if(saved.storyPlot10NoteAdded){
+      const stage=saved.storyPlot10LineStage||0;
+      if(stage===0)root.append(plot10LineComposer(messages));
+      else{
+        const inactive=elem('div','composer story-composer story-composer-inactive');
+        inactive.append(elem('span','composer-icon','+'),elem('div','composer-field story-readonly','Message...'));
+        root.append(inactive);
+      }
+      if(stage===1)scheduleStoryUi(()=>plot10LineReadAndAnswer(messages),3000);
+      if(stage>=2)markPlot10Read(messages);
+    }else root.append(composer('line','Message...'));
+    host.append(root);scrollDown(messages);
+  }
+  function plot10LineComposer(messages){
+    const form=elem('div','composer story-composer plot10-line-composer');
+    form.append(elem('span','composer-icon','+'));
+    const field=click('Message...','composer-field story-scripted-input',()=>{
+      if(field.disabled || (saved.storyPlot10LineStage||0)!==0)return;
+      field.disabled=true;
+      const replies=cfg.story.plot10LineReplies;
+      let index=saved.storyPlot10LineSentCount||0;
+      const stillHere=()=>page==='line' && messages.isConnected && (saved.storyPlot10LineStage||0)===0;
+      const next=()=>{
+        if(!stillHere())return;
+        if(index>=replies.length){
+          saved.storyPlot10LineStage=1;persist();
+          field.textContent='Message...';
+          field.classList.remove('story-typing-active');
+          scheduleStoryUi(()=>plot10LineReadAndAnswer(messages),3000);
+          return;
+        }
+        const text=replies[index];let position=0;
+        field.textContent='';field.classList.add('story-typing-active');
+        const type=()=>{
+          if(!stillHere())return;
+          position++;
+          field.textContent=text.slice(0,position);
+          if(position<text.length)scheduleStoryUi(type,cfg.story.replyTypingIntervalMs);
+          else scheduleStoryUi(()=>{
+            if(!stillHere())return;
+            renderMessages(messages,[{from:'me',text}]);
+            messages.lastElementChild?.classList.add('story-bubble-enter');
+            index++;saved.storyPlot10LineSentCount=index;persist();
+            field.textContent='';field.classList.remove('story-typing-active');
+            scrollDown(messages);
+            scheduleStoryUi(next,550);
+          },330);
+        };
+        scheduleStoryUi(type,180);
+      };
+      next();
+    });
+    field.setAttribute('aria-label','Tap to automatically type the six LINE messages to Miu');
+    form.append(field,elem('span','story-send-decoration','↑'));
+    return form;
+  }
+  function markPlot10Read(messages){
+    if(messages.querySelector('.plot10-read'))return;
+    const rows=[...messages.querySelectorAll('.chat-row.me')];
+    const last=rows[rows.length-1];
+    if(!last)return;
+    const mark=elem('div','plot10-read','Read');
+    last.append(mark);
+  }
+  function plot10LineReadAndAnswer(messages){
+    if(page!=='line' || !messages.isConnected || (saved.storyPlot10LineStage||0)!==1)return;
+    markPlot10Read(messages);
+    const root=messages.parentElement;
+    const banner=elem('div','plot10-line-typing',cfg.line.name+' 🧸 is typing...');
+    root.insertBefore(banner,messages);
+    scheduleStoryUi(()=>{
+      if(page!=='line' || !messages.isConnected || (saved.storyPlot10LineStage||0)!==1)return;
+      banner.remove();
+      const reply={from:'them',text:cfg.story.plot10LineAnswer};
+      renderMessages(messages,[reply]);
+      messages.lastElementChild?.classList.add('story-bubble-enter');
+      saved.storyPlot10LineStage=2;
+      saved.storyValentineUnlocked=true;
+      persist();scrollDown(messages);
+    },2500);
   }
   // Plot 3 is a small, resumable state machine. Each stage is committed only
   // when a message is sent/received, never while a draft is being animated.
