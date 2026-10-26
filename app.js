@@ -697,7 +697,14 @@
       messages.lastElementChild?.classList.add('story-bubble-enter');
       saved.storyPlot10LineStage=2;
       saved.storyValentineUnlocked=true;
-      persist();scrollDown(messages);
+      persist();
+      // Unlock free chat immediately after Kiddo's final scripted reply.
+      const inactive=root.querySelector('.story-composer-inactive');
+      if(inactive){
+        const easter=lineEasterComposer(messages);
+        inactive.replaceWith(easter.form);
+      }
+      scrollDown(messages);
     },2500);
   }
   // Plot 3 is a small, resumable state machine. Each stage is committed only
