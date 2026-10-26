@@ -1241,7 +1241,7 @@
       const b=click('','list-item note-list-item',()=>setPage('note-editor',n.id));
       const detail=elem('div','note-list-copy');
       const preview=(n.body||'').trim();
-      detail.append(elem('strong','',preview.split('\\n')[0]||n.title||'Note'),
+      detail.append(elem('strong','',preview.split(/\\r?\\n/)[0]||n.title||'Note'),
         elem('small','',n.date||'Note'));
       b.append(detail,elem('div','chevron','›'));
       list.append(b);
