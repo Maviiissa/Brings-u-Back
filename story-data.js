@@ -142,6 +142,31 @@ window.PHONE_STORY = {
     },
     plot4Date: {weekday:'SUNDAY',day:'12',month:'December',time:'14:23'},
     plot4HomeDelayMs: 5000,
+    plot7Note: {
+      id: 'plot7-2028-01-01',
+      title: 'It has always been us, intertwined across time.',
+      date: 'January 1, 2028 at 10:15 PM',
+      body: 'It has always been us, intertwined across time.\n\nIt’s a new year now. I wanted to say Happy New Year to her.\n\nBut her message went quiet over a month ago, and I never received from Miu since our last birthday…\n\nI saw Miu at the Gala last week. She looked breathtaking in that sleek black gown, yet her eyes were cold, filled with a distance that chilled me to the bone.\n\nShe passed me like I was a total stranger, not a single word exchanged.\n\nThe media is still spewing fake rumours about me and that male co-star. I know Miu saw them.\n\nI remember how, back in 2026, when we blew up, the agency decided separating us would be "better for her future." They forced me into a publicity stunt with someone else, and Miu fought it with everything she had. She looked me in the eye and asked, “Then what am I to you?”\n\nI was too terrified of losing her. Too scared of crossing the line and ruining the career she worked so hard for. So I stayed silent.\n\nAnd my silence broke her heart.'
+    },
+    plot7Date: {weekday:'SATURDAY',day:'1',month:'January',time:'22:15'},
+    plot7HomeDelayMs: 10000,
+    plot7Notification: {
+      from:'them',sender:'Natsha',time:'10:15 PM',
+      text:"P'Lena... can I ask you something?"
+    },
+    plot7Messages: [
+      {stage:0,from:'them',text:"P'Lena... can I ask you something?"},
+      {stage:1,from:'me',text:"Sure. You can tell me anything, I’m listening."},
+      {stage:2,from:'them',text:'What would you do if you fell in love with your close friend?'},
+      {stage:2,from:'them',text:"I'm so scared of ruining everything, but every time she looks at me, my heart goes crazy... 😔"},
+      {stage:3,from:'me',text:"Hey, take a deep breath. Kiddo. It’s okay to feel scared, love can be overwhelming like that."},
+      {stage:3,from:'me',text:'I have someone that I really love. But I was a coward.'},
+      {stage:3,from:'me',text:'We shared everything, cared for each other, but when things got complicated, I let my fear push her away.'},
+      {stage:3,from:'me',text:"And now... I feel like I've lost her."},
+      {stage:4,from:'them',text:"Oh... P'Lena. Don't be sad. 🫂"},
+      {stage:4,from:'them',text:"I just don’t know what to do…I don’t wanna lose her. She is the most important person in my life."},
+      {stage:5,from:'me',text:"If she loves you as well, or even if she doesn't yet, you should be brave. Loving someone isn't something to be ashamed of. You have to tell her, okay? Promise me."}
+    ],
     plot6Note: {
       id: 'plot6-2027-12-26',
       title: "I couldn't help but smile reading her messages",
