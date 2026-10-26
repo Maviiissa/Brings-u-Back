@@ -424,7 +424,7 @@
   function home(){
     const root=elem('section','page home');root.append(status(storyClock(),true));
     const main=elem('div','home-content');
-    const imageButton=click('','photo-widget',()=>setPage(saved.storyValentineUnlocked?'secret-album':'photos'));imageButton.append(img(cfg.phone.homePhoto,'Photos'));main.append(imageButton);
+    const imageButton=click('','photo-widget',()=>setPage(saved.storyValentineUnlocked?'secret-album':'photos'));const cover=img(saved.storyValentineUnlocked?cfg.secretAlbum.photos[0].src:cfg.phone.homePhoto,'Photos');cover.onerror=()=>{cover.onerror=null;cover.src=cfg.phone.homePhoto;};imageButton.append(cover);main.append(imageButton);
     main.append(elem('div','photo-label','Photos'));
     const grid=elem('div','home-grid');const cal=click('','calendar-card',()=>setPage('calendar'));
     const homeDate=storyCalendarDate();
