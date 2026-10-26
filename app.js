@@ -1333,10 +1333,13 @@
   }
   function photos(){const root=appShell('Photos','home');const container=elem('div','scroll');const grid=elem('div','photo-grid');for(const p of cfg.photos){const b=click('','photo-tile',()=>setPage('photo-detail',p.id));b.append(img(p.src,p.title));grid.append(b)}container.append(grid);root.append(container);host.append(root)}
   function photoDetail(){const p=cfg.photos.find(p=>p.id===selected)||cfg.photos[0];const root=appShell(p.title,'photos');const contents=elem('div','scroll photo-detail');contents.append(img(p.src,p.title),elem('p','',p.caption));root.append(contents);host.append(root)}
+  function storyInstagramPosts(){
+    return saved.storyValentineUnlocked?[cfg.story.valentinePost,...cfg.instagram]:cfg.instagram;
+  }
   function instaPhoto(index, cls=''){
     const p=elem('div','ig-photo '+cls);
     const avatarMode=cls.includes('avatar');
-    const source=avatarMode ? cfg.instagramAvatar : cfg.instagram[index]?.src;
+    const source=avatarMode ? cfg.instagramAvatar : storyInstagramPosts()[index]?.src;
     p.style.setProperty('--ig-col',index%3);
     p.style.setProperty('--ig-row',Math.floor(index/3));
     p.style.backgroundPosition=['0%','50%','100%'][index%3]+' '+(Math.floor(index/3)*100)+'%';
@@ -1362,7 +1365,7 @@
     const summary=elem('div','ig-summary');
     summary.append(instaPhoto(5,'ig-avatar'));
     const stats=elem('div','ig-stats');
-    [['2,008','posts'],['1.8 M','followers'],['1,293','following']].forEach(([num,label])=>{
+    [[saved.storyValentineUnlocked?'2,009':'2,008','posts'],['1.8 M','followers'],['1,293','following']].forEach(([num,label])=>{
       const stat=elem('div','ig-stat');stat.append(elem('strong','',num),elem('span','',label));stats.append(stat);
     });
     summary.append(stats);overview.append(summary);
@@ -1379,7 +1382,7 @@
     overview.append(highlights);content.append(overview);
     const tabs=elem('div','ig-tabs');tabs.append(elem('span','ig-tab-selected','▦'),elem('span','','▷'),elem('span','','↻'),elem('span','','♙'));content.append(tabs);
     const grid=elem('div','ig-grid');
-    cfg.instagram.forEach((p,i)=>{
+    storyInstagramPosts().forEach((p,i)=>{
       const tile=click('','ig-tile',()=>setPage('instagram-post',i));
       tile.append(instaPhoto(i));
       tile.setAttribute('aria-label','View '+p.date+' post');
@@ -1389,8 +1392,9 @@
     root.append(content);host.append(root);
   }
   function instagramPost(){
-    const p=cfg.instagram[Number(selected)]||cfg.instagram[0];
-    const index=Math.max(0,cfg.instagram.indexOf(p));
+    const posts=storyInstagramPosts();
+    const p=posts[Number(selected)]||posts[0];
+    const index=Math.max(0,posts.indexOf(p));
     const root=elem('section','page ig-page');
     root.append(status());
     const nav=elem('div','ig-nav');
@@ -1405,6 +1409,11 @@
     const likeRow=elem('div','ig-post-likes');likeRow.append(elem('span','','♥'),elem('strong','',p.likes+' likes'));content.append(likeRow);
     const caption=elem('div','ig-post-caption');caption.append(elem('strong','','lalinalena '),document.createTextNode(p.caption));content.append(caption);
     content.append(elem('div','ig-post-date',p.date));
+    if(saved.storyValentineUnlocked && p===cfg.story.valentinePost){
+      const ending=elem('div','story-ending');
+      ending.append(elem('div','story-ending-heart','🤍🤎'),elem('strong','story-ending-title','THE END'),elem('span','story-ending-subtitle','Brings U Back'));
+      content.append(ending);
+    }
     root.append(content);host.append(root);
   }
   function calendar(){const root=appShell('Calendar','home');const content=elem('div','app-list');for(const x of cfg.calendar){const b=elem('div','list-item');b.append(elem('div','',x.date),elem('strong','',x.title));content.append(b)}root.append(content);host.append(root)}
