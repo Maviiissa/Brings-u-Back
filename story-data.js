@@ -221,7 +221,7 @@ window.PHONE_STORY = {
     ],
     plot10LineAnswer:"Lalee, Open the door…I’ve been sitting in my car for an hour.",
     valentinePost:{
-      src:'assets/IMG_3251.jpeg',
+      src:'assets/IMG_3251.jpg',
       caption:'Happy Valentine’s Day 🤍🤎 My entire world @Miu_natsha',
       date:'14 February 2028',
       likes:'1.8M'
