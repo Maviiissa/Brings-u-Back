@@ -485,3 +485,14 @@
 }
 .story-composer .story-send-arrow:active:not(:disabled){transform:scale(.92)}
 .story-composer .story-scripted-input{min-width:0}
+
+/* Fixed journal entries: scrollable reading surface, no editing affordances. */
+.note-readonly{
+  flex:1;min-height:0;overflow-y:auto;overflow-x:hidden;
+  padding:17px 20px 32px;
+  font-size:15px;line-height:1.8;color:#202124;
+  white-space:pre-wrap;overflow-wrap:anywhere;
+  user-select:text;-webkit-user-select:text;
+  background:#fff;
+  -webkit-overflow-scrolling:touch;
+}
