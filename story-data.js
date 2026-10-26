@@ -317,7 +317,7 @@ window.PHONE_STORY = {
       { id:'secret-5', src:'assets/secret-album-05.jpg', date:"April 6, 2028 at 21:48 pm" },
       { id:'secret-6', src:'assets/secret-album-06.jpg', date:"April 15, 2028 at 23:58 pm" },
       { id:'secret-7', src:'assets/secret-album-07.jpg', date:"May 18, 2028 at 18:21 pm" },
-      { id:'secret-8', src:'assets/secret-album-08.jpg', date:"August 31, 2028 at 19:26 pm" },
+      { id:'secret-8', src:'assets/secret-album-08.jpg?v=20261026-corrected', date:"August 31, 2028 at 19:26 pm" },
       { id:'secret-9', src:'assets/secret-album-09.jpg', date:"November 24, 2028 at 23:55 pm" }
     ]
   },
