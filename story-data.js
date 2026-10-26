@@ -167,6 +167,65 @@ window.PHONE_STORY = {
       {stage:4,from:'them',text:"I just don’t know what to do…I don’t wanna lose her. She is the most important person in my life."},
       {stage:5,from:'me',text:"If she loves you as well, or even if she doesn't yet, you should be brave. Loving someone isn't something to be ashamed of. You have to tell her, okay? Promise me."}
     ],
+    // Final arc: the two timelines meet, then the player reaches Miu on LINE.
+    plot8Note: {
+      id:'plot8-2028-01-08',
+      title:'Loving someone isn’t something to be ashamed of.',
+      date:'January 8, 2028 at 6:30 PM',
+      body:'“Loving someone isn\'t something to be ashamed of. You have to tell her, okay? Promise me.”\n\nI typed those words to her, but they felt like a mirror reflecting my own cowardice back at me.\n\nFor the past week, her advice from 2019 has been echoing in my head. Eighteen-year-old Natsha, terrified yet full of love, was teaching me how to fight for what matters.\n\nI haven\'t fixed the wreckage between Miu and me yet, but the suffocating fear in my chest is finally starting to give way to something else…\n\nI should tell her, I should tell Miu how much I loved her, and how much I still am in love with her.'
+    },
+    plot8Date:{weekday:'SATURDAY',day:'8',month:'January',time:'18:30'},
+    plot8HomeDelayMs:10000,
+    plot8Notification:{from:'them',sender:'Natsha',time:'6:30 PM',text:"P'Lena, I think I made a big decision... I want to try entering the entertainment industry!"},
+    plot8Messages:[
+      {stage:0,from:'them',text:"P'Lena, I think I made a big decision... I want to try entering the entertainment industry!"},
+      {stage:0,from:'them',text:"That pretty senior of mine is an actress, and I want to be someone who can stand beside her in the spotlight ✨"},
+      {stage:1,from:'me',text:"The entertainment industry is not as glamorous as it looks, kiddo. It's complicated, full of noise, and people can get hurt easily. Are you sure you're ready for that?"},
+      {stage:2,from:'them',text:"Wait... why did you just type a whole paragraph warning me about that? 😆"},
+      {stage:2,from:'them',text:"You sound exactly like my P’Na! She literally told me the same thing yesterday! Are you two secretly the same person or what? 🫣"},
+      {stage:2,from:'them',text:"Just kidding 5555. I have made my decision and I will not be afraid of anything! I just want to stay with her no matter what 🥰"},
+      {stage:2,from:'them',text:"I guess I have to convince my parents first….😟"}
+    ],
+    plot9Note:{
+      id:'plot9-2028-01-15',
+      title:'She laughed and asked if we were secretly the same person.',
+      date:'January 15, 2028 at 9:15 PM',
+      body:'She laughed and asked if we were secretly the same person.\n\nI stared at my phone screen in the dark…Miu has always been the brave one. Fighting for her dreams, braving her parents\' expectations, and holding out her hand to me without hesitation.\n\nI was the only one constantly running, constantly controlled by fear.\n\nNow the miracle of meeting the 18-year-old Miu is giving me back the courage I threw away.\n\nI refuse to be a coward any longer.'
+    },
+    plot9Date:{weekday:'SATURDAY',day:'15',month:'January',time:'21:15'},
+    plot9HomeDelayMs:10000,
+    plot9Notification:{from:'them',sender:'Natsha',time:'9:15 PM',text:"Guess what? My parents were totally against it at first, but I didn't give up!"},
+    plot9Messages:[
+      {stage:0,from:'them',text:"Guess what? My parents were totally against it at first, but I didn't give up! I told them I really want to try, and they finally gave me their blessing! 🥹🎉"},
+      {stage:0,from:'them',text:"BTW I don't think it's the right time to confess to P'Na yet, but that's okay!"},
+      {stage:0,from:'them',text:"I'll just keep staying by her side and working hard. I really hope one day, she'll look at me and love me back... 💌"},
+      {stage:1,from:'me',text:"She already does, kiddo."},
+      {stage:1,from:'me',text:"Trust me. Her love for you has always been there, and it will last a very, very long time."},
+      {stage:2,from:'them',text:"Really? I hope so! 🥺✨"},
+      {stage:2,from:'them',text:"Thank you for always listening to me and giving me courage, P'Lena. You're the best safe place ever!"}
+    ],
+    plot10Note:{
+      id:'plot10-2028-01-22',
+      title:'I never received another message from Natsha.',
+      date:'January 22, 2028 at 10:00 AM',
+      body:'I never received another message from Natsha.\n\nIs she doing okay? Is she still hurting because of my hesitation? This miraculous bridge across eight years of time is closing forever, and all I can pray for is that she stays safe, shines bright, and reaches every dream she ever chased.\n\nShe taught me that loving someone is never something to fear.\n\nNow, it’s time to bring you back.\n\nMiu, please... just give me one more chance to love you.'
+    },
+    plot10Date:{weekday:'SATURDAY',day:'22',month:'January',time:'10:00'},
+    plot10LineReplies:[
+      "Miu, I am so, so sorry.",
+      "I know I broke your heart, and I know I was a complete coward back then when the noise got too loud.",
+      "I was terrified of losing you, terrified of crossing the friend zone and ruining the career you worked so hard for.",
+      "I love you, Miu. I have been in love with you for so long, and I'm done letting fear dictate my heart.",
+      "I can’t bear a single day without you…Miu",
+      "Please, can we talk?"
+    ],
+    plot10LineAnswer:"Lalee, Open the door…I’ve been sitting in my car for an hour.",
+    valentinePost:{
+      src:'assets/IMG_3251.jpg',
+      caption:'Happy Valentine’s Day 🤍🤎 My entire world @Miu_natsha',
+      date:'14 February 2028',
+      likes:'1.8M'
+    },
     plot6Note: {
       id: 'plot6-2027-12-26',
       title: "I couldn't help but smile reading her messages",
