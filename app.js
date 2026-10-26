@@ -3,29 +3,48 @@
   const cfg = window.PHONE_STORY;
   const host = document.querySelector('#screen');
   const STORE = 'miu-fiction-v3-local';
-  // DEVELOPMENT MODE: refresh always starts a fresh playthrough.
-  // Switch to false at launch to restore per-browser saves.
-  const DEV_RESET_ON_REFRESH = true;
+  // Each browser/profile keeps its own save; a refresh never wipes progress.
+  // Explicit replay link: ?restart=1 clears only this game's local save.
   const initial = () => ({lineSent:[],smsSent:[],noteEdits:{},favoriteTrack:null,photosExtra:[]});
   let saved = initial();
-  if(DEV_RESET_ON_REFRESH){
-    try { localStorage.removeItem(STORE); } catch {}
-  } else {
-    try { saved = {...initial(), ...JSON.parse(localStorage.getItem(STORE)||'{}')}; }
-    catch { saved = initial(); }
-  }
+  try {
+    const params = new URLSearchParams(window.location.search);
+    if(params.has('restart')){
+      localStorage.removeItem(STORE);
+      params.delete('restart');
+      const remaining=params.toString();
+      window.history.replaceState(null,'',window.location.pathname+(remaining?'?'+remaining:'')+window.location.hash);
+    }
+    const stored=JSON.parse(localStorage.getItem(STORE)||'null');
+    if(stored && typeof stored==='object' && !Array.isArray(stored)){
+      saved={...initial(),...stored};
+    }
+  }catch{ saved=initial(); }
+  const allowedPages=new Set(['lock','home','line-list','line','sms','sms-contact','kiddo-profile','notes','note-editor','photos','photo-detail','instagram','instagram-post','calendar','camera','phone','safari','music']);
+  const resumePage=allowedPages.has(saved.currentPage)?saved.currentPage:'lock';
+  const resumeSelection=saved.currentSelection??null;
   let page = 'lock';
   let selected = null;
   let draft = '';
   let lastPage = 'home';
   let storyTimer = null;
   let storyLastTick = 0;
-  let notificationVisible = false;
+  // Reconstruct any unread SMS banner after reopening the site.
+  let notificationVisible = [
+    ['storyFirstSmsDelivered','storyFirstSmsOpened'],
+    ['storySecondSmsDelivered','storySecondSmsOpened'],
+    ['storyThirdSmsDelivered','storyThirdSmsOpened'],
+    ['storyFourthSmsDelivered','storyFourthSmsOpened'],
+    ['storyFifthSmsDelivered','storyFifthSmsOpened'],
+    ['storySixthSmsDelivered','storySixthSmsOpened'],
+    ['storySeventhSmsDelivered','storySeventhSmsOpened'],
+    ['storyEighthSmsDelivered','storyEighthSmsOpened'],
+    ['storyNinthSmsDelivered','storyNinthSmsOpened']
+  ].some(([delivered,opened])=>saved[delivered]&&!saved[opened]);
   let storyUiTimers = [];
   const scheduleStoryUi = (callback,delay) => {const id=window.setTimeout(callback,delay);storyUiTimers.push(id);return id;};
   const clearStoryUi = () => {storyUiTimers.forEach(window.clearTimeout);storyUiTimers=[];};
   const persist = () => {
-    if(DEV_RESET_ON_REFRESH)return;
     try {localStorage.setItem(STORE,JSON.stringify(saved));}catch{}
   };
   const elem = (tag,cls='',text) => {const el=document.createElement(tag);if(cls)el.className=cls;if(text!==undefined)el.textContent=text;return el;};
@@ -131,8 +150,11 @@
       notificationVisible=false;
       persist();
     }
+    saved.currentPage=p;
+    saved.currentSelection=id;
+    persist();
     render();
-    if(unlocking)startStoryBrowsing();
+    if((unlocking || (p!=='lock' && !saved.storyFirstSmsDelivered)) && !saved.storyFirstSmsDelivered)startStoryBrowsing();
     if(notificationVisible && p!=='sms')showStoryNotification();
     if(p==='home' && saved.storyPlot3Ready && !saved.storyThirdSmsDelivered){
       scheduleStoryUi(()=>{
@@ -1394,9 +1416,8 @@
   function safari(){const root=appShell('Safari','home');const content=elem('div','scroll');for(const p of cfg.safari){content.append(elem('div','safari-address',p.url));const card=elem('div','app-list');card.append(elem('h2','',p.title),elem('p','',p.body));content.append(card)}root.append(content);host.append(root)}
   function music(){const root=appShell('Music','home');const list=elem('div','app-list');for(const track of cfg.music){const b=click('','list-item',()=>{saved.favoriteTrack=track.title;persist();render()});const l=elem('div');l.append(elem('strong','',track.title),elem('small','',track.artist));b.append(l,elem('div','',saved.favoriteTrack===track.title?'♥':'♡'));list.append(b)}list.append(elem('p','empty-app','No audio is included yet. Tracks can be added when you supply files.'));root.append(list);host.append(root)}
   function render(){host.replaceChildren();switch(page){case'lock':return lockScreen();case'home':return home();case'line-list':return lineList();case'line':return line();case'sms':return sms();case'sms-contact':return smsContact();case'kiddo-profile':return kiddoProfile();case'notes':return notes();case'note-editor':return noteEditor();case'photos':return photos();case'photo-detail':return photoDetail();case'instagram':return instagram();case'instagram-post':return instagramPost();case'calendar':return calendar();case'camera':return camera();case'phone':return phoneApp();case'safari':return safari();case'music':return music();default:return home()}}
-  render();
-  // The countdown starts on first unlock; returning to the site resumes it.
-  if(saved.storyBrowseMs>0 && !saved.storyFirstSmsDelivered){
-    // Keep the phone locked until the player swipes up again.
-  }
+  // Restore the last screen and resume any unfinished story timer/animation.
+  // The story state, not transient DOM typing, is the source of truth.
+  if(resumePage==='lock')render();
+  else setPage(resumePage,resumeSelection);
 })();
