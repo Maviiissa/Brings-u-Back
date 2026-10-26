@@ -628,7 +628,7 @@
     const step=()=>{
       if(page!==context||!field.isConnected||!valid())return;
       pos++;field.textContent=text.slice(0,pos);
-      if(pos<text.length)scheduleStoryUi(step,cfg.story.replyTypingIntervalMs);
+      if(pos<text.length)scheduleStoryUi(step,Math.max(14,Math.min(38,Math.floor(2600/Math.max(text.length,1)))));
       else{
         field.dataset.typing='no';field.dataset.ready='yes';
         send.disabled=false;field.classList.remove('story-typing-active');
