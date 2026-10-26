@@ -509,13 +509,22 @@
     const stageKey='story'+plot[0].toUpperCase()+plot.slice(1)+'Stage';
     let delivered=(saved.storyBubbleCounts||{})[key]||0;
     if(delivered>=items.length){
-      // If the player leaves just after the final bubble, resume at the
-      // reply stage on reopening rather than getting stuck on an idle field.
-      if(nextStage!==null)scheduleStoryUi(()=>{
+      // Resume the final Plot 3 reaction only after Natsha's name is visible.
+      if(plot==='plot3' && stage===6){
+        scheduleStoryUi(()=>{
+          if(page!=='sms' || !messages.isConnected || (saved[stageKey]||0)!==6)return;
+          const root=messages.parentElement;
+          const idle=root?.querySelector('.story-composer-inactive');
+          if(idle){
+            idle.replaceWith(plot3Composer(6));
+            plot3FinalDraft(root);
+          }
+        },480);
+      }else if(nextStage!==null)scheduleStoryUi(()=>{
         if(page!=='sms' || (saved[stageKey]||0)!==stage)return;
         saved[stageKey]=nextStage;
         persist();render();
-      },400);
+      },480);
       return;
     }
 
@@ -544,11 +553,14 @@
         const idle=messages.parentElement?.querySelector('.story-composer-inactive');
         if(!idle)return;
         let composer=null;
-        if(plot==='plot3' && stage===0)composer=plot3Composer(0);
+        if(plot==='plot3' && (stage===0 || stage===6))composer=plot3Composer(stage);
         if(plot==='plot4' && stage===0)composer=plot4Composer(messages,0);
         if(plot==='plot5' && stage===0)composer=plot5Composer(messages,0);
         if(plot==='plot6' && stage===0)composer=plot6Composer(messages);
-        if(composer)idle.replaceWith(composer);
+        if(composer){
+          idle.replaceWith(composer);
+          if(plot==='plot3' && stage===6)plot3FinalDraft(messages.parentElement);
+        }
       },480);
     };
     const showNext=()=>{
@@ -835,7 +847,7 @@
     history.push(...storyVisibleMessages('plot3',stage,cfg.story.plot3Messages));
     renderMessages(messages,history);
     root.append(messages);
-    if(stage===0 && (saved.storyBubbleCounts||{})['plot3:0']>=2 || stage===3 || stage===6){
+    if(stage===0 && (saved.storyBubbleCounts||{})['plot3:0']>=2 || stage===3){
       root.append(plot3Composer(stage));
     }else{
       const inactive=elem('div','composer story-composer story-composer-inactive');
@@ -843,9 +855,10 @@
       root.append(inactive);
     }
     host.append(root);scrollDown(messages);
-    if([0,2,5].includes(stage))storyIncomingSequence(messages,'plot3',stage,stage===0?null:stage+1);
+    if([0,2,5,6].includes(stage))storyIncomingSequence(messages,'plot3',stage,stage===0 || stage===6?null:stage+1);
     if([1,4].includes(stage))plot3Incoming(messages,stage);
-    if(stage===6)plot3FinalDraft(root);
+    // Stage 6's three-second reaction starts after the "I am Natsha" bubble
+    // is actually mounted, not when the prior "beautiful name" bubble ends.
   }
   function plot3Composer(stage){
     const form=elem('div','composer story-composer plot3-composer');
