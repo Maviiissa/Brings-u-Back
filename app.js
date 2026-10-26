@@ -412,10 +412,12 @@
     const details=elem('div','line-conversation-details');
     details.append(elem('strong','line-conversation-name',cfg.line.name));
     const entries=[...(cfg.line.messages||[]),...saved.lineSent].filter(x=>x.from==='me'||x.from==='them');
-    const last=entries.length?entries[entries.length-1].text:'';
+    let last=entries.length?entries[entries.length-1].text:'';
+    if((saved.storyPlot10LineStage||0)>=2)last=cfg.story.plot10LineAnswer;
+    else if(saved.storyPlot10LineSentCount>0)last=cfg.story.plot10LineReplies[saved.storyPlot10LineSentCount-1];
     details.append(elem('span','line-conversation-preview',last));
     conversation.append(details);
-    const when=elem('div','line-conversation-date','25 Nov 2027');
+    const when=elem('div','line-conversation-date',saved.storyPlot10NoteAdded?'22 Jan 2028':'25 Nov 2027');
     conversation.append(when);
     list.append(conversation);
     root.append(list);
