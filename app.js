@@ -517,7 +517,7 @@
     if(page!=='line' || !messages.isConnected || (saved.storyPlot10LineStage||0)!==1)return;
     markPlot10Read(messages);
     const root=messages.parentElement;
-    const banner=elem('div','plot10-line-typing',cfg.line.name+' 🧸 is typing...');
+    const banner=elem('div','plot10-line-typing',cfg.line.name+' is typing...');
     root.insertBefore(banner,messages);
     scheduleStoryUi(()=>{
       if(page!=='line' || !messages.isConnected || (saved.storyPlot10LineStage||0)!==1)return;
