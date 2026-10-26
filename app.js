@@ -20,7 +20,7 @@
       saved={...initial(),...stored};
     }
   }catch{ saved=initial(); }
-  const allowedPages=new Set(['lock','home','line-list','line','sms','sms-contact','kiddo-profile','notes','note-editor','photos','photo-detail','instagram','instagram-post','calendar','camera','phone','safari','music']);
+  const allowedPages=new Set(['lock','home','line-list','line','sms','sms-contact','kiddo-profile','notes','note-editor','photos','photo-detail','instagram','instagram-post','calendar','camera','phone']);
   const resumePage=allowedPages.has(saved.currentPage)?saved.currentPage:'lock';
   const resumeSelection=saved.currentSelection??null;
   let page = 'lock';
@@ -309,7 +309,10 @@
   }
   function hasUnreadStoryNotes(){return unreadStoryNotes().length>0;}
   function appTile(label,type,graphic,count,target=type){
-    const b=click('','home-app',()=>setPage(target));const icon=elem('div','tile '+type); if(graphic)icon.append(elem('span','',graphic));
+    const decorative=type==='safari'||type==='music';
+    const b=decorative?elem('div','home-app home-app-decorative'):click('','home-app',()=>setPage(target));
+    if(decorative)b.setAttribute('aria-hidden','true');
+    const icon=elem('div','tile '+type); if(graphic)icon.append(elem('span','',graphic));
     if(count){icon.append(elem('span','app-count',count));}b.append(icon,elem('div','app-caption',label));return b;
   }
   function lockscreen(){
@@ -1415,7 +1418,7 @@
   function phoneApp(){const root=appShell('Phone','home');const content=elem('div','app-list');for(const p of cfg.phoneLog){const item=click('','list-item',()=>alert('This is a fictional call log.'));const t=elem('div');t.append(elem('strong','',p.name),elem('small','',p.subtitle));item.append(t,elem('div','','ⓘ'));content.append(item)}root.append(content);host.append(root)}
   function safari(){const root=appShell('Safari','home');const content=elem('div','scroll');for(const p of cfg.safari){content.append(elem('div','safari-address',p.url));const card=elem('div','app-list');card.append(elem('h2','',p.title),elem('p','',p.body));content.append(card)}root.append(content);host.append(root)}
   function music(){const root=appShell('Music','home');const list=elem('div','app-list');for(const track of cfg.music){const b=click('','list-item',()=>{saved.favoriteTrack=track.title;persist();render()});const l=elem('div');l.append(elem('strong','',track.title),elem('small','',track.artist));b.append(l,elem('div','',saved.favoriteTrack===track.title?'♥':'♡'));list.append(b)}list.append(elem('p','empty-app','No audio is included yet. Tracks can be added when you supply files.'));root.append(list);host.append(root)}
-  function render(){host.replaceChildren();switch(page){case'lock':return lockScreen();case'home':return home();case'line-list':return lineList();case'line':return line();case'sms':return sms();case'sms-contact':return smsContact();case'kiddo-profile':return kiddoProfile();case'notes':return notes();case'note-editor':return noteEditor();case'photos':return photos();case'photo-detail':return photoDetail();case'instagram':return instagram();case'instagram-post':return instagramPost();case'calendar':return calendar();case'camera':return camera();case'phone':return phoneApp();case'safari':return safari();case'music':return music();default:return home()}}
+  function render(){host.replaceChildren();switch(page){case'lock':return lockScreen();case'home':return home();case'line-list':return lineList();case'line':return line();case'sms':return sms();case'sms-contact':return smsContact();case'kiddo-profile':return kiddoProfile();case'notes':return notes();case'note-editor':return noteEditor();case'photos':return photos();case'photo-detail':return photoDetail();case'instagram':return instagram();case'instagram-post':return instagramPost();case'calendar':return calendar();case'camera':return camera();case'phone':return phoneApp();default:return home()}}
   // Restore the last screen and resume any unfinished story timer/animation.
   // The story state, not transient DOM typing, is the source of truth.
   if(resumePage==='lock')render();
