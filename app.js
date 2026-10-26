@@ -1182,7 +1182,13 @@
     const plot5Notes=saved.storyPlot5NoteAdded?[cfg.story.plot5Note]:[];
     const plot6Notes=saved.storyPlot6NoteAdded?[cfg.story.plot6Note]:[];
     const plot7Notes=saved.storyPlot7NoteAdded?[cfg.story.plot7Note]:[];
+    const plot8Notes=saved.storyPlot8NoteAdded?[cfg.story.plot8Note]:[];
+    const plot9Notes=saved.storyPlot9NoteAdded?[cfg.story.plot9Note]:[];
+    const plot10Notes=saved.storyPlot10NoteAdded?[cfg.story.plot10Note]:[];
     const entries=[
+      ...plot10Notes.map(n=>({...n,...saved.noteEdits[n.id],id:n.id,isStoryNote:true})),
+      ...plot9Notes.map(n=>({...n,...saved.noteEdits[n.id],id:n.id,isStoryNote:true})),
+      ...plot8Notes.map(n=>({...n,...saved.noteEdits[n.id],id:n.id,isStoryNote:true})),
       ...plot7Notes.map(n=>({...n,...saved.noteEdits[n.id],id:n.id,isStoryNote:true})),
       ...plot6Notes.map(n=>({...n,...saved.noteEdits[n.id],id:n.id,isStoryNote:true})),
       ...plot5Notes.map(n=>({...n,...saved.noteEdits[n.id],id:n.id,isStoryNote:true})),
@@ -1191,7 +1197,7 @@
       ...plot2Notes.map(n=>({...n,...saved.noteEdits[n.id],id:n.id,isStoryNote:true})),
       ...cfg.notes.map(n=>({ ...n, ...saved.noteEdits[n.id], id:n.id, date:n.date, isStoryNote:true })),
       ...Object.entries(saved.noteEdits)
-        .filter(([id])=>!cfg.notes.some(n=>n.id===id) && id!==cfg.story.plot2Note.id && id!==cfg.story.plot3Note.id && id!==cfg.story.plot4Note.id && id!==cfg.story.plot5Note.id && id!==cfg.story.plot6Note.id && id!==cfg.story.plot7Note.id)
+        .filter(([id])=>!cfg.notes.some(n=>n.id===id) && id!==cfg.story.plot2Note.id && id!==cfg.story.plot3Note.id && id!==cfg.story.plot4Note.id && id!==cfg.story.plot5Note.id && id!==cfg.story.plot6Note.id && id!==cfg.story.plot7Note.id && id!==cfg.story.plot8Note.id && id!==cfg.story.plot9Note.id && id!==cfg.story.plot10Note.id)
         .map(([id,n])=>({id,...n,date:'Personal note',isStoryNote:false}))
     ];
     entries.forEach(n=>{
@@ -1206,6 +1212,9 @@
   }
   function noteEditor(){
     const config=cfg.notes.find(n=>n.id===selected)
+      || (saved.storyPlot10NoteAdded && selected===cfg.story.plot10Note.id?cfg.story.plot10Note:null)
+      || (saved.storyPlot9NoteAdded && selected===cfg.story.plot9Note.id?cfg.story.plot9Note:null)
+      || (saved.storyPlot8NoteAdded && selected===cfg.story.plot8Note.id?cfg.story.plot8Note:null)
       || (saved.storyPlot7NoteAdded && selected===cfg.story.plot7Note.id?cfg.story.plot7Note:null)
       || (saved.storyPlot6NoteAdded && selected===cfg.story.plot6Note.id?cfg.story.plot6Note:null)
       || (saved.storyPlot5NoteAdded && selected===cfg.story.plot5Note.id?cfg.story.plot5Note:null)
