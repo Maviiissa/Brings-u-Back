@@ -20,7 +20,7 @@
       saved={...initial(),...stored};
     }
   }catch{ saved=initial(); }
-  const allowedPages=new Set(['lock','home','line-list','line','sms','sms-contact','kiddo-profile','notes','note-editor','photos','photo-detail','instagram','instagram-post','calendar','camera','phone']);
+  const allowedPages=new Set(['lock','home','line-list','line','sms','sms-contact','kiddo-profile','notes','note-editor','photos','photo-detail','secret-album','secret-photo','instagram','instagram-post','calendar','camera','phone']);
   const resumePage=allowedPages.has(saved.currentPage)?saved.currentPage:'lock';
   const resumeSelection=saved.currentSelection??null;
   let page = 'lock';
@@ -424,7 +424,7 @@
   function home(){
     const root=elem('section','page home');root.append(status(storyClock(),true));
     const main=elem('div','home-content');
-    const imageButton=click('','photo-widget',()=>setPage('photos'));imageButton.append(img(cfg.phone.homePhoto,'Photos'));main.append(imageButton);
+    const imageButton=click('','photo-widget',()=>setPage(saved.storyValentineUnlocked?'secret-album':'photos'));imageButton.append(img(cfg.phone.homePhoto,'Photos'));main.append(imageButton);
     main.append(elem('div','photo-label','Photos'));
     const grid=elem('div','home-grid');const cal=click('','calendar-card',()=>setPage('calendar'));
     const homeDate=storyCalendarDate();
@@ -1480,8 +1480,78 @@
     root.append(body);
     host.append(root);
   }
-  function photos(){const root=appShell('Photos','home');const container=elem('div','scroll');const grid=elem('div','photo-grid');for(const p of cfg.photos){const b=click('','photo-tile',()=>setPage('photo-detail',p.id));b.append(img(p.src,p.title));grid.append(b)}container.append(grid);root.append(container);host.append(root)}
-  function photoDetail(){const p=cfg.photos.find(p=>p.id===selected)||cfg.photos[0];const root=appShell(p.title,'photos');const contents=elem('div','scroll photo-detail');contents.append(img(p.src,p.title),elem('p','',p.caption));root.append(contents);host.append(root)}
+
+  function photos(){
+    const root=appShell('Photos','home');
+    const container=elem('div','scroll');
+    if(saved.storyValentineUnlocked){
+      const album=click('','secret-album-card',()=>setPage('secret-album'));
+      album.append(img(cfg.secretAlbum.photos[0].src,'Album cover'));
+      const info=elem('div','secret-album-card-info');
+      info.append(elem('strong','',cfg.secretAlbum.title),elem('small','',cfg.secretAlbum.photos.length+' Photos'));
+      album.append(info);container.append(album);
+    }
+    const grid=elem('div','photo-grid');
+    for(const p of cfg.photos){
+      const b=click('','photo-tile',()=>setPage('photo-detail',p.id));
+      b.append(img(p.src,p.title));grid.append(b);
+    }
+    container.append(grid);root.append(container);host.append(root);
+  }
+  function photoDetail(){
+    const p=cfg.photos.find(p=>p.id===selected)||cfg.photos[0];
+    const root=appShell(p.title,'photos');
+    const contents=elem('div','scroll photo-detail');
+    contents.append(img(p.src,p.title),elem('p','',p.caption));
+    root.append(contents);host.append(root);
+  }
+  function secretAlbum(){
+    if(!saved.storyValentineUnlocked){setPage('photos');return;}
+    const root=appShell(cfg.secretAlbum.title,'home');
+    root.classList.add('secret-album-page');
+    const content=elem('div','scroll secret-album-scroll');
+    content.append(elem('div','secret-album-count',cfg.secretAlbum.photos.length+' Photos'));
+    const grid=elem('div','secret-album-grid');
+    cfg.secretAlbum.photos.forEach((photo,i)=>{
+      const tile=click('','secret-album-tile',()=>setPage('secret-photo',photo.id));
+      tile.setAttribute('aria-label','View photo '+(i+1)+' — '+photo.date);
+      const picture=img(photo.src,'Memory '+(i+1));
+      picture.loading='lazy';
+      tile.append(picture);grid.append(tile);
+    });
+    content.append(grid);root.append(content);host.append(root);
+  }
+  function secretPhoto(){
+    if(!saved.storyValentineUnlocked){setPage('photos');return;}
+    const pictures=cfg.secretAlbum.photos;
+    let index=pictures.findIndex(photo=>photo.id===selected);
+    if(index<0)index=0;
+    const photo=pictures[index];
+    const root=appShell(cfg.secretAlbum.title,'secret-album');
+    root.classList.add('secret-photo-page');
+    const viewer=elem('div','secret-photo-viewer');
+    viewer.append(elem('div','secret-photo-date',photo.date));
+    const frame=elem('div','secret-photo-frame');
+    const picture=img(photo.src,'Memory '+(index+1)+' of '+pictures.length);
+    picture.draggable=false;
+    frame.append(picture);viewer.append(frame);
+    const footer=elem('div','secret-photo-footer');
+    const previous=click('‹','secret-photo-arrow',()=>setPage('secret-photo',pictures[(index+pictures.length-1)%pictures.length].id));
+    previous.setAttribute('aria-label','Previous photo');
+    const next=click('›','secret-photo-arrow',()=>setPage('secret-photo',pictures[(index+1)%pictures.length].id));
+    next.setAttribute('aria-label','Next photo');
+    footer.append(previous,elem('span','secret-photo-counter',(index+1)+' / '+pictures.length),next);
+    viewer.append(footer);
+    let startX=null;
+    frame.addEventListener('touchstart',e=>{startX=e.touches[0]?.clientX??null;},{passive:true});
+    frame.addEventListener('touchend',e=>{
+      if(startX===null)return;
+      const delta=(e.changedTouches[0]?.clientX??startX)-startX;
+      startX=null;
+      if(Math.abs(delta)>45)setPage('secret-photo',pictures[(index+(delta<0?1:pictures.length-1))%pictures.length].id);
+    },{passive:true});
+    root.append(viewer);host.append(root);
+  }
   function storyInstagramPosts(){
     return saved.storyValentineUnlocked?[cfg.story.valentinePost,...cfg.instagram]:cfg.instagram;
   }
@@ -1576,7 +1646,7 @@
   function phoneApp(){const root=appShell('Phone','home');const content=elem('div','app-list');for(const p of cfg.phoneLog){const item=click('','list-item',()=>alert('This is a fictional call log.'));const t=elem('div');t.append(elem('strong','',p.name),elem('small','',p.subtitle));item.append(t,elem('div','','ⓘ'));content.append(item)}root.append(content);host.append(root)}
   function safari(){const root=appShell('Safari','home');const content=elem('div','scroll');for(const p of cfg.safari){content.append(elem('div','safari-address',p.url));const card=elem('div','app-list');card.append(elem('h2','',p.title),elem('p','',p.body));content.append(card)}root.append(content);host.append(root)}
   function music(){const root=appShell('Music','home');const list=elem('div','app-list');for(const track of cfg.music){const b=click('','list-item',()=>{saved.favoriteTrack=track.title;persist();render()});const l=elem('div');l.append(elem('strong','',track.title),elem('small','',track.artist));b.append(l,elem('div','',saved.favoriteTrack===track.title?'♥':'♡'));list.append(b)}list.append(elem('p','empty-app','No audio is included yet. Tracks can be added when you supply files.'));root.append(list);host.append(root)}
-  function render(){host.replaceChildren();switch(page){case'lock':return lockScreen();case'home':return home();case'line-list':return lineList();case'line':return line();case'sms':return sms();case'sms-contact':return smsContact();case'kiddo-profile':return kiddoProfile();case'notes':return notes();case'note-editor':return noteEditor();case'photos':return photos();case'photo-detail':return photoDetail();case'instagram':return instagram();case'instagram-post':return instagramPost();case'calendar':return calendar();case'camera':return camera();case'phone':return phoneApp();default:return home()}}
+  function render(){host.replaceChildren();switch(page){case'lock':return lockScreen();case'home':return home();case'line-list':return lineList();case'line':return line();case'sms':return sms();case'sms-contact':return smsContact();case'kiddo-profile':return kiddoProfile();case'notes':return notes();case'note-editor':return noteEditor();case'photos':return photos();case'photo-detail':return photoDetail();case'secret-album':return secretAlbum();case'secret-photo':return secretPhoto();case'instagram':return instagram();case'instagram-post':return instagramPost();case'calendar':return calendar();case'camera':return camera();case'phone':return phoneApp();default:return home()}}
   // Restore the last screen and resume any unfinished story timer/animation.
   // The story state, not transient DOM typing, is the source of truth.
   if(resumePage==='lock')render();
