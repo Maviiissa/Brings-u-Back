@@ -521,3 +521,10 @@
   -webkit-text-fill-color:#171717;
   opacity:1;
 }
+
+/* Plot 10: each confession bubble receives its Read label at the same moment. */
+.line-chat .chat-row.plot10-outgoing .line-message-meta .plot10-read{
+  display:block;margin:0 3px 2px 0;padding:0;
+  align-self:flex-end;white-space:nowrap;
+  color:#fff;font-size:10px;font-weight:650;line-height:1.2;
+}
