@@ -204,6 +204,12 @@ window.PHONE_STORY = {
       {stage:2,from:'them',text:"Really? I hope so! 🥺✨"},
       {stage:2,from:'them',text:"Thank you for always listening to me and giving me courage, P'Lena. You're the best safe place ever!"}
     ],
+    kiddoSecretNote:{
+          "id": "kiddo-secret-2028-02-14",
+          "title": "Things I love about my Lalee🦋 (don't tell her😠)！",
+          "date": "February 14, 2028 at 7:35 AM",
+          "body": "Things I love about my Lalee🦋 (don't tell her😠)！\n\n1. She looks ridiculously cute when she sleeps, like a soft little bun that you just want to squish.\n2. I’ve loved her for so long, so insanely long that sometimes I think I must have loved her in our past lives too.\n3. She only drinks bubble tea and refuses to drink a single drop of water! I’ve nagged her a million times 😤\n4. I’m completely addicted to the scent of her skin right when she wakes up in the morning.\n5. She is so hopelessly shy when it comes to expressing her feelings, which is painfully adorable. (Even if her overthinking used to drive me crazy 🙄)\n6. She is endlessly patient with me, no matter how dramatic I get. Awwww, I am just so deeply, hopelessly in love with her!\n7. She thinks she's keeping all her little secrets from me, but I can read her mind through her ears turning red. So obvious, Lalee~ 🤭\n8. She always bites my bumbum and... 🤫 (Okay, that stays between us).\n9. She came back to me. And this time, she stayed.\n10. Lalee, I will love you always and forever, nothing can set us apart now.🧸🤎🦋"
+    },
     plot10Note:{
       id:'plot10-2028-01-22',
       title:'I never received another message from Natsha.',
