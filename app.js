@@ -508,7 +508,16 @@
     const key=plot+':'+stage;
     const stageKey='story'+plot[0].toUpperCase()+plot.slice(1)+'Stage';
     let delivered=(saved.storyBubbleCounts||{})[key]||0;
-    if(delivered>=items.length)return;
+    if(delivered>=items.length){
+      // If the player leaves just after the final bubble, resume at the
+      // reply stage on reopening rather than getting stuck on an idle field.
+      if(nextStage!==null)scheduleStoryUi(()=>{
+        if(page!=='sms' || (saved[stageKey]||0)!==stage)return;
+        saved[stageKey]=nextStage;
+        persist();render();
+      },400);
+      return;
+    }
 
     // Keep the same message list mounted during a batch. Rebuilding the
     // entire screen for every bubble caused scroll jumps and delayed replies.
@@ -567,6 +576,75 @@
       },delivered===0?850:720);
     };
     showNext();
+  }
+  function smsPlot7(){
+    const root=appShell('Messages','home');
+    const contact=elem('div','sms-contact');
+    contact.append(smsAvatar(),click(saved.storyContactName||'Natsha','sms-number sms-name-button',()=>setPage('sms-contact')),elem('div','sms-meta',cfg.sms.service));
+    root.append(contact);
+    const messages=elem('div','scroll chat-view sms-chat');
+    const history=[...(cfg.sms.messages||[])];
+    if(saved.storyFirstSmsDelivered)history.push({type:'date',text:'November 25, 2027'},cfg.story.firstMessage);
+    if(saved.storyPlayerReplied)history.push({from:'me',text:cfg.story.playerReply});
+    if(saved.storyStrangerReplied)history.push({from:'them',text:cfg.story.strangerReply});
+    if(saved.storySecondSmsDelivered)history.push({type:'date',text:'November 28, 2027'},cfg.story.secondMessage);
+    if(saved.storySecondPlayerReplied)history.push({from:'me',text:cfg.story.secondPlayerReply});
+    if(saved.storySecondStrangerReplied)history.push({from:'them',text:cfg.story.secondStrangerReply});
+    history.push({type:'date',text:'December 5, 2027'});
+    for(const msg of cfg.story.plot3Messages)if(msg.stage<=(saved.storyPlot3Stage||0))history.push(msg);
+    history.push({type:'date',text:'December 12, 2027'});
+    for(const msg of cfg.story.plot4Messages)if(msg.stage<=(saved.storyPlot4Stage||0))history.push(msg);
+    history.push({type:'date',text:'December 19, 2027'});
+    for(const msg of cfg.story.plot5Messages)if(msg.stage<=(saved.storyPlot5Stage||0))history.push(msg);
+    history.push({type:'date',text:'December 26, 2027'});
+    for(const msg of cfg.story.plot6Messages)if(msg.stage<=(saved.storyPlot6Stage||0))history.push(msg);
+    history.push({type:'date',text:'January 1, 2028'});
+    const stage=Number(saved.storyPlot7Stage)||0;
+    history.push(...storyVisibleMessages('plot7',stage,cfg.story.plot7Messages));
+    renderMessages(messages,history);
+    root.append(messages);
+    if([1,3,5].includes(stage)){
+      root.append(plot7Composer(messages,stage));
+    }else{
+      const inactive=elem('div','composer story-composer story-composer-inactive');
+      inactive.append(elem('span','composer-icon','+'),elem('div','composer-field story-readonly','Text Message'));
+      root.append(inactive);
+    }
+    host.append(root);scrollDown(messages);
+    if([0,2,4].includes(stage)){
+      storyIncomingSequence(messages,'plot7',stage,stage+1);
+    }
+  }
+  function plot7Composer(messages,stage){
+    const form=elem('div','composer story-composer plot7-composer');
+    form.append(elem('span','composer-icon','+'));
+    const field=click('Text Message · SMS','composer-field story-scripted-input',()=>{
+      if(field.disabled || (saved.storyPlot7Stage||0)!==stage)return;
+      field.disabled=true;
+      const replies=cfg.story.plot7Messages.filter(msg=>msg.stage===stage && msg.from==='me').map(msg=>msg.text);
+      const next=(index)=>{
+        if(page!=='sms')return;
+        plot3Type(field,replies[index],()=>{
+          scheduleStoryUi(()=>{
+            if(page!=='sms')return;
+            if(index+1<replies.length){
+              const row=elem('div','chat-row me story-bubble-enter');
+              row.append(elem('div','bubble',replies[index]));
+              messages.append(row);scrollDown(messages);
+              field.textContent='';field.classList.remove('story-typing-active');
+              scheduleStoryUi(()=>next(index+1),450);
+            }else{
+              saved.storyPlot7Stage=stage+1;
+              persist();render();
+            }
+          },500);
+        });
+      };
+      next(0);
+    });
+    field.setAttribute('aria-label','Tap to type scripted reply');
+    form.append(field,elem('span','story-send-decoration','↑'));
+    return form;
   }
   function smsPlot6(){
     const root=appShell('Messages','home');
