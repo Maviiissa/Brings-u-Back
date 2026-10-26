@@ -467,44 +467,31 @@
   function plot10LineComposer(messages){
     const form=elem('div','composer story-composer plot10-line-composer');
     form.append(elem('span','composer-icon','+'));
+    const replies=cfg.story.plot10LineReplies;
+    const valid=()=>page==='line'&&messages.isConnected&&(saved.storyPlot10LineStage||0)===0;
     const field=click('Message...','composer-field story-scripted-input',()=>{
-      if(field.disabled || (saved.storyPlot10LineStage||0)!==0)return;
-      field.disabled=true;
-      const replies=cfg.story.plot10LineReplies;
-      let index=saved.storyPlot10LineSentCount||0;
-      const stillHere=()=>page==='line' && messages.isConnected && (saved.storyPlot10LineStage||0)===0;
-      const next=()=>{
-        if(!stillHere())return;
-        if(index>=replies.length){
-          saved.storyPlot10LineStage=1;persist();
-          field.textContent='Message...';
-          field.classList.remove('story-typing-active');
-          scheduleStoryUi(()=>plot10LineReadAndAnswer(messages),3000);
-          return;
-        }
-        const text=replies[index];let position=0;
-        field.textContent='';field.classList.add('story-typing-active');
-        const type=()=>{
-          if(!stillHere())return;
-          position++;
-          field.textContent=text.slice(0,position);
-          if(position<text.length)scheduleStoryUi(type,cfg.story.replyTypingIntervalMs);
-          else scheduleStoryUi(()=>{
-            if(!stillHere())return;
-            renderMessages(messages,[{from:'me',text}]);
-            messages.lastElementChild?.classList.add('story-bubble-enter');
-            index++;saved.storyPlot10LineSentCount=index;persist();
-            field.textContent='';field.classList.remove('story-typing-active');
-            scrollDown(messages);
-            scheduleStoryUi(next,550);
-          },330);
-        };
-        scheduleStoryUi(type,180);
-      };
-      next();
+      if(!valid())return;
+      const index=saved.storyPlot10LineSentCount||0;
+      if(index>=replies.length)return;
+      storyDraft(field,replies[index],send,valid,'line');
     });
-    field.setAttribute('aria-label','Tap to automatically type the six LINE messages to Miu');
-    form.append(field,elem('span','story-send-decoration','↑'));
+    const send=storySendArrow(form,()=>{
+      if(!valid()||send.disabled||field.dataset.ready!=='yes')return;
+      const index=saved.storyPlot10LineSentCount||0;
+      if(index>=replies.length)return;
+      send.disabled=true;field.dataset.ready='no';
+      send.classList.remove('story-send-ready');
+      renderMessages(messages,[{from:'me',text:replies[index]}]);
+      messages.lastElementChild?.classList.add('story-bubble-enter');
+      saved.storyPlot10LineSentCount=index+1;persist();
+      field.textContent='Message...';scrollDown(messages);
+      if(index+1===replies.length){
+        saved.storyPlot10LineStage=1;persist();
+        scheduleStoryUi(()=>plot10LineReadAndAnswer(messages),3000);
+      }
+    });
+    field.setAttribute('aria-label','Tap to type each LINE message, then tap Send');
+    form.insertBefore(field,send);
     return form;
   }
   function markPlot10Read(messages){
@@ -949,7 +936,7 @@
     const stage=Number(saved.storyPlot4Stage)||0;
     history.push(...storyVisibleMessages('plot4',stage,cfg.story.plot4Messages));
     renderMessages(messages,history);root.append(messages);
-    if(stage===0 && (saved.storyBubbleCounts||{})['plot4:0']>=2 || stage===3)root.append(plot4Composer(messages,stage));
+    if((stage===0 && (saved.storyBubbleCounts||{})['plot4:0']>=2) || stage===3)root.append(plot4Composer(messages,stage));
     else{
       const idle=elem('div','composer story-composer story-composer-inactive');
       idle.append(elem('span','composer-icon','+'),elem('div','composer-field story-readonly','Text Message'));
@@ -980,7 +967,7 @@
     history.push(...storyVisibleMessages('plot3',stage,cfg.story.plot3Messages));
     renderMessages(messages,history);
     root.append(messages);
-    if(stage===0 && (saved.storyBubbleCounts||{})['plot3:0']>=2 || stage===3 && (saved.storyBubbleCounts||{})['plot3:3']>=1){
+    if((stage===0 && (saved.storyBubbleCounts||{})['plot3:0']>=2) || (stage===3 && (saved.storyBubbleCounts||{})['plot3:3']>=1) || (stage===6 && (saved.storyBubbleCounts||{})['plot3:6']>=1)){
       root.append(plot3Composer(stage));
     }else{
       const inactive=elem('div','composer story-composer story-composer-inactive');
@@ -990,6 +977,7 @@
     host.append(root);scrollDown(messages);
     if([0,2,3,5,6].includes(stage))storyIncomingSequence(messages,'plot3',stage,[0,3,6].includes(stage)?null:stage+1);
     if([1,4].includes(stage))plot3Incoming(messages,stage);
+    if(stage===6 && (saved.storyBubbleCounts||{})['plot3:6']>=1)plot3FinalDraft(root);
     // Stage 6's three-second reaction starts after the "I am Natsha" bubble
     // is actually mounted, not when the prior "beautiful name" bubble ends.
   }
@@ -997,20 +985,23 @@
     const form=elem('div','composer story-composer plot3-composer');
     form.append(elem('span','composer-icon','+'));
     const field=click('Text Message · SMS','composer-field story-scripted-input',()=>{
-      if(field.disabled || stage===6)return;
-      field.disabled=true;
+      if(stage===6||Number(saved.storyPlot3Stage)!==stage)return;
       const text=stage===0?cfg.story.plot3Messages[2].text:'Lena';
-      plot3Type(field,text,()=>{
-        scheduleStoryUi(()=>{
-          if(page!=='sms')return;
-          saved.storyPlot3Stage=stage===0?1:4;
-          persist();render();
-        },550);
-      });
+      storyDraft(field,text,send,()=>Number(saved.storyPlot3Stage)===stage);
     });
-    field.setAttribute('aria-label',stage===6?'Scripted reply is about to be typed':'Tap to type the next scripted reply');
-    if(stage===6){field.disabled=true;field.textContent='Text Message';}
-    form.append(field,elem('span','story-send-decoration','↑'));
+    const send=storySendArrow(form,()=>{
+      if(send.disabled||field.dataset.ready!=='yes'||Number(saved.storyPlot3Stage)!==stage)return;
+      const text=stage===0?cfg.story.plot3Messages[2].text:stage===3?'Lena':cfg.story.plot3Drafts[2];
+      send.disabled=true;field.dataset.ready='no';
+      const key='plot3:'+(stage===0?1:stage===3?4:7)+':sent';
+      if(!saved.storyBubbleCounts)saved.storyBubbleCounts={};
+      saved.storyBubbleCounts[key]=1;
+      saved.storyPlot3Stage=stage===0?1:stage===3?4:7;
+      persist();render();
+    });
+    field.setAttribute('aria-label',stage===6?'The final draft is being composed; tap Send when ready':'Tap to type the scripted reply, then Send');
+    if(stage===6){field.textContent='Text Message';}
+    form.insertBefore(field,send);
     return form;
   }
   function plot3Type(field,message,onDone,interval=cfg.story.replyTypingIntervalMs){
@@ -1053,25 +1044,31 @@
   }
   function plot3FinalDraft(root){
     const field=root.querySelector('.plot3-composer .story-scripted-input');
-    if(!field)return;
+    const send=root.querySelector('.plot3-composer .story-send-arrow');
+    if(!field||!send||field.dataset.reactionStarted==='yes')return;
+    field.dataset.reactionStarted='yes';
     const [first,second,final]=cfg.story.plot3Drafts;
-    // Three seconds of silence after "I am Natsha".
+    const valid=()=>page==='sms'&&field.isConnected&&(saved.storyPlot3Stage||0)===6;
+    send.disabled=true;
     scheduleStoryUi(()=>{
-      if(page!=='sms')return;
+      if(!valid())return;
       plot3Type(field,first,()=>{
+        if(!valid())return;
         scheduleStoryUi(()=>plot3Erase(field,()=>{
+          if(!valid())return;
           plot3Type(field,second,()=>{
+            if(!valid())return;
             scheduleStoryUi(()=>plot3Erase(field,()=>{
+              if(!valid())return;
               plot3Type(field,final,()=>{
-                scheduleStoryUi(()=>{
-                  if(page!=='sms')return;
-                  saved.storyPlot3Stage=7;
-                  persist();render();
-                },800);
+                if(!valid())return;
+                field.classList.remove('story-typing-active');
+                field.dataset.ready='yes';send.disabled=false;
+                send.classList.add('story-send-ready');
               });
-            }),500);
+            }),400);
           });
-        }),650);
+        }),500);
       });
     },cfg.story.plot3ReactionPauseMs);
   }
@@ -1115,41 +1112,29 @@
   function storySmsComposer(messages,phase){
     const form=elem('div','composer story-composer');
     form.append(elem('span','composer-icon','+'));
+    const message=phase===2?cfg.story.secondPlayerReply:cfg.story.playerReply;
+    const sent=()=>phase===2?saved.storySecondPlayerReplied:saved.storyPlayerReplied;
     const field=click('Text Message · SMS','composer-field story-scripted-input',()=>{
-      if(field.disabled)return;
-      if(phase===1 && saved.storyPlayerReplied)return;
-      if(phase===2 && saved.storySecondPlayerReplied)return;
-      field.disabled=true;
-      field.textContent='';
-      field.classList.add('story-typing-active');
-      const message=phase===2?cfg.story.secondPlayerReply:cfg.story.playerReply;
-      let pos=0;
-      const typeNext=()=>{
-        if(page!=='sms')return;
-        pos++;
-        field.textContent=message.slice(0,pos);
-        if(pos<message.length)scheduleStoryUi(typeNext,cfg.story.replyTypingIntervalMs);
-        else scheduleStoryUi(sendReply,650);
-      };
-      const sendReply=()=>{
-        if(page!=='sms')return;
-        if(phase===2)saved.storySecondPlayerReplied=true;
-        else saved.storyPlayerReplied=true;
-        persist();
-        field.classList.remove('story-typing-active');
-        const row=elem('div','chat-row me');
-        row.append(elem('div','bubble',message));
-        messages.append(row);scrollDown(messages);
-        field.textContent='Text Message';
-        field.classList.remove('story-scripted-input');
-        field.classList.add('story-readonly');
-        showStrangerTyping(messages,phase);
-      };
-      scheduleStoryUi(typeNext,250);
+      if(sent())return;
+      storyDraft(field,message,send,()=>!sent());
     });
-    field.setAttribute('aria-label','Tap to automatically type the scripted reply');
-    form.append(field);
-    form.append(elem('span','story-send-decoration','↑'));
+    const send=storySendArrow(form,()=>{
+      if(sent()||field.dataset.ready!=='yes'||send.disabled)return;
+      send.disabled=true;field.dataset.ready='no';
+      if(phase===2)saved.storySecondPlayerReplied=true;
+      else saved.storyPlayerReplied=true;
+      persist();
+      renderMessages(messages,[{from:'me',text:message}]);
+      messages.lastElementChild?.classList.add('story-bubble-enter');
+      scrollDown(messages);
+      field.textContent='Text Message';field.classList.remove('story-scripted-input');
+      field.classList.add('story-readonly');
+      scheduleStoryUi(()=>{
+        if(page==='sms'&&messages.isConnected)showStrangerTyping(messages,phase);
+      },550);
+    });
+    field.setAttribute('aria-label','Tap to type your reply, then tap Send');
+    form.insertBefore(field,send);
     return form;
   }
   function showStrangerTyping(messages,phase=1){
