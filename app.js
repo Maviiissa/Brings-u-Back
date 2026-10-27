@@ -284,12 +284,14 @@
     return '';
   };
   function storyClock(){
+    if(saved.storyValentineUnlocked)return '11:25';
     for(const n of [10,9,8,7,6,5,4,3,2]){
       if(saved['storyPlot'+n+'DateChanged'])return cfg.story['plot'+n+'Date'].time;
     }
     return saved.storyFirstSmsDelivered?'9:28':cfg.phone.time;
   }
   function storyCalendarDate(){
+    if(saved.storyValentineUnlocked)return {weekday:'MONDAY',day:'14',month:'February',detail:'February'};
     for(const n of [10,9,8,7,6,5,4,3,2]){
       if(saved['storyPlot'+n+'DateChanged'])return cfg.story['plot'+n+'Date'];
     }
