@@ -171,6 +171,28 @@
 }
 @media(prefers-reduced-motion:reduce){.lock-scene{transition:none!important}}
 
+/* Valentine's Day lock screen — same iPhone controls, new full-frame couple photo. */
+.lock-screen.post-ending-lock{background:#151515}
+.post-ending-lock .lock-portrait{
+  top:0;
+  bottom:0;
+  height:100%;
+  object-fit:cover;
+  object-position:center center;
+  -webkit-mask-image:none;
+  mask-image:none;
+}
+.post-ending-lock .lock-backdrop{filter:blur(22px) brightness(.52)}
+.post-ending-lock .lock-scene:before{
+  background:linear-gradient(to bottom,rgba(0,0,0,.35),rgba(0,0,0,.08) 38%,transparent 66%,rgba(0,0,0,.17));
+}
+.post-ending-lock .lock-date,
+.post-ending-lock .lock-clock{
+  color:#fff;
+  text-shadow:0 2px 10px rgba(0,0,0,.5);
+}
+.post-ending-lock .lock-date{font-size:clamp(16px,4.8vw,21px)}
+
 /* LINE read receipts and source timestamps — each chat bubble has a Read label. */
 .line-chat .chat-row{align-items:flex-end;gap:5px}
 .line-chat .chat-row .bubble{max-width:76%}
