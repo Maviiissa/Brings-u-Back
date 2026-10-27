@@ -21,7 +21,9 @@
     }
   }catch{ saved=initial(); }
   const allowedPages=new Set(['lock','home','line-list','line','sms','sms-contact','kiddo-profile','notes','note-editor','photos','recent-album','photo-detail','secret-album','secret-photo','instagram','instagram-post','calendar','camera','phone']);
-  const resumePage=allowedPages.has(saved.currentPage)?saved.currentPage:'lock';
+  // Once the Valentine Instagram ending is unlocked, every reload starts on the new lock screen.
+  // Keep all story progress and the saved last app intact; only the entry screen changes.
+  const resumePage=saved.storyValentineUnlocked?'lock':(allowedPages.has(saved.currentPage)?saved.currentPage:'lock');
   const resumeSelection=saved.currentSelection??null;
   let page = 'lock';
   let selected = null;
@@ -354,13 +356,22 @@
   // separately from the original photo, so there is no duplicated UI.
   function lockScreen(){
     const root=elem('section','page lock-screen');
+    const postEnding=!!saved.storyValentineUnlocked;
+    if(postEnding)root.classList.add('post-ending-lock');
+    const wallpaper=postEnding?'assets/post-ending-lockscreen.jpg':cfg.lockScreen.wallpaper;
     const scene=elem('div','lock-scene');
-    const backdrop=img(cfg.lockScreen.wallpaper,'');
+    const backdrop=img(wallpaper,'');
     backdrop.className='lock-backdrop';
     backdrop.draggable=false;
-    const portrait=img(cfg.lockScreen.wallpaper,'Lock screen portrait');
+    const portrait=img(wallpaper,postEnding?'Lalee and Miu together':'Lock screen portrait');
     portrait.className='lock-portrait';
     portrait.draggable=false;
+    // Keep the original wallpaper as a safe fallback until the new photo asset is uploaded.
+    if(postEnding){
+      const fallback=()=>{backdrop.src=cfg.lockScreen.wallpaper;portrait.src=cfg.lockScreen.wallpaper;};
+      backdrop.addEventListener('error',fallback,{once:true});
+      portrait.addEventListener('error',fallback,{once:true});
+    }
     scene.append(backdrop,portrait);
 
     const indicators=elem('div','lock-indicators');
@@ -368,8 +379,8 @@
     const battery=elem('div','lock-battery battery-full');battery.setAttribute('aria-label','Battery full');
     indicators.append(battery);
     scene.append(indicators);
-    scene.append(elem('div','lock-date',cfg.lockScreen.date));
-    scene.append(elem('div','lock-clock',cfg.lockScreen.time));
+    scene.append(elem('div','lock-date',postEnding?'February 14, 2028':cfg.lockScreen.date));
+    scene.append(elem('div','lock-clock',postEnding?'11:25':cfg.lockScreen.time));
 
     const hint=click('Swipe up to unlock','lock-unlock',unlock);
     hint.setAttribute('aria-label','Unlock phone without a password');
