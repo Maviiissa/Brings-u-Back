@@ -513,6 +513,215 @@
   const lineEasterNormalize=value=>value.toLowerCase().replace(/[^a-z0-9\s]/g,' ').replace(/\s+/g,' ').trim();
   // Phrase-aware matching prevents "miss" matching unrelated words such as "dismiss".
   const lineEasterHas=(normalized,...phrases)=>phrases.some(phrase=>(' '+normalized+' ').includes(' '+phrase+' '));
+  // Kiddo Chat Engine v1: three optional, post-ending, keyword-driven mini-conversations.
+  // A separate persisted stage avoids disturbing the original LINE Easter egg contexts.
+  // Each scene is deliberately finite; players can re-enter it or switch topics at any time.
+  function lineKiddoV1Replies(n,has){
+    if(!saved.storyValentineUnlocked)return null;
+    const setStage=value=>{saved.lineKiddoV1Stage=value;};
+    const begin=(scene,stage,replies)=>{
+      saved.lineEasterContext=''; // Don't let an older mini-game consume a v1 follow-up.
+      saved.lineKiddoV1Scene=scene;
+      setStage(stage);
+      return replies;
+    };
+    const finish=replies=>{setStage('');return replies;};
+
+    // Original one-off Easter eggs always remain available, even mid-conversation.
+    // The existing handler below owns these replies and their unlock conditions.
+    if(n==='if we never met'||n==='marry me'||n==='i love you'||
+       n==='where are you'||n==='what are you doing'||n==='good night'||
+       has('coffee is water','bubble tea','boba','i miss you','miss you',
+           'i love you','love you','kiss me','give me a kiss','i want a kiss',
+           'hug me','i need a hug','i want a hug','i m mad at you','i am mad at you',
+           'jealous','sad','crying','anxious','stressed','upset')){
+      setStage('');
+      return null;
+    }
+
+    // Explicit new topics take priority over a previous unfinished conversation.
+    const hungry=has('hungry','starving','famished','need food','want food',
+                     'skipped lunch','skipped dinner','haven t eaten','haven t had lunch') &&
+                 !has('not hungry','no longer hungry','not starving','not hungry anymore');
+    const tired=has('tired','exhausted','drained','worn out','sleepy','burnt out',
+                    'burned out','need some rest') &&
+                !has('not tired','not sleepy','no longer tired','not exhausted','tired of you');
+    const house=has('our house','our home','our apartment','dream house','dream home',
+                    'live together','living together','move in together','move in with you',
+                    'our future house','our future home');
+    if(hungry)return begin('hungry','hungry-menu',[
+      'I “fed” you last night already!!!',
+      'Babe, there is literally food in the fridge🫠',
+      'OKAY OKAY. Come here, my hungry Lalee 🥺',
+      'What should I make you? Pancakes, pasta, or something else?'
+    ]);
+    if(tired)return begin('tired','tired-choice',[
+      'LALEEEEE my poor babyyyy 🥺',
+      'Come here. I am wrapping all eight octopus arms around you 🐙',
+      'Do you wanna tell me about your day, or should I just cuddle you?'
+    ]);
+    if(house)return begin('house','house-room',[
+      'OUR HOUSE????? 🥹🏡',
+      'Lalee, are we really talking about our own little home???',
+      'Okay first of all: a bed big enough for us AND 47 teddy bears.',
+      'What would you want most: a cozy bedroom, a kitchen, or a little balcony?'
+    ]);
+
+    const stage=saved.lineKiddoV1Stage||'';
+    if(!stage)return null;
+    // Let the existing handler respond when the player explicitly changes to an
+    // unrelated original topic, instead of forcing them down the current branch.
+    if(has('good morning','goodnight','good night','where are you','what are you doing',
+           'coffee','matcha','water','kiss','love','miss','marry','jealous',
+           'stop teasing','bumbum','your bum','your butt')){
+      setStage('');
+      return null;
+    }
+
+    if(stage==='hungry-menu'){
+      if(has('pancake','pancakes'))return begin('hungry','hungry-topping',[
+        'PANCAKES!!! 🥞',
+        'This is how our whole story started, you know 🥺',
+        'I promise mine are better than those terrible ones.',
+        'Chocolate, strawberries, or extra maple syrup, baby?'
+      ]);
+      const foods=[
+        ['pasta',['pasta','spaghetti','noodles']],['ramen',['ramen']],
+        ['pizza',['pizza']],['sushi',['sushi']],['rice',['rice']],
+        ['burgers',['burger','burgers']],['soup',['soup']],
+        ['eggs',['eggs','omelette']],['salad',['salad']],
+        ['dumplings',['dumpling','dumplings']],['steak',['steak']]
+      ];
+      const chosen=foods.find(([,words])=>has(...words));
+      if(chosen){
+        saved.lineKiddoV1Food=chosen[0];
+        return begin('hungry','hungry-company',[
+          chosen[0].toUpperCase()+'???? YESSSS 😭💗',
+          'My Lalee has excellent taste. Obviously. She chose ME.',
+          'Should we make it together, or should I bring it to you? 😚'
+        ]);
+      }
+      if(has('anything','whatever','surprise me','you choose','don t know','dont know','idk')){
+        saved.lineKiddoV1Food='surprise dinner';
+        return begin('hungry','hungry-company',[
+          'HEHEHE. Then chef Miu is taking over 😌',
+          'I am making you a surprise dinner. NO PEEKING.',
+          'Wanna help me in the kitchen or sit there looking pretty?'
+        ]);
+      }
+      if(has('why','really'))return ['Because feeding my girlfriend is my favourite job 😤','Now choose, Lalee: pancakes, pasta, or something else?'];
+      return ['Laleeeee I need a MENU, not just that cute face 😭','Pancakes, pasta, or tell me what you feel like eating?'];
+    }
+    if(stage==='hungry-topping'){
+      return begin('hungry','hungry-company',[
+        'OHHHH good choice, baby 😚',
+        'One giant stack of pancakes coming right up.',
+        'Are we eating together? I wanna sit next to youuuu 🥺'
+      ]);
+    }
+    if(stage==='hungry-company'){
+      if(has('no','nope','alone','bring','deliver','sit','pretty')){
+        return finish(['Fineee, princess. I will bring it to you 😌','But I am collecting payment in kisses. MANY kisses.']);
+      }
+      return finish(['YAYYYYY date night at home!!! 🥹','I am claiming the seat RIGHT next to you. No escaping your Kiddo 🐙💗']);
+    }
+    if(stage==='tired-choice'){
+      if(has('hug','cuddle','hold','squeeze','stay','quiet','nothing','don t know','dont know','idk')){
+        return begin('tired','tired-hug',[
+          'No questions, baby. Come here 🥺',
+          '*wraps you in the BIGGEST octopus hug* 🐙',
+          'We can stay like this as long as you want.',
+          'Feeling even a tiny bit better, Lalee?'
+        ]);
+      }
+      if(has('sleep','rest','nap','bed','lie down')){
+        return begin('tired','tired-rest',[
+          'Then bedtime it is, my sleepy Lalee 🥺',
+          'I will get the blanket. You get the teddy bear.',
+          'Do you want me to stay until you fall asleep?'
+        ]);
+      }
+      if(has('talk','tell','work','meeting','boss','day','listen','happened','busy')){
+        return begin('tired','tired-talk',[
+          'Of course, my love. Tell me everything 🧸',
+          'Was work being horrible again, or did something else happen?'
+        ]);
+      }
+      return ['Awww Lalee 🥺','Do you want to talk about it, take a nap, or just get a BIGGG hug?'];
+    }
+    if(stage==='tired-talk'){
+      if(has('work','meeting','boss','colleague','deadline','job')){
+        return begin('tired','tired-check',[
+          'WORK AGAIN??? 😠',
+          'I am officially stealing my girlfriend away from her responsibilities.',
+          'Do you want a little distraction, or should I keep listening?'
+        ]);
+      }
+      return begin('tired','tired-check',[
+        'Oh baby. That sounds like a lot 🥺',
+        'You do not have to carry all of it alone.',
+        'Want me to keep listening, or should I distract you with something silly?'
+      ]);
+    }
+    if(stage==='tired-hug'){
+      if(has('no','not yet','still','not really','worse')){
+        return ['That is okay, my love. No rush. 🧸','I am not going anywhere. Wanna stay in my arms a little longer?'];
+      }
+      return finish(['Hehehe. One more kiss for my brave girl 😚','I am so proud of you, Lalee. Now let me take care of you a little.']);
+    }
+    if(stage==='tired-rest'){
+      return finish(['Of course I am staying, silly 🥺','You can have my arm, my hoodie, AND the whole blanket.','Good night, my favourite person. MWAHHH 😚']);
+    }
+    if(stage==='tired-check'){
+      if(has('listen','talk','more','tell')){
+        return ['Always, baby. I am listening 🧸','What is the part that bothered you the most?'];
+      }
+      if(has('distraction','distract','funny','silly','laugh','joke')){
+        return finish(['OKAY. EMERGENCY KIDDO ENTERTAINMENT SERVICE 😤','Question: if I were a potato, would you still kiss me??? 🥔😭']);
+      }
+      return finish(['Come here, my love. 🥺','No fixing everything tonight. Just you, me, and a very long cuddle.']);
+    }
+    if(stage==='house-room'){
+      const room=has('balcony','terrace')?'balcony':
+                 has('kitchen','cook','cooking')?'kitchen':
+                 has('bed','bedroom','sleep')?'bedroom':
+                 has('cat','dog','pet')?'pets':null;
+      if(room){
+        saved.lineKiddoV1Room=room;
+        const details={
+          balcony:['A BALCONY!!! 🌿','Morning coffee together while I steal kisses from you.'],
+          kitchen:['OUR KITCHENNNN 😭','I will make pancakes and you can be my very pretty assistant.'],
+          bedroom:['YESSSS OUR BEDROOM 🧸','A giant bed, soft blankets, and you stuck in my octopus arms.'],
+          pets:['PETS TOO??? 😭','Okay. A cat, a dog, and approximately 47 teddy bears.']
+        };
+        return begin('house','house-style',[
+          ...details[room],
+          'Should we make it super cozy, or bright with lots of sunshine?'
+        ]);
+      }
+      if(has('why','really'))return ['Because I want a thousand ordinary mornings with you 🥺','So which part should we plan first: bedroom, kitchen, or balcony?'];
+      return ['HEHEHE I have too many ideas already 😭','Tell me your favourite part: bedroom, kitchen, or balcony?'];
+    }
+    if(stage==='house-style'){
+      return begin('house','house-future',[
+        'THAT IS EXACTLY WHAT I WAS THINKING!!! 🥹',
+        'We can make it ours. Little photos everywhere. Your hoodie on my chair.',
+        'And on Sundays we make pancakes together.',
+        'What else should our little home have, Lalee?'
+      ]);
+    }
+    if(stage==='house-future'){
+      return finish([
+        'I LOVE THAT IDEA 😭💗',
+        'You know what my favourite part of that house will be?',
+        'Coming home and finding you there.',
+        'Every single day. 🏡'
+      ]);
+    }
+    setStage('');
+    return null;
+  }
+
   function lineEasterReplies(message){
     const n=lineEasterNormalize(message);
     const has=(...phrases)=>lineEasterHas(n,...phrases);
@@ -541,6 +750,9 @@
       }
       return [];
     }
+    // v1 runs only after the original water-apology lock and before ordinary fallbacks.
+    const kiddoV1=lineKiddoV1Replies(n,has);
+    if(kiddoV1)return kiddoV1;
     // Preserve the original one-time discoveries and their exact unlock text.
     if(n==='if we never met'){
       context('');
