@@ -325,6 +325,9 @@ window.PHONE_STORY = {
     { id:'memory-1', src:'assets/home-photo.jpg', title:'Photos', caption:'这是一张临时照片；你之后可以换成自己的素材。' }
   ],
   instagramAvatar: 'assets/IMG_3246.jpg',
+  // Instagram: single-photo posts use src:'assets/photo.jpg' (unchanged).
+  // For swipeable posts, use photos:['assets/photo1.jpg','assets/photo2.jpg',...]
+  // instead of src. The first photo becomes the profile-grid thumbnail.
   instagram: [
     {src:'assets/IMG_3241.jpg',caption:'Wandering with you🤍',date:'7 October 2026',likes:'428K'},
     {src:'assets/IMG_3242.jpg',caption:'Art, lunch, you. ❤️',date:'5 October 2026',likes:'386K'},
