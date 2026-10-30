@@ -750,6 +750,19 @@
       }
       return [];
     }
+    // Special five-bubble confession: case-insensitive, keyword-combination trigger.
+    // Match whole words so unrelated words containing "love" do not qualify.
+    if(has('love') && has('so much')){
+      context('');
+      saved.lineKiddoV1Stage='';
+      return [
+        "I love you too Lalee",
+        "You know…since the day that I realise I love you",
+        "Like back when I was 18",
+        "There isn't a single moment where I wanna go back and fix anything or regret anything that has happened",
+        "I just love you so so much🤎"
+      ];
+    }
     // v1 runs only after the original water-apology lock and before ordinary fallbacks.
     const kiddoV1=lineKiddoV1Replies(n,has);
     if(kiddoV1)return kiddoV1;
