@@ -1943,10 +1943,16 @@
   function storyInstagramPosts(){
     return saved.storyValentineUnlocked?[cfg.story.valentinePost,...cfg.instagram]:cfg.instagram;
   }
-  function instaPhoto(index, cls=''){
+  // A post may use a single "src" or an ordered "photos" array.
+  // Single-image posts keep their original appearance and behaviour.
+  function instaPostImages(post){
+    const photos=Array.isArray(post?.photos)?post.photos.filter(src=>typeof src==='string'&&src.trim()):[];
+    return photos.length?photos:(post?.src?[post.src]:[]);
+  }
+  function instaPhoto(index, cls='', overrideSource=null){
     const p=elem('div','ig-photo '+cls);
     const avatarMode=cls.includes('avatar');
-    const source=avatarMode ? cfg.instagramAvatar : storyInstagramPosts()[index]?.src;
+    const source=avatarMode ? cfg.instagramAvatar : (overrideSource||instaPostImages(storyInstagramPosts()[index])[0]);
     p.style.setProperty('--ig-col',index%3);
     p.style.setProperty('--ig-row',Math.floor(index/3));
     p.style.backgroundPosition=['0%','50%','100%'][index%3]+' '+(Math.floor(index/3)*100)+'%';
@@ -1997,7 +2003,11 @@
     storyInstagramPosts().forEach((p,i)=>{
       const tile=click('','ig-tile',()=>setPage('instagram-post',i));
       tile.append(instaPhoto(i));
-      tile.setAttribute('aria-label','View '+p.date+' post');
+      if(instaPostImages(p).length>1){
+        tile.classList.add('ig-multi-tile');
+        tile.append(elem('span','ig-multi-badge','▣'));
+      }
+      tile.setAttribute('aria-label','View '+p.date+' post'+(instaPostImages(p).length>1?', '+instaPostImages(p).length+' photos':''));
       grid.append(tile);
     });
     content.append(grid);
@@ -2017,7 +2027,65 @@
     const header=elem('div','ig-post-header');
     header.append(instaPhoto(5,'ig-post-avatar'),elem('strong','','lalinalena'),elem('span','ig-verified','✿'));
     content.append(header);
-    content.append(instaPhoto(index,'ig-post-image'));
+    const postImages=instaPostImages(p);
+    if(postImages.length>1){
+      const carousel=elem('div','ig-carousel');
+      carousel.setAttribute('role','region');
+      carousel.setAttribute('aria-label','Instagram photo carousel');
+      const viewport=elem('div','ig-carousel-viewport');
+      const track=elem('div','ig-carousel-track');
+      postImages.forEach((src,i)=>{
+        const slide=elem('div','ig-carousel-slide');
+        slide.append(instaPhoto(index,'ig-post-image',src));
+        slide.setAttribute('aria-label','Photo '+(i+1)+' of '+postImages.length);
+        track.append(slide);
+      });
+      viewport.append(track);
+      carousel.append(viewport);
+      const count=elem('div','ig-carousel-count');
+      carousel.append(count);
+      const prev=click('‹','ig-carousel-arrow ig-carousel-prev',()=>showPhoto(current-1));
+      const next=click('›','ig-carousel-arrow ig-carousel-next',()=>showPhoto(current+1));
+      prev.setAttribute('aria-label','Previous photo');
+      next.setAttribute('aria-label','Next photo');
+      carousel.append(prev,next);
+      const dots=elem('div','ig-carousel-dots');
+      const dotButtons=postImages.map((_,i)=>{
+        const dot=click('','ig-carousel-dot',()=>showPhoto(i));
+        dot.setAttribute('aria-label','Show photo '+(i+1));
+        dots.append(dot);
+        return dot;
+      });
+      let current=0;
+      function showPhoto(nextIndex){
+        current=Math.max(0,Math.min(postImages.length-1,nextIndex));
+        track.style.transform='translateX(-'+(current*100)+'%)';
+        count.textContent=(current+1)+'/'+postImages.length;
+        prev.disabled=current===0;
+        next.disabled=current===postImages.length-1;
+        dotButtons.forEach((dot,i)=>{
+          dot.classList.toggle('ig-carousel-dot-active',i===current);
+          dot.setAttribute('aria-current',i===current?'true':'false');
+        });
+      }
+      let startX=null,startY=null;
+      viewport.addEventListener('touchstart',e=>{
+        startX=e.touches[0]?.clientX??null;
+        startY=e.touches[0]?.clientY??null;
+      },{passive:true});
+      viewport.addEventListener('touchend',e=>{
+        if(startX===null)return;
+        const dx=(e.changedTouches[0]?.clientX??startX)-startX;
+        const dy=(e.changedTouches[0]?.clientY??startY)-startY;
+        startX=null;startY=null;
+        if(Math.abs(dx)>40&&Math.abs(dx)>Math.abs(dy)*1.2)showPhoto(current+(dx<0?1:-1));
+      },{passive:true});
+      viewport.addEventListener('touchcancel',()=>{startX=null;startY=null;},{passive:true});
+      showPhoto(0);
+      content.append(carousel,dots);
+    }else{
+      content.append(instaPhoto(index,'ig-post-image'));
+    }
     const likeRow=elem('div','ig-post-likes');likeRow.append(elem('span','','♥'),elem('strong','',p.likes+' likes'));content.append(likeRow);
     const caption=elem('div','ig-post-caption');caption.append(elem('strong','','lalinalena '),document.createTextNode(p.caption));content.append(caption);
     content.append(elem('div','ig-post-date',p.date));
