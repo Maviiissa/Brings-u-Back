@@ -751,8 +751,9 @@
       return [];
     }
     // Special five-bubble confession: case-insensitive, keyword-combination trigger.
-    // Match whole words so unrelated words containing "love" do not qualify.
-    if(has('love') && has('so much')){
+    // Accept affectionate elongated spellings such as "loooove", "soooo much",
+    // "so so much", and "soooo muuuchhhh", without matching unrelated words.
+    if(/\bl[o]+v[e]+\b/.test(n) && /\bs[o]+(?:\s+s[o]+)*\s+m[u]+c[h]+\b/.test(n)){
       context('');
       saved.lineKiddoV1Stage='';
       return [
