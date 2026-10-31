@@ -780,7 +780,9 @@
         "Stop making me emotional. Come kiss meeeeee😠"
       ];
     }
-    if(n==='marry me'){
+    if(has('marry me')){
+      saved.storyWeddingUnlocked=true;
+      saved.lineKiddoV1Stage='';
       context('');
       return ["Lalee, I said that “I really do” years ago…","Ask me in person, I will say that again."];
     }
@@ -1941,7 +1943,7 @@
     root.append(viewer);host.append(root);
   }
   function storyInstagramPosts(){
-    return saved.storyValentineUnlocked?[cfg.story.valentinePost,...cfg.instagram]:cfg.instagram;
+    return saved.storyValentineUnlocked?[...(saved.storyWeddingUnlocked?[cfg.story.weddingPost]:[]),cfg.story.valentinePost,...cfg.instagram]:cfg.instagram;
   }
   // A post may use a single "src" or an ordered "photos" array.
   // Single-image posts keep their original appearance and behaviour.
@@ -1983,7 +1985,7 @@
     const summary=elem('div','ig-summary');
     summary.append(instaPhoto(5,'ig-avatar'));
     const stats=elem('div','ig-stats');
-    [[saved.storyValentineUnlocked?'2,009':'2,008','posts'],['1.8 M','followers'],['1,293','following']].forEach(([num,label])=>{
+    [[saved.storyWeddingUnlocked?'2,010':(saved.storyValentineUnlocked?'2,009':'2,008'),'posts'],['1.8 M','followers'],['1,293','following']].forEach(([num,label])=>{
       const stat=elem('div','ig-stat');stat.append(elem('strong','',num),elem('span','',label));stats.append(stat);
     });
     summary.append(stats);overview.append(summary);
