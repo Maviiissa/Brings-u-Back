@@ -226,6 +226,12 @@ window.PHONE_STORY = {
       "Please, can we talk?"
     ],
     plot10LineAnswer:"Lalee, Open the door…I’ve been sitting in my car for an hour.",
+    weddingPost:{
+      photos:['assets/wedding-2028-1.jpeg','assets/wedding-2028-2.jpeg'],
+      caption:'Hello, my Ms. Schuett 🤎 @miunatsha\nFrom this day forward, through all the days to come, and into forever. 🤍',
+      date:'30 October 2028',
+      likes:'1.8M'
+    },
     valentinePost:{
       src:'assets/IMG_3251.jpg',
       caption:'Happy Valentine’s Day 🤍🤎 My entire world @Miu_natsha',
